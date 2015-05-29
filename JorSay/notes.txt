@@ -1,0 +1,89 @@
+When a notification is received, Wear service is started by handheld app. It listens for 'shake' for a minute, and then switches itself off.
+
+SetupActivity - start this on Launch
+- Does two things - Google API setup, TTS Setup
+- Displays a UI with a progress bar
+
+On all success, displays welcome/configuration screens
+
+
+http://stackoverflow.com/questions/22368520/how-to-correctly-use-google-plus-sign-in-with-multiple-activities
+http://stackoverflow.com/questions/29247124/passing-googleapiclient-object-to-another-activity
+
+
+https://developer.android.com/training/wearables/data-layer/messages.html - use this
+" Unlike with data items, there is no syncing between the handheld and wearable apps. 
+Messages are a one-way communication mechanism that's good for remote procedure calls (RPC),
+ such as sending a message to the wearable to start an activity."
+
+GoogleAPIClient object is disconnected because we call disconnect in onStop of SetupActivity
+that's good.
+
+we should not share object. create another one in notificationlistener and use it when it connects.
+probably, it does a bcast on connectionSuspended and on connectionFailed, and the bcast receiver 
+(registered statically in manifest) starts activity to take care of error handling.
+
+
+How this works:
+1. Handheld detects that a notification is posted, and sends a message to wearable to start the service.
+2. service stays awake for next minute to listen for shake. on shake, tells the phone.
+3. Phone reads the message.
+Alternatively:
+1. Handheld detects that a notification is posted, and sends a message to wearable to start the Activity.
+2. Activity runs a timer for a minute with display etc. If user taps the button, tells the phone.
+3. Phone reads the message.
+
+Step 1: Two-way communication between the handheld and wearable.
+Read this carefully: https://developer.android.com/training/wearables/data-layer/messages.html
+Implement a WearableListenerService in the wearable app. Handheld should advertise 
+read_notifications capability. That's the only one wearable will talk to.
+
+You typically create instances of WearableListener service in both your wearable and 
+handheld apps. If you are not interested in data events in one of these apps, then you 
+don't need to implement this service in that particular app.
+
+Keep this in mind: Permissions within Data Layer Callbacks
+
+
+Look at https://developer.android.com/training/wearables/data-layer/data-items.html.
+Send data from NotificationListener. WearCommunicator is actually going to be WearDataEventListener. 
+The only interesting method is going to be 	onDataChanged. Basically connect to googleApiClient etc. 
+and get notified when data changes. On wearable side, ShakeMonitor is a separate IntentService that monitors
+for shake and sends out the data event. I don't think we are going to need capability tracking etc.1 - even if we do,
+it will be for our own internal purposes like knowing when nodes of we-are-interested-in capability are
+connected.
+
+
+Investigate these both: why result is timeout and why internal data leak?
+internal data leak because onDestory happens before the 'release' call.
+05-17 10:35:31.280    6185-6185/com.mocha17.slayer V/SLAYER﹕ WearCommunicator onCreate
+05-17 10:35:31.301    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator onDataChanged: com.google.android.gms.wearable.DataEventBuffer@28178f89
+05-17 10:35:31.301    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator dataItem: DataItemEntity[@cba0b8e,dataSz=114, numAssets=0, uri=wear://31f1072a-e21c-4d24-b26e-a64f68182a06/notification-received]
+05-17 10:35:31.301    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator Uri lastPath is: notification-received
+05-17 10:35:31.301    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator got notification_received, data:
+    p
+    notification_key\XVPackage: com.good.gcs, Title: Secured by Good, Text: Synced at 10:34 AM. Disconnected.
+05-17 10:35:31.301    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator sending message
+05-17 10:35:31.301    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator sendMessage1 with await
+05-17 10:35:40.197    6185-6185/com.mocha17.slayer V/SLAYER﹕ WearCommunicator onDestroy
+05-17 10:35:45.218    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@18905faf)
+05-17 10:35:45.219    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@22fa3fbc)
+05-17 10:35:45.219    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@2b609b45)
+05-17 10:35:45.219    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@3cf529a)
+05-17 10:35:45.219    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@78d47cb)
+05-17 10:35:45.220    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@15099ba8)
+05-17 10:35:45.220    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@2e74a6c1)
+05-17 10:35:45.220    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@cbffe66)
+05-17 10:35:45.220    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@162695a7)
+05-17 10:35:45.221    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@1630ca54)
+05-17 10:35:45.221    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@2163edfd)
+05-17 10:35:45.221    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@38bd9af2)
+05-17 10:35:45.221    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@371ce543)
+05-17 10:35:45.222    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@19fa37c0)
+05-17 10:35:45.222    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@2b066cf9)
+05-17 10:35:45.222    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@886743e)
+05-17 10:35:45.222    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@3e9e929f)
+05-17 10:35:45.223    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@2b0fec)
+05-17 10:35:45.223    6185-6194/com.mocha17.slayer E/DataBuffer﹕ Internal data leak within a DataBuffer object detected!  Be sure to explicitly call release() on all DataBuffer extending objects when you are done with them. (internal object: com.google.android.gms.common.data.DataHolder@2db7dfb5)
+05-17 10:35:51.303    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator sendMessage1 onResult: null, Status{statusCode=TIMEOUT, resolution=null}
+05-17 10:35:51.303    6185-6490/com.mocha17.slayer V/SLAYER﹕ WearCommunicator releasing data buffer
