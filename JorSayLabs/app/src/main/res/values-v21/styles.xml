@@ -14,6 +14,9 @@
         <!-- navigation bar (the one with back, home and recent apps buttons) -->
         <item name="android:navigationBarColor">@color/navigationBar</item>
         <!-- text color -->
-        <item name="android:textColorPrimary">@color/text</item>
+        <!-- primary branding - for app name etc. in Toolbar -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <!-- overall text color -->
+        <item name="android:textColor">@color/text</item>
     </style>
 </resources>

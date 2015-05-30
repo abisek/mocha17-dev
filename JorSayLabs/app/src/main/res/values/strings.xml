@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">JorSayLabs</string>
-
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <!-- Status messages -->
+    <string name="status_read_aloud">Not reading notifications aloud</string>
+    <string name="status_num_apps">Reading notifications for all apps</string>
+    <string name="status_activity">Reading notifications always</string>
+    <string name="status_time_of_day">Reading notifications throughout the day</string>
+
+    <!-- Preference screen -->
+    <string name="global_read_aloud">Read notifications aloud</string>
 </resources>

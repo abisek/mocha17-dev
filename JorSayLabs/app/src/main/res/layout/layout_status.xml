@@ -2,4 +2,47 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
+    <!-- Reading/not reading notifications aloud and whether all notifications/only most recent
+     Examples: not reading notifications aloud, reading all notifications aloud,
+     reading last posted (or most recent) notification-->
+    <TextView
+        android:id="@+id/status_read_aloud"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/text_padding"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/status_read_aloud"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+    <!-- reading aloud notifications for all or n apps -->
+    <TextView
+        android:id="@+id/status_num_apps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/text_padding"
+        android:layout_marginTop="@dimen/text_margin"
+        android:layout_below="@id/status_read_aloud"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/status_num_apps"/>
+    <!-- reading aloud notifications during all or some activities (like driving) -->
+    <TextView
+        android:id="@+id/status_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/text_padding"
+        android:layout_marginTop="@dimen/text_margin"
+        android:layout_below="@id/status_num_apps"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/status_activity"/>
+    <!-- reading aloud notifications at all day or during certain selected times -->
+    <TextView
+        android:id="@+id/status_time_of_day"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/text_padding"
+        android:layout_marginTop="@dimen/text_margin"
+        android:layout_below="@id/status_activity"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/status_time_of_day"/>
 </RelativeLayout>
