@@ -12,6 +12,9 @@
         <!-- Overall background -->
         <item name="android:windowBackground">@color/background</item>
         <!-- text color -->
-        <item name="android:textColorPrimary">@color/text</item>
+        <!-- primary branding - for app name etc. in Toolbar -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <!-- overall text color -->
+        <item name="android:textColor">@color/text</item>
     </style>
 </resources>
