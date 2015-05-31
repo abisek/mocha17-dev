@@ -10,4 +10,7 @@
 
     <!-- Preference screen -->
     <string name="global_read_aloud">Read notifications aloud</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

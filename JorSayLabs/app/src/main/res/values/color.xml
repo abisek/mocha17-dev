@@ -2,12 +2,12 @@
 <!-- http://developer.android.com/training/material/images/ThemeColors.png
 http://www.google.com/design/spec/style/color.html#color-color-palette -->
 <resources>
-    <color name="primary">#FFC107</color>
-    <color name="primary_dark">#FFA000</color>
-    <color name="background">#757575</color>
-    <color name="content_background">#E0E0E0</color>
-    <color name="navigationBar">#424242</color>
+    <color name="primary">#FF6347</color>
+    <color name="primary_dark">#FF5033</color>
+    <color name="background">#F5F5F5</color>
+    <color name="content_background">#EEEEEE</color>
+    <color name="navigationBar">#9E9E9E</color>
     <color name="text_primary">#FFFFFF</color>
-    <color name="text">#000000</color>
-    <color name="accent">#AB47BC</color>
+    <color name="text">#424242</color>
+    <color name="accent">#FF6347</color>
 </resources>
