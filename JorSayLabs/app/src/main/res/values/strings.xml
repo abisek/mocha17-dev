@@ -9,7 +9,14 @@
     <string name="status_time_of_day">Reading notifications throughout the day</string>
 
     <!-- Preference screen -->
-    <string name="global_read_aloud">Read notifications aloud</string>
+    <string name="pref_key_global_read_aloud" translatable="false">pref_key_global_read_aloud</string>
+    <string name="pref_global_read_aloud">Read notifications aloud</string>
+    <string name="pref_key_persistent_notification" translatable="false">pref_key_persistent_notification</string>
+    <string name="pref_persistent_notification">Show persistent notification</string>
+    <string name="pref_persistent_notification_help">helps background service run more reliably</string>
+    <string name="pref_apps_title">Apps to read notifications for</string>
+    <string name="pref_apps_all">All apps</string>
+    <string name="pref_apps_select">Select apps</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
