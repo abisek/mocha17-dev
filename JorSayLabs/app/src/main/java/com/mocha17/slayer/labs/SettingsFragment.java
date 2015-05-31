@@ -9,12 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.CheckBoxPreference;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.Constants;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SettingsManager;
+import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SwitchPreference;
 
 public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
-    private CheckBoxPreference prefGlobalReadAloud, prefPersistentNotification;
+    private SwitchPreference prefGlobalReadAloud, prefPersistentNotification;
     //private boolean isPersistentNotificationPreferenceAdded;
     //private int persistentNotificationPreferenceOrder;
 
@@ -46,15 +46,15 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         addPreferencesFromResource(R.xml.preferences);
 
         //Create persistent notification preference
-        prefPersistentNotification = new CheckBoxPreference(getActivity(),
+        prefPersistentNotification = new SwitchPreference(getActivity(),
                 Constants.ORDER_PREF_PERSISTENT_NOTIFICATION, getString(R.string.pref_key_persistent_notification),
                 getString(R.string.pref_persistent_notification), getString(R.string.pref_persistent_notification_help));
         prefPersistentNotification.setOnPreferenceChangeListener(this);
         prefPersistentNotification.setChecked(
-                SettingsManager.get().getPreferenceValue(R.string.pref_key_persistent_notification, false));
+                SettingsManager.get().getPreferenceValue(R.string.pref_key_persistent_notification, true));
 
         //Create global 'read aloud' preference
-        prefGlobalReadAloud = new CheckBoxPreference(getActivity(), Constants.ORDER_PREF_GLOBAL_READ_ALOUD,
+        prefGlobalReadAloud = new SwitchPreference(getActivity(), Constants.ORDER_PREF_GLOBAL_READ_ALOUD,
                 getString(R.string.pref_key_global_read_aloud), getString(R.string.pref_global_read_aloud));
         prefGlobalReadAloud.setOnPreferenceChangeListener(this);
         //Add this by default to the PreferenceScreen
@@ -64,7 +64,15 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         if (prefGlobalReadAloud != null) {
             prefGlobalReadAloud.setChecked(
                     SettingsManager.get().getPreferenceValue(R.string.pref_key_global_read_aloud, false));
-            //Show persistentNotifcation preference only if global setting is checked
+        }
+        //Show persistentNotifcation preference only if global setting is checked
+        updatePreferenceVisibility();
+    }
+
+    /** conditionally shows or hides preferences */
+    private void updatePreferenceVisibility() {
+        if (prefGlobalReadAloud != null) {
+            //Show persistent notifcation preference only if global setting is checked
             if (prefGlobalReadAloud.isChecked()) {
                 getPreferenceScreen().addPreference(prefPersistentNotification);
                 prefPersistentNotification.added(true);
@@ -78,6 +86,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        
     }
 
     @Override
@@ -94,13 +103,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             Log.v("CK", "onPrefernceChange key: " + key + ", value " + value);
             prefGlobalReadAloud.setChecked(value);
             SettingsManager.get().setPreferenceValue(key, value);
-            if (value == true && !prefPersistentNotification.isAdded()) {
-                getPreferenceScreen().addPreference(prefPersistentNotification);
-                prefPersistentNotification.added(true);
-            } else if (value == false && prefPersistentNotification.isAdded()) {
-                getPreferenceScreen().removePreference(prefPersistentNotification);
-                prefPersistentNotification.added(false);
-            }
+            updatePreferenceVisibility();
             return true;
         }
         if (key.equals(prefPersistentNotification.getKey())) {

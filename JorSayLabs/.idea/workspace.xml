@@ -46,17 +46,21 @@
       <file leaf-file-name="SettingsFragment.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/mocha17/slayer/labs/SettingsFragment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.39823008">
-              <caret line="87" column="13" selection-start-line="87" selection-start-column="13" selection-end-line="87" selection-end-column="13" />
+            <state vertical-scroll-proportion="0.86283183">
+              <caret line="88" column="8" selection-start-line="88" selection-start-column="8" selection-end-line="88" selection-end-column="8" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1887#1939#0" expanded="true" />
-                <element signature="e#1957#2005#0" expanded="true" />
-                <element signature="e#2007#2060#0" expanded="true" />
-                <element signature="e#2239#2280#0" expanded="true" />
-                <element signature="e#2464#2510#0" expanded="true" />
-                <element signature="e#2512#2554#0" expanded="true" />
-                <element signature="e#2921#2956#0" expanded="true" />
+                <element signature="e#1128#1129#0" expanded="true" />
+                <element signature="e#1178#1179#0" expanded="true" />
+                <element signature="e#1881#1933#0" expanded="true" />
+                <element signature="e#1951#1999#0" expanded="true" />
+                <element signature="e#2001#2054#0" expanded="true" />
+                <element signature="e#2233#2274#0" expanded="true" />
+                <element signature="e#2455#2501#0" expanded="true" />
+                <element signature="e#2503#2545#0" expanded="true" />
+                <element signature="e#2912#2947#0" expanded="true" />
+                <element signature="e#3857#3858#0" expanded="true" />
+                <element signature="e#3889#3890#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -95,16 +99,16 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CheckBoxPreference.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/mocha17/slayer/labs/com/mocha17/slayer/labs/backend/CheckBoxPreference.java">
+      <file leaf-file-name="SwitchPreference.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/mocha17/slayer/labs/com/mocha17/slayer/labs/backend/SwitchPreference.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+              <caret line="12" column="29" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="29" />
               <folding>
-                <element signature="e#1295#1296#0" expanded="true" />
-                <element signature="e#1323#1324#0" expanded="true" />
-                <element signature="e#1363#1364#0" expanded="true" />
-                <element signature="e#1397#1398#0" expanded="true" />
+                <element signature="e#1283#1284#0" expanded="true" />
+                <element signature="e#1311#1312#0" expanded="true" />
+                <element signature="e#1351#1352#0" expanded="true" />
+                <element signature="e#1385#1386#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -1644,24 +1648,6 @@
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="res" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="layout" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidResFolderTypeNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="JorSayLabs" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidModuleNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
               <option name="myItemId" value="java" />
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidSourceTypeNode" />
             </PATH_ELEMENT>
@@ -1771,7 +1757,7 @@
     <property name="recentsLimit" value="5" />
     <property name="android.project.structure.last.selected" value="app" />
     <property name="android.project.structure.proportion" value="0.15" />
-    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="emulator-5554" />
+    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="TA98901I67" />
     <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="Nexus_5_API_21_x86" />
     <property name="OverrideImplement.combined" value="true" />
     <property name="OverrideImplement.overriding.sorted" value="false" />
@@ -2031,13 +2017,17 @@
           <caret line="93" column="33" selection-start-line="93" selection-start-column="33" selection-end-line="93" selection-end-column="33" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1887#1939#0" expanded="true" />
-            <element signature="e#1957#2005#0" expanded="true" />
-            <element signature="e#2007#2060#0" expanded="true" />
-            <element signature="e#2239#2280#0" expanded="true" />
-            <element signature="e#2464#2510#0" expanded="true" />
-            <element signature="e#2512#2554#0" expanded="true" />
-            <element signature="e#2921#2956#0" expanded="true" />
+            <element signature="e#1128#1129#0" expanded="true" />
+            <element signature="e#1178#1179#0" expanded="true" />
+            <element signature="e#1881#1933#0" expanded="true" />
+            <element signature="e#1951#1999#0" expanded="true" />
+            <element signature="e#2001#2054#0" expanded="true" />
+            <element signature="e#2233#2274#0" expanded="true" />
+            <element signature="e#2455#2501#0" expanded="true" />
+            <element signature="e#2503#2545#0" expanded="true" />
+            <element signature="e#2912#2947#0" expanded="true" />
+            <element signature="e#3857#3858#0" expanded="true" />
+            <element signature="e#3889#3890#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2138,13 +2128,17 @@
           <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1887#1939#0" expanded="true" />
-            <element signature="e#1957#2005#0" expanded="true" />
-            <element signature="e#2007#2060#0" expanded="true" />
-            <element signature="e#2239#2280#0" expanded="true" />
-            <element signature="e#2464#2510#0" expanded="true" />
-            <element signature="e#2512#2554#0" expanded="true" />
-            <element signature="e#2921#2956#0" expanded="true" />
+            <element signature="e#1128#1129#0" expanded="true" />
+            <element signature="e#1178#1179#0" expanded="true" />
+            <element signature="e#1881#1933#0" expanded="true" />
+            <element signature="e#1951#1999#0" expanded="true" />
+            <element signature="e#2001#2054#0" expanded="true" />
+            <element signature="e#2233#2274#0" expanded="true" />
+            <element signature="e#2455#2501#0" expanded="true" />
+            <element signature="e#2503#2545#0" expanded="true" />
+            <element signature="e#2912#2947#0" expanded="true" />
+            <element signature="e#3857#3858#0" expanded="true" />
+            <element signature="e#3889#3890#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2349,32 +2343,36 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/mocha17/slayer/labs/com/mocha17/slayer/labs/backend/CheckBoxPreference.java">
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/mocha17/slayer/labs/com/mocha17/slayer/labs/backend/SwitchPreference.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+          <caret line="12" column="29" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="29" />
           <folding>
-            <element signature="e#1295#1296#0" expanded="true" />
-            <element signature="e#1323#1324#0" expanded="true" />
-            <element signature="e#1363#1364#0" expanded="true" />
-            <element signature="e#1397#1398#0" expanded="true" />
+            <element signature="e#1283#1284#0" expanded="true" />
+            <element signature="e#1311#1312#0" expanded="true" />
+            <element signature="e#1351#1352#0" expanded="true" />
+            <element signature="e#1385#1386#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/mocha17/slayer/labs/SettingsFragment.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.39823008">
-          <caret line="87" column="13" selection-start-line="87" selection-start-column="13" selection-end-line="87" selection-end-column="13" />
+        <state vertical-scroll-proportion="0.86283183">
+          <caret line="88" column="8" selection-start-line="88" selection-start-column="8" selection-end-line="88" selection-end-column="8" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1887#1939#0" expanded="true" />
-            <element signature="e#1957#2005#0" expanded="true" />
-            <element signature="e#2007#2060#0" expanded="true" />
-            <element signature="e#2239#2280#0" expanded="true" />
-            <element signature="e#2464#2510#0" expanded="true" />
-            <element signature="e#2512#2554#0" expanded="true" />
-            <element signature="e#2921#2956#0" expanded="true" />
+            <element signature="e#1128#1129#0" expanded="true" />
+            <element signature="e#1178#1179#0" expanded="true" />
+            <element signature="e#1881#1933#0" expanded="true" />
+            <element signature="e#1951#1999#0" expanded="true" />
+            <element signature="e#2001#2054#0" expanded="true" />
+            <element signature="e#2233#2274#0" expanded="true" />
+            <element signature="e#2455#2501#0" expanded="true" />
+            <element signature="e#2503#2545#0" expanded="true" />
+            <element signature="e#2912#2947#0" expanded="true" />
+            <element signature="e#3857#3858#0" expanded="true" />
+            <element signature="e#3889#3890#0" expanded="true" />
           </folding>
         </state>
       </provider>
