@@ -5,13 +5,26 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+/*
+How are Settings displayed?
+We have a Card in the Activity layout with a FrameLayout inside it.
+We load the Fragment in this FrameLayout. This Fragment has a layout - this layout contains the
+default ListView id used by Android for populating preferences. The preferences themselves come
+from the preferences XML file. (That's why there's both in the onCreateView for the fragment - the
+layout is inflated and preferences are populated there.)
+This is a little complicated, but gets us the preferences displayed inside a Card.
 
+Now, we could have extended PreferenceActivity here and called addPreferencesFromResource(), but that
+is deprecated for the Activity. PreferenceFragment is the way to go, with PreferenceActivity acting as
+holder of PreferenceHeaders (with Fragment displayed on tapping each of them).
+ */
 public class MainActivity extends Activity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SettingsFragment settingsFragment = SettingsFragment.newInstance();
+        getFragmentManager().beginTransaction().add(R.id.settings_container, settingsFragment, "Settings").commit();
     }
 
     @Override

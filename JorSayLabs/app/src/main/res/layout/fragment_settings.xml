@@ -6,6 +6,7 @@
     preferences defined in xml/preferences.xml. This layout then remains a standalone
     piece which we are integrating into the Activity layout by placing it inside a Card.
     Reference:  http://stackoverflow.com/questions/2697233/how-to-add-a-button-to-preferencescreen -->
+
     <ListView android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

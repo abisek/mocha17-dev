@@ -10,7 +10,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="@dimen/text_padding"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/status_read_aloud"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
@@ -23,7 +22,6 @@
         android:padding="@dimen/text_padding"
         android:layout_marginTop="@dimen/text_margin"
         android:layout_below="@id/status_read_aloud"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/status_num_apps"/>
     <!-- reading aloud notifications during all or some activities (like driving) -->
     <TextView
@@ -33,7 +31,6 @@
         android:padding="@dimen/text_padding"
         android:layout_marginTop="@dimen/text_margin"
         android:layout_below="@id/status_num_apps"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/status_activity"/>
     <!-- reading aloud notifications at all day or during certain selected times -->
     <TextView
@@ -43,6 +40,5 @@
         android:padding="@dimen/text_padding"
         android:layout_marginTop="@dimen/text_margin"
         android:layout_below="@id/status_activity"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/status_time_of_day"/>
 </RelativeLayout>
