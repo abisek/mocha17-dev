@@ -18,5 +18,8 @@
         <item name="android:textColorPrimary">@color/text_primary</item>
         <!-- overall text color -->
         <item name="android:textColor">@color/text</item>
+        <!-- Theme for Dialog -->
+        <item name="android:alertDialogTheme">@style/AppDialogTheme</item>
+        <item name="android:dialogTheme">@style/AppDialogTheme</item>
     </style>
 </resources>
