@@ -1,12 +1,13 @@
 package com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend;
 
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 
 /**
  * For holding relevant information from android.content.pm.ApplicationInfo.
  * Created by Chaitanya on 6/2/15.
  */
-public class AppInfo {
+public class AppInfo implements Comparable<AppInfo> {
     public String packageName;
     public String name;
     public Drawable icon;
@@ -15,9 +16,7 @@ public class AppInfo {
     @Override
     public String toString() {
         return "AppInfo{" +
-                "packageName='" + packageName + '\'' +
-                ", name='" + name + '\'' +
-                ", icon=" + icon +
+                "name='" + name + '\'' +
                 ", selected=" + selected +
                 '}';
     }
@@ -29,5 +28,13 @@ public class AppInfo {
         this.selected = selected;
 
 
+    }
+
+    @Override
+    public int compareTo(AppInfo another) {
+        if (another == null || TextUtils.isEmpty(another.name)) {
+            return 1;
+        }
+        return this.name.compareTo(another.name);
     }
 }
