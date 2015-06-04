@@ -7,7 +7,6 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,10 +121,8 @@ public class SettingsFragment extends PreferenceFragment
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         String key = preference.getKey();
-        Log.v("CK", "onPrefernceChange key: " + key);
         if (key.equals(prefGlobalReadAloud.getKey())) {
             boolean value = (boolean) newValue;
-            Log.v("CK", "onPrefernceChange key: " + key + ", value " + value);
             prefGlobalReadAloud.setChecked(value);
             SettingsManager.get().setPreferenceValue(key, value);
             updatePreferenceVisibility();
@@ -133,7 +130,6 @@ public class SettingsFragment extends PreferenceFragment
         }
         if (key.equals(prefPersistentNotification.getKey())) {
             boolean value = (boolean) newValue;
-            Log.v("CK", "onPrefernceChange key: " + key + ", value " + value);
             prefPersistentNotification.setChecked(value);
             SettingsManager.get().setPreferenceValue(key, value);
             return true;

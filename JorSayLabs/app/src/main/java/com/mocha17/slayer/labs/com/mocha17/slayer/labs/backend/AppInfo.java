@@ -1,7 +1,6 @@
 package com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend;
 
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 
 /**
  * For holding relevant information from android.content.pm.ApplicationInfo.
@@ -32,9 +31,20 @@ public class AppInfo implements Comparable<AppInfo> {
 
     @Override
     public int compareTo(AppInfo another) {
-        if (another == null || TextUtils.isEmpty(another.name)) {
+        //We want to sort by selected state and then by name
+        //in effect, getting two alphabetical lists - one of selected, followed by that of unselected
+        if (another == null) {
             return 1;
         }
-        return this.name.compareTo(another.name);
+        if (this.selected == another.selected) {
+            return this.name.compareTo(another.name);
+        }
+        //Selected should be at the top
+        if (this.selected == true) {
+            return -1;
+        } else if (this.selected == false) {
+            return 1;
+        }
+        return 0;
     }
 }

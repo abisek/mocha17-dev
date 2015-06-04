@@ -15,8 +15,8 @@
         <include
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/card_margin_internal"
-            android:layout_marginBottom="@dimen/card_margin_internal"
+            android:layout_marginTop="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/margin_small"
             layout="@layout/layout_status" />
     </android.support.v7.widget.CardView>
 
@@ -27,12 +27,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/statusCard"
-        android:layout_marginTop="@dimen/card_margin">
+        android:layout_marginTop="@dimen/margin">
         <FrameLayout
             android:id="@+id/settings_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/card_margin_internal"
-            android:layout_marginBottom="@dimen/card_margin_internal" />
+            android:layout_marginTop="@dimen/margin_small"
+            android:layout_marginBottom="@dimen/margin_small" />
     </android.support.v7.widget.CardView>
 </RelativeLayout>
