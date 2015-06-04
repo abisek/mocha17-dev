@@ -72,7 +72,6 @@ public class SettingsFragment extends PreferenceFragment
         prefApps.setOnPreferenceClickListener(this);
         //TODO get value and set summary accordingly
         prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.all)));
-        preferenceScreen.addPreference(prefApps);
 
         //Create the apps list
         prefAppsList = new MultiSelectListPreference(getActivity());
@@ -101,9 +100,13 @@ public class SettingsFragment extends PreferenceFragment
             if (prefGlobalReadAloud.isChecked()) {
                 preferenceScreen.addPreference(prefPersistentNotification);
                 prefPersistentNotification.added(true);
+
+                preferenceScreen.addPreference(prefApps);
             } else {
                 preferenceScreen.removePreference(prefPersistentNotification);
                 prefPersistentNotification.added(false);
+
+                preferenceScreen.removePreference(prefApps);
             }
         }
     }
