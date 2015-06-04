@@ -180,7 +180,6 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 //highly unlikely
                 return UI_STATE.APPS_LIST_LOADING_FAILURE;
             }
-            int count = 0;
             for (ApplicationInfo applicationInfo : installedApps) {
                 Drawable icon = pm.getApplicationIcon(applicationInfo);
                 appInfos.add(new AppInfo(applicationInfo.packageName, applicationInfo.loadLabel(pm).toString(),
@@ -192,9 +191,6 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                     //gonna be ignored anyway.
                     //We do have a isCancelled() check before we do UI update
                     return UI_STATE.APPS_LIST_LOADING_CANCELLED;
-                }
-                if (count++ >= 5) {
-                    break;
                 }
             }
 
