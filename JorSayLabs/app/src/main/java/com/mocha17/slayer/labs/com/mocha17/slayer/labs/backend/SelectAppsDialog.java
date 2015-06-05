@@ -45,6 +45,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     AppsLoaderTask appsLoaderTask;
 
     private enum UI_STATE {
+        ALL_APPS,
         APPS_LIST_LOADING_START,
         APPS_LIST_LOADING_SUCCESS,
         APPS_LIST_LOADING_FAILURE,
@@ -72,10 +73,6 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 new HashSet<String>());
         //The set returned by getPreferenceValue cannot be reliably modified, so copy it into a modifiable one.
         selectedPackages = new HashSet<>(prevSelected);
-
-        //Start loading apps list
-        appsLoaderTask = new AppsLoaderTask();
-        appsLoaderTask.execute();
     }
 
     @Override
@@ -108,7 +105,11 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         allApps = (CheckedTextView)view.findViewById(R.id.all_apps);
         allApps.setOnClickListener(this);
 
-        updateUI(UI_STATE.APPS_LIST_LOADING_START);
+        if (SettingsManager.get().getPreferenceValue(R.string.pref_key_all_apps, false)) {
+            updateUI(UI_STATE.ALL_APPS);
+        } else {
+            updateUI(UI_STATE.APPS_LIST_LOADING_START);
+        }
         return view;
     }
 
@@ -117,6 +118,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         switch (v.getId()) {
             case R.id.ok_button:
                 SettingsManager.get().setPreferenceValue(R.string.pref_key_apps, selectedPackages);
+                SettingsManager.get().setPreferenceValue(R.string.pref_key_all_apps, allApps.isChecked());
             case R.id.cancel_button:
                 if (!appsLoaderTask.isCancelled()) {
                     appsLoaderTask.cancel(true);
@@ -125,23 +127,39 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 break;
             case R.id.all_apps:
                 allApps.toggle();
+                if (allApps.isChecked()) {
+                    updateUI(UI_STATE.ALL_APPS);
+                } else {
+                    updateUI(UI_STATE.APPS_LIST_LOADING_START);
+                }
                 break;
         }
     }
 
     private void updateUI(UI_STATE uiState) {
-        if (appsLoaderTask.isCancelled()) {
+        //We want to ignore UI state updates when the Task is cancelled - most likely
+        //the user is moving away from this Dialog; but we could enter this
+        //method when this task isn't initialized and hasn't started.
+        //Hence the null check.
+        if (appsLoaderTask!= null && appsLoaderTask.isCancelled()) {
             return;
         }
 
         switch(uiState) {
+            case ALL_APPS:
+                allApps.setChecked(true);
+                appsList.setVisibility(View.GONE);
+                appsListLoading.setVisibility(View.GONE);
+                break;
             case APPS_LIST_LOADING_START:
                 appsList.setVisibility(View.INVISIBLE); //continues to take space
                 appsListLoading.setVisibility(View.VISIBLE);
+
+                appsLoaderTask = new AppsLoaderTask();
+                appsLoaderTask.execute();
                 break;
             case APPS_LIST_LOADING_SUCCESS:
                 appsListLoading.setVisibility(View.GONE);
-
                 appsList.setVisibility(View.VISIBLE);
                 //Adapter for the List
                 //AppListAdater will work on the class member appInfos - instead of getting a List via Constructor

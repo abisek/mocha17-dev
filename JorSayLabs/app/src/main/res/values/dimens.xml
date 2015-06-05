@@ -11,7 +11,7 @@
     <dimen name="card_corner">2dp</dimen>
     <dimen name="card_elevation">4dp</dimen>
 
-    <dimen name="drawable_padding">24dp</dimen>
+    <dimen name="drawable_padding">12dp</dimen>
 
     <dimen name="progress_spinner_size">64dp</dimen>
 

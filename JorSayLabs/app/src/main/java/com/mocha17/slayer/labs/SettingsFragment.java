@@ -19,7 +19,7 @@ import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SwitchPreference;
 public class SettingsFragment extends PreferenceFragment
         implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
     PreferenceScreen preferenceScreen;
-    private SwitchPreference prefGlobalReadAloud, prefPersistentNotification;
+    private SwitchPreference prefGlobalReadAloud, prefPersistentNotification, prefAndroidWear;
     private MultiSelectListPreference prefAppsList;
     private Preference prefApps;
 
@@ -53,6 +53,12 @@ public class SettingsFragment extends PreferenceFragment
         addPreferencesFromResource(R.xml.preferences);
         preferenceScreen = getPreferenceScreen();
 
+        //Create Android Wear requirement preference
+        prefAndroidWear = new SwitchPreference(getActivity(), Constants.ORDER_PREF_ANDROID_WEAR,
+                getString(R.string.pref_key_android_wear), getString(R.string.pref_android_wear));
+        prefAndroidWear.setOnPreferenceChangeListener(this);
+        prefAndroidWear.setChecked(SettingsManager.get().getPreferenceValue(R.string.pref_key_android_wear, true));
+
         //Create persistent notification preference
         prefPersistentNotification = new SwitchPreference(getActivity(),
                 Constants.ORDER_PREF_PERSISTENT_NOTIFICATION, getString(R.string.pref_key_persistent_notification),
@@ -70,8 +76,11 @@ public class SettingsFragment extends PreferenceFragment
         prefApps.setKey(getString(R.string.pref_key_apps));
         prefApps.setOrder(Constants.ORDER_PREF_APPS);
         prefApps.setOnPreferenceClickListener(this);
-        //TODO get value and set summary accordingly
-        prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.all)));
+        if (SettingsManager.get().getPreferenceValue(R.string.pref_key_all_apps, false)) {
+            prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.all)));
+        } else {
+            prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.selected)));
+        }
 
         //Create the apps list
         prefAppsList = new MultiSelectListPreference(getActivity());
@@ -102,11 +111,17 @@ public class SettingsFragment extends PreferenceFragment
                 prefPersistentNotification.added(true);
 
                 preferenceScreen.addPreference(prefApps);
+
+                preferenceScreen.addPreference(prefAndroidWear);
+                prefAndroidWear.added(true);
             } else {
                 preferenceScreen.removePreference(prefPersistentNotification);
                 prefPersistentNotification.added(false);
 
                 preferenceScreen.removePreference(prefApps);
+
+                preferenceScreen.removePreference(prefAndroidWear);
+                prefAndroidWear.added(false);
             }
         }
     }
@@ -134,6 +149,12 @@ public class SettingsFragment extends PreferenceFragment
         if (key.equals(prefPersistentNotification.getKey())) {
             boolean value = (boolean) newValue;
             prefPersistentNotification.setChecked(value);
+            SettingsManager.get().setPreferenceValue(key, value);
+            return true;
+        }
+        if (key.equals(prefAndroidWear.getKey())) {
+            boolean value = (boolean) newValue;
+            prefAndroidWear.setChecked(value);
             SettingsManager.get().setPreferenceValue(key, value);
             return true;
         }
