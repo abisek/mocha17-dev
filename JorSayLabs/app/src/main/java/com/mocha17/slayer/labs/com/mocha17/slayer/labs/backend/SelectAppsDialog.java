@@ -147,24 +147,34 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
 
         switch(uiState) {
             case ALL_APPS:
-                allApps.setChecked(true);
-                appsList.setVisibility(View.GONE);
-                appsListLoading.setVisibility(View.GONE);
+                appsList.setVisibility(View.INVISIBLE);
+                appsListLoading.setVisibility(View.INVISIBLE);
                 break;
             case APPS_LIST_LOADING_START:
                 appsList.setVisibility(View.INVISIBLE); //continues to take space
                 appsListLoading.setVisibility(View.VISIBLE);
-
-                appsLoaderTask = new AppsLoaderTask();
-                appsLoaderTask.execute();
+                /* We could have chosen to avoid running this Task again if it was
+                done, opting to show the data immediately. We are not doing that because
+                triggering it again updates selected state correctly. If user selects appA
+                while list is displayed, selects all apps and then unselectes all apps,
+                in the list displayed, appA should be shown as selected. */
+                if (appsLoaderTask == null || appsLoaderTask.isDone()) {
+                    appsLoaderTask = new AppsLoaderTask();
+                    appsLoaderTask.execute();
+                }
                 break;
             case APPS_LIST_LOADING_SUCCESS:
-                appsListLoading.setVisibility(View.GONE);
-                appsList.setVisibility(View.VISIBLE);
-                //Adapter for the List
-                //AppListAdater will work on the class member appInfos - instead of getting a List via Constructor
-                AppsListAdapter appsListAdapter = new AppsListAdapter();
-                appsList.setAdapter(appsListAdapter);
+                //Handle the race condition when allApps is toggled on while the AsyncTask was still
+                //executing. Do not make the views visible if allApps is checked.
+                if (!allApps.isChecked()) {
+                    appsListLoading.setVisibility(View.GONE);
+                    appsList.setVisibility(View.VISIBLE);
+
+                    //Adapter for the List
+                    //AppListAdater will work on the class member appInfos - instead of getting a List via Constructor
+                    AppsListAdapter appsListAdapter = new AppsListAdapter();
+                    appsList.setAdapter(appsListAdapter);
+                }
                 break;
             case APPS_LIST_LOADING_FAILURE:
                 Toast.makeText(context, R.string.select_apps_error, Toast.LENGTH_SHORT).show();
@@ -180,6 +190,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     private class AppsLoaderTask extends AsyncTask<Void, Void, UI_STATE> {
         private int iconWidth, iconHeight;
         private Canvas canvas;
+        private boolean done;
 
         AppsLoaderTask() {
             Resources resources = context.getResources();
@@ -221,6 +232,13 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         @Override
         protected void onPostExecute(UI_STATE result) {
             updateUI(result);
+            if (result == UI_STATE.APPS_LIST_LOADING_SUCCESS) {
+                done = true;
+            }
+        }
+
+        boolean isDone() {
+            return done;
         }
 
         //The code in this method comes from AOSP:
