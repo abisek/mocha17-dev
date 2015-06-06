@@ -1,6 +1,8 @@
 package com.mocha17.slayer.labs;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
@@ -15,9 +17,8 @@ import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.Constants;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SelectAppsDialog;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SettingsManager;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SwitchPreference;
-
 public class SettingsFragment extends PreferenceFragment
-        implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
+        implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener, Dialog.OnDismissListener {
     PreferenceScreen preferenceScreen;
     private SwitchPreference prefGlobalReadAloud, prefPersistentNotification, prefAndroidWear;
     private MultiSelectListPreference prefAppsList;
@@ -57,15 +58,12 @@ public class SettingsFragment extends PreferenceFragment
         prefAndroidWear = new SwitchPreference(getActivity(), Constants.ORDER_PREF_ANDROID_WEAR,
                 getString(R.string.pref_key_android_wear), getString(R.string.pref_android_wear));
         prefAndroidWear.setOnPreferenceChangeListener(this);
-        prefAndroidWear.setChecked(SettingsManager.get().getPreferenceValue(R.string.pref_key_android_wear, true));
 
         //Create persistent notification preference
         prefPersistentNotification = new SwitchPreference(getActivity(),
                 Constants.ORDER_PREF_PERSISTENT_NOTIFICATION, getString(R.string.pref_key_persistent_notification),
                 getString(R.string.pref_persistent_notification), getString(R.string.pref_persistent_notification_help));
         prefPersistentNotification.setOnPreferenceChangeListener(this);
-        prefPersistentNotification.setChecked(
-                SettingsManager.get().getPreferenceValue(R.string.pref_key_persistent_notification, true));
 
         //Create 'apps' preference
         prefApps = new SwitchPreference(getActivity(),
@@ -76,11 +74,6 @@ public class SettingsFragment extends PreferenceFragment
         prefApps.setKey(getString(R.string.pref_key_apps));
         prefApps.setOrder(Constants.ORDER_PREF_APPS);
         prefApps.setOnPreferenceClickListener(this);
-        if (SettingsManager.get().getPreferenceValue(R.string.pref_key_all_apps, false)) {
-            prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.all)));
-        } else {
-            prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.selected)));
-        }
 
         //Create the apps list
         prefAppsList = new MultiSelectListPreference(getActivity());
@@ -109,11 +102,16 @@ public class SettingsFragment extends PreferenceFragment
             if (prefGlobalReadAloud.isChecked()) {
                 preferenceScreen.addPreference(prefPersistentNotification);
                 prefPersistentNotification.added(true);
+                prefPersistentNotification.setChecked(
+                        SettingsManager.get().getPreferenceValue(R.string.pref_key_persistent_notification, true));
 
                 preferenceScreen.addPreference(prefApps);
+                setPrefAppsSummary();
 
                 preferenceScreen.addPreference(prefAndroidWear);
                 prefAndroidWear.added(true);
+                prefAndroidWear.setChecked(SettingsManager.get().getPreferenceValue(R.string.pref_key_android_wear, true));
+                setPrefAndroidWearSummary();
             } else {
                 preferenceScreen.removePreference(prefPersistentNotification);
                 prefPersistentNotification.added(false);
@@ -123,6 +121,22 @@ public class SettingsFragment extends PreferenceFragment
                 preferenceScreen.removePreference(prefAndroidWear);
                 prefAndroidWear.added(false);
             }
+        }
+    }
+
+    private void setPrefAndroidWearSummary() {
+        if (!prefAndroidWear.isChecked()) {
+            prefAndroidWear.setSummary(R.string.pref_android_wear_read_all);
+        } else {
+            prefAndroidWear.setSummary(null);
+        }
+    }
+
+    private void setPrefAppsSummary() {
+        if (SettingsManager.get().getPreferenceValue(R.string.pref_key_all_apps, false)) {
+            prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.all)));
+        } else {
+            prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.selected)));
         }
     }
 
@@ -156,6 +170,7 @@ public class SettingsFragment extends PreferenceFragment
             boolean value = (boolean) newValue;
             prefAndroidWear.setChecked(value);
             SettingsManager.get().setPreferenceValue(key, value);
+            setPrefAndroidWearSummary();
             return true;
         }
         return false;
@@ -166,10 +181,18 @@ public class SettingsFragment extends PreferenceFragment
         String key = preference.getKey();
         if (key.equals(prefApps.getKey())) {
             if (getFragmentManager().findFragmentByTag("SelectAppsDialog") == null) {
-                getFragmentManager().beginTransaction().add(SelectAppsDialog.newInstance(), "SelectAppsDialog").commit();
+                SelectAppsDialog selectAppsDialog = SelectAppsDialog.newInstance();
+                selectAppsDialog.setOnDismissListener(this);
+                getFragmentManager().beginTransaction().add(selectAppsDialog, "SelectAppsDialog").commit();
             }
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        //Update summary text when the 'select apps' dialog goes away
+        setPrefAppsSummary();
     }
 }

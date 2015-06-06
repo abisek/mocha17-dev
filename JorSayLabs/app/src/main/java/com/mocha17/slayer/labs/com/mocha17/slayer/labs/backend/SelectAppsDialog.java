@@ -2,6 +2,7 @@ package com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend;
 
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -35,6 +36,7 @@ import java.util.Set;
 public class SelectAppsDialog extends DialogFragment implements View.OnClickListener {
 
     private Context context;
+    private DialogInterface.OnDismissListener dismissListener;
 
     //https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html
     private RecyclerView appsList;
@@ -61,6 +63,18 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
 
     //public Constructor
     public SelectAppsDialog() {
+    }
+
+    public void setOnDismissListener(DialogInterface.OnDismissListener dismissListener) {
+        this.dismissListener = dismissListener;
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (dismissListener != null) {
+            dismissListener.onDismiss(dialog);
+        }
     }
 
     @Override
@@ -147,6 +161,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
 
         switch(uiState) {
             case ALL_APPS:
+                allApps.setChecked(true);
                 appsList.setVisibility(View.INVISIBLE);
                 appsListLoading.setVisibility(View.INVISIBLE);
                 break;
@@ -210,9 +225,6 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 return UI_STATE.APPS_LIST_LOADING_FAILURE;
             }
             for (ApplicationInfo applicationInfo : installedApps) {
-                Drawable icon = pm.getApplicationIcon(applicationInfo);
-                appInfos.add(new AppInfo(applicationInfo.packageName, applicationInfo.loadLabel(pm).toString(),
-                        getSizeAdjustedDrawable(icon), selectedPackages.contains(applicationInfo.packageName)));
                 if (isCancelled()) {
                     //When an AsyncTask is cancelled, onPostExecute isn't called,
                     //instead, onCancelled() is called. We have nothing
@@ -221,6 +233,9 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                     //We do have a isCancelled() check before we do UI update
                     return UI_STATE.APPS_LIST_LOADING_CANCELLED;
                 }
+                Drawable icon = pm.getApplicationIcon(applicationInfo);
+                appInfos.add(new AppInfo(applicationInfo.packageName, applicationInfo.loadLabel(pm).toString(),
+                        getSizeAdjustedDrawable(icon), selectedPackages.contains(applicationInfo.packageName)));
             }
 
             //Sort
@@ -270,7 +285,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
 
             icon.setBounds(0, 0, width, height);
             icon.draw(canvas);
-            return new BitmapDrawable(getResources(), bitmap);
+            return new BitmapDrawable(context.getResources(), bitmap);
         }
     }
 
