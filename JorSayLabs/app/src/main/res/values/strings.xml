@@ -22,6 +22,7 @@
     <string name="pref_apps_summary">Reading notifications for %1$s apps</string>
     <string name="all">all</string>
     <string name="selected">select</string>
+    <string name="none">none of the</string>
     <string name="select_apps_title">Select apps</string>
     <string name="all_apps">All apps</string>
     <string name="select_apps_error">Could not load list of apps. Please try again!</string>

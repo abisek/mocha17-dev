@@ -17,6 +17,10 @@ import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.Constants;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SelectAppsDialog;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SettingsManager;
 import com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend.SwitchPreference;
+
+import java.util.HashSet;
+import java.util.Set;
+
 public class SettingsFragment extends PreferenceFragment
         implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener, Dialog.OnDismissListener {
     PreferenceScreen preferenceScreen;
@@ -136,7 +140,13 @@ public class SettingsFragment extends PreferenceFragment
         if (SettingsManager.get().getPreferenceValue(R.string.pref_key_all_apps, false)) {
             prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.all)));
         } else {
-            prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.selected)));
+            Set<String> appsList = SettingsManager.get().getPreferenceValue(R.string.pref_key_apps,
+                    new HashSet<String>());
+            if (appsList == null || appsList.isEmpty()) {
+                prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.none)));
+            } else {
+                prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.selected)));
+            }
         }
     }
 
