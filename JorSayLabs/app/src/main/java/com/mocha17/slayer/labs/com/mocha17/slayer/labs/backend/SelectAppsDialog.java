@@ -120,7 +120,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 SettingsManager.get().setPreferenceValue(R.string.pref_key_apps, selectedPackages);
                 SettingsManager.get().setPreferenceValue(R.string.pref_key_all_apps, allApps.isChecked());
             case R.id.cancel_button:
-                if (!appsLoaderTask.isCancelled()) {
+                if (appsLoaderTask!= null && !appsLoaderTask.isCancelled()) {
                     appsLoaderTask.cancel(true);
                 }
                 getDialog().dismiss();
