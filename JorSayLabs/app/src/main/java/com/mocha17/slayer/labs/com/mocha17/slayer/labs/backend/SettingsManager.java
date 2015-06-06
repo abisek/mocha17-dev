@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 
 import com.mocha17.slayer.labs.SlayerLabsApp;
 
+import java.util.Set;
+
 /**
  * Created by mocha on 5/31/15.
  */
@@ -50,5 +52,14 @@ public class SettingsManager {
 
     public void setPreferenceValue(String key, boolean value) {
         editor.putBoolean(key, value).apply();
+    }
+
+
+    public Set<String> getPreferenceValue(int keyId, Set<String> defValues) {
+        return sharedPreferences.getStringSet(context.getString(keyId), defValues);
+    }
+
+    public void setPreferenceValue(int keyId, Set<String> values) {
+        editor.putStringSet(context.getString(keyId), values).apply();
     }
 }

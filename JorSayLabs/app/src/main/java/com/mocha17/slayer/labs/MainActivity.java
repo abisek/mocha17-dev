@@ -8,10 +8,9 @@ import android.view.MenuItem;
 /*
 How are Settings displayed?
 We have a Card in the Activity layout with a FrameLayout inside it.
-We load the Fragment in this FrameLayout. This Fragment has a layout - this layout contains the
-default ListView id used by Android for populating preferences. The preferences themselves come
-from the preferences XML file. (That's why there's both in the onCreateView for the fragment - the
-layout is inflated and preferences are populated there.)
+We load the Fragment in this FrameLayout. The Fragment itself has a layout - this layout contains the
+default ListView id used by Android for populating preferences. The scaffolding needed comes from the
+preferences XML and the preferences are added by the Fragment code.
 This is a little complicated, but gets us the preferences displayed inside a Card.
 
 Now, we could have extended PreferenceActivity here and called addPreferencesFromResource(), but that

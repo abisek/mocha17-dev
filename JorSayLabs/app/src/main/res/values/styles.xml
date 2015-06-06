@@ -16,6 +16,25 @@
         <item name="android:textColorPrimary">@color/text_primary</item>
         <!-- overall text color -->
         <item name="android:textColor">@color/text</item>
+        <!-- Theme for Dialog -->
+        <item name="android:alertDialogTheme">@style/AppDialogTheme</item>
+        <item name="android:dialogTheme">@style/AppDialogTheme</item>
+    </style>
+
+    <!-- Android doesn't set accent colors properly for Dialogs - you get the
+    default Material color, and your app's accent color is ignored. This is a long-standing
+    bug, and people have come up with multiple solutions:
+    https://code.google.com/p/android/issues/detail?id=72717
+    http://stackoverflow.com/questions/26608390/android-v21-theme-appcompat-color-accent-is-ignored-no-padding-on-dialogs
+    https://github.com/afollestad/material-dialogs
+    The solution we are using gets us what we want with least cost - we
+    have a theme defined for Dialogs that explicitly sets colorAccent. -->
+    <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:textColor">@color/text</item>
     </style>
 
     <style name="CardStyle" parent = "CardView.Light">
