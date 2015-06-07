@@ -1,7 +1,7 @@
 <resources>
 
     <!-- inherit from the material theme -->
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <!-- Main theme colors -->
         <!--   app branding color for the app bar -->
         <item name="colorPrimary">@color/primary</item>
@@ -19,8 +19,9 @@
         <!-- Theme for Dialog -->
         <item name="android:alertDialogTheme">@style/AppDialogTheme</item>
         <item name="android:dialogTheme">@style/AppDialogTheme</item>
-</style>
+    </style>
 
+    <style name="AppTheme" parent="AppBaseTheme" />
     <!-- Android doesn't set accent colors properly for Dialogs - you get the
     default Material color, and your app's accent color is ignored. This is a long-standing
     bug, and people have come up with multiple solutions:

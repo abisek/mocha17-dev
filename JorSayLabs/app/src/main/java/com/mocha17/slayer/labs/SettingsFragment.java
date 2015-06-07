@@ -130,9 +130,9 @@ public class SettingsFragment extends PreferenceFragment
 
     private void setPrefAndroidWearSummary() {
         if (!prefAndroidWear.isChecked()) {
-            prefAndroidWear.setSummary(R.string.pref_android_wear_read_all);
+            prefAndroidWear.setSummary(R.string.pref_android_wear_summary_off);
         } else {
-            prefAndroidWear.setSummary(null);
+            prefAndroidWear.setSummary(R.string.pref_android_wear_summary_on);
         }
     }
 
