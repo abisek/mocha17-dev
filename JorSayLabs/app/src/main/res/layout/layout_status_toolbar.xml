@@ -28,9 +28,10 @@
         android:layout_marginBottom="@dimen/margin"
         android:elevation="@dimen/elevation">
         <TextView
+            android:id="@+id/status_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/status_reading_aloud"
-            android:layout_margin="@dimen/margin"/>
+            android:layout_margin="@dimen/margin"
+            android:textStyle="bold"/>
     </android.support.v7.widget.CardView>
 </android.support.v7.widget.Toolbar>

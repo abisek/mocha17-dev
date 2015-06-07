@@ -2,6 +2,7 @@ package com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.mocha17.slayer.labs.SlayerLabsApp;
 
@@ -11,8 +12,6 @@ import java.util.Set;
  * Created by mocha on 5/31/15.
  */
 public class SettingsManager {
-    private static final String PREF_FILE = "com.mocha17.slayer.preferences";
-
     private Context context;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -24,7 +23,7 @@ public class SettingsManager {
 
     private SettingsManager() {
         context = SlayerLabsApp.getInstance().getApplicationContext();
-        sharedPreferences = context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         editor = sharedPreferences.edit();
     }
 
@@ -61,5 +60,9 @@ public class SettingsManager {
 
     public void setPreferenceValue(int keyId, Set<String> values) {
         editor.putStringSet(context.getString(keyId), values).apply();
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        return sharedPreferences;
     }
 }
