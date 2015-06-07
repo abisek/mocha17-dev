@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">JorSayLabs</string>
+    <string name="app_name">JorSay</string>
     <string name="action_settings">Settings</string>
 
     <!-- Status messages -->
@@ -24,7 +24,7 @@
 
     <string name="pref_key_persistent_notification" translatable="false">pref_key_persistent_notification</string>
     <string name="pref_persistent_notification">Show persistent notification</string>
-    <string name="pref_persistent_notification_help">improves reliability</string>
+    <string name="pref_persistent_notification_help">Improves reliability</string>
 
     <string name="pref_key_apps" translatable="false">pref_key_apps</string>
     <string name="pref_key_all_apps" translatable="false">pref_key_all_apps</string>
