@@ -3,7 +3,8 @@
     <string name="action_settings">Settings</string>
 
     <!-- Status messages -->
-    <string name="status_read_aloud">Not reading notifications aloud</string>
+    <string name="status_not_reading_aloud">Not reading notifications aloud</string>
+    <string name="status_reading_aloud">Reading notifications aloud</string>
     <string name="status_num_apps">Reading notifications for all apps</string>
     <string name="status_activity">Reading notifications always</string>
     <string name="status_time_of_day">Reading notifications throughout the day</string>
@@ -14,14 +15,17 @@
 
     <string name="pref_key_persistent_notification" translatable="false">pref_key_persistent_notification</string>
     <string name="pref_persistent_notification">Show persistent notification</string>
-    <string name="pref_persistent_notification_help">helps background service run more reliably</string>
+    <string name="pref_persistent_notification_help">improves reliability</string>
 
     <string name="pref_key_apps" translatable="false">pref_key_apps</string>
     <string name="pref_key_all_apps" translatable="false">pref_key_all_apps</string>
     <string name="pref_apps_title">Apps to read notifications for</string>
+    <!-- We could have used plurals, but the strings Android gives depends on the language, and
+    'zero' for english does not work. -->
+    <string name="pref_apps_summary_one">Reading notifications for 1 app</string>
     <string name="pref_apps_summary">Reading notifications for %1$s apps</string>
     <string name="all">all</string>
-    <string name="selected">select</string>
+    <string name="pref_apps_summary_none">No apps selected</string>
     <string name="select_apps_title">Select apps</string>
     <string name="all_apps">All apps</string>
     <string name="select_apps_error">Could not load list of apps. Please try again!</string>
@@ -29,4 +33,7 @@
     <string name="pref_key_android_wear" translatable="false">pref_key_android_wear</string>
     <string name="pref_android_wear">Android Wear requirement</string>
     <string name="pref_android_wear_read_all">Reads notifications aloud immediately</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,29 +1,30 @@
 package com.mocha17.slayer.labs;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-/*
-How are Settings displayed?
-We have a Card in the Activity layout with a FrameLayout inside it.
-We load the Fragment in this FrameLayout. The Fragment itself has a layout - this layout contains the
-default ListView id used by Android for populating preferences. The scaffolding needed comes from the
-preferences XML and the preferences are added by the Fragment code.
-This is a little complicated, but gets us the preferences displayed inside a Card.
+/* How are Settings displayed?
+We have a FrameLayout in the Activity Layout, and the PreferenceFragment is loaded in it.
+The Fragment itself has a layout - this layout contains the default ListView id used by Android for
+populating preferences. The scaffolding needed comes from the preferences XML and the preferences
+are added by the Fragment code.
 
 Now, we could have extended PreferenceActivity here and called addPreferencesFromResource(), but that
 is deprecated for the Activity. PreferenceFragment is the way to go, with PreferenceActivity acting as
-holder of PreferenceHeaders (with Fragment displayed on tapping each of them).
- */
-public class MainActivity extends Activity {
+holder of PreferenceHeaders (with Fragment displayed on tapping each of them). */
+public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         SettingsFragment settingsFragment = SettingsFragment.newInstance();
         getFragmentManager().beginTransaction().add(R.id.settings_container, settingsFragment, "Settings").commit();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        setSupportActionBar(toolbar);
     }
 
     @Override

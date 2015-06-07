@@ -2,37 +2,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/activity_horizontal_margin"
+    android:clipChildren="false"
     android:clipToPadding="false"
     tools:context=".MainActivity">
     <!--clipToPadding was needed for shadows on both cards to show up -->
-    <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/statusCard"
-        style="@style/CardStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <include
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/margin_small"
-            layout="@layout/layout_status" />
-    </android.support.v7.widget.CardView>
 
-    <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/settings_card"
-        style="@style/CardStyle"
+    <!-- Toolbars -->
+    <!--http://stackoverflow.com/questions/29239254/extended-toolbar-with-custom-view-not-displaying-with-full-width -->
+    <!-- This has been very interesting. Adding a custom view to ToolBar results in title not being
+    shown. We could add the title as part of the custom view of course, but then the card we wanted
+    to show - basically anything below the overflow button, would have the right edge terminated
+    before the left edge of the overflow button. If navigation button is added, left edge gets
+    clipped too. I went slightly mad figuring this out. Fortunately, I was not the only one having
+    this problem.
+    The solution is to use two ToolBars, one as the 'standard' ActionBar, and another immediately
+    below as our content ToolBar.Then, our content ToolBar doesn't need to deal with overflow or
+    navigation icon etc and can occupy complete horizontal space. -->
+    <include
+        android:id="@+id/app_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/statusCard"
-        android:layout_marginTop="@dimen/margin">
+        layout="@layout/layout_app_toolbar" />
+    <include
+        android:id="@+id/status_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/app_toolbar"
+        layout="@layout/layout_status_toolbar" />
         <FrameLayout
             android:id="@+id/settings_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_small"
-            android:layout_marginBottom="@dimen/margin_small" />
-    </android.support.v7.widget.CardView>
+            android:layout_below="@id/status_toolbar"/>
 </RelativeLayout>
