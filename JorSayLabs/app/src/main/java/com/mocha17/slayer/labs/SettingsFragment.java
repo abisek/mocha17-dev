@@ -142,10 +142,15 @@ public class SettingsFragment extends PreferenceFragment
         } else {
             Set<String> appsList = SettingsManager.get().getPreferenceValue(R.string.pref_key_apps,
                     new HashSet<String>());
+
             if (appsList == null || appsList.isEmpty()) {
-                prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.none)));
+                prefApps.setSummary(getString(R.string.pref_apps_summary_none));
             } else {
-                prefApps.setSummary(getString(R.string.pref_apps_summary, getString(R.string.selected)));
+                if (appsList.size() == 1) {
+                    prefApps.setSummary(getString(R.string.pref_apps_summary_one));
+                } else {
+                    prefApps.setSummary(getString(R.string.pref_apps_summary, appsList.size()));
+                }
             }
         }
     }

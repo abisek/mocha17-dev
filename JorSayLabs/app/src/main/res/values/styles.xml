@@ -1,7 +1,7 @@
 <resources>
 
     <!-- inherit from the material theme -->
-    <style name="AppTheme" parent="@style/Theme.AppCompat.Light">
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <!-- Main theme colors -->
         <!--   app branding color for the app bar -->
         <item name="colorPrimary">@color/primary</item>
@@ -19,7 +19,7 @@
         <!-- Theme for Dialog -->
         <item name="android:alertDialogTheme">@style/AppDialogTheme</item>
         <item name="android:dialogTheme">@style/AppDialogTheme</item>
-    </style>
+</style>
 
     <!-- Android doesn't set accent colors properly for Dialogs - you get the
     default Material color, and your app's accent color is ignored. This is a long-standing
@@ -40,6 +40,6 @@
     <style name="CardStyle" parent = "CardView.Light">
         <item name="cardBackgroundColor">@color/content_background</item>
         <item name="cardCornerRadius">@dimen/card_corner</item>
-        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardElevation">@dimen/elevation</item>
     </style>
 </resources>
