@@ -17,7 +17,8 @@
     this problem.
     The solution is to use two ToolBars, one as the 'standard' ActionBar, and another immediately
     below as our content ToolBar.Then, our content ToolBar doesn't need to deal with overflow or
-    navigation icon etc and can occupy complete horizontal space. -->
+    navigation icon etc and can occupy complete horizontal space.
+    Moreover, we can now let status toolbar 'scroll up', while keeping app toolbar in place. -->
     <include
         android:id="@+id/app_toolbar"
         android:layout_width="match_parent"
@@ -29,9 +30,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/app_toolbar"
         layout="@layout/layout_status_toolbar" />
-        <FrameLayout
-            android:id="@+id/settings_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/status_toolbar"/>
+    <FrameLayout
+        android:id="@+id/settings_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/status_toolbar"/>
 </RelativeLayout>
