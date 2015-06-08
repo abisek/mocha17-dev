@@ -3,17 +3,18 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="text_padding">12dp</dimen>
+    <dimen name="toolbar_content_inset">0dp</dimen>
+
+    <dimen name="padding">12dp</dimen>
+    <dimen name="padding_small">4dp</dimen>
+
     <dimen name="text_margin">4dp</dimen>
 
     <dimen name="margin">16dp</dimen>
     <dimen name="margin_small">8dp</dimen>
-    <dimen name="card_corner">2dp</dimen>
-    <dimen name="elevation">4dp</dimen>
 
-    <dimen name="drawable_padding">12dp</dimen>
+    <dimen name="elevation">4dp</dimen>
+    <dimen name="card_corner">2dp</dimen>
 
     <dimen name="progress_spinner_size">64dp</dimen>
-
-    <dimen name="padding_small">4dp</dimen>
 </resources>

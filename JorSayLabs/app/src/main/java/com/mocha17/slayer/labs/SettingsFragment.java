@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
@@ -25,7 +24,6 @@ public class SettingsFragment extends PreferenceFragment
         implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener, Dialog.OnDismissListener {
     PreferenceScreen preferenceScreen;
     private SwitchPreference prefGlobalReadAloud, prefPersistentNotification, prefAndroidWear;
-    private MultiSelectListPreference prefAppsList;
     private Preference prefApps;
 
     private ListPreference l;
@@ -78,12 +76,6 @@ public class SettingsFragment extends PreferenceFragment
         prefApps.setKey(getString(R.string.pref_key_apps));
         prefApps.setOrder(Constants.ORDER_PREF_APPS);
         prefApps.setOnPreferenceClickListener(this);
-
-        //Create the apps list
-        prefAppsList = new MultiSelectListPreference(getActivity());
-        prefAppsList.setTitle(R.string.select_apps_title);
-        prefAppsList.setEntries(R.array.listSelectAllAppsOrSome);
-        prefAppsList.setEntryValues(R.array.valuesSelectAllAppsOrSome);
 
         //Create global 'read aloud' preference
         prefGlobalReadAloud = new SwitchPreference(getActivity(), Constants.ORDER_PREF_GLOBAL_READ_ALOUD,

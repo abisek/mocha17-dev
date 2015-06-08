@@ -2,36 +2,28 @@
 <android.support.v7.widget.Toolbar
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
     android:minHeight="?attr/actionBarSize"
-    android:elevation="@dimen/elevation"
-    app:contentInsetLeft="0dp"
-    app:contentInsetStart="0dp"
-    app:contentInsetRight="0dp"
-    app:contentInsetEnd="0dp"
-    android:clipToPadding="false"
-    android:clipChildren="false"
-    android:background="@color/accent"
+    app:contentInsetLeft="@dimen/toolbar_content_inset"
+    app:contentInsetStart="@dimen/toolbar_content_inset"
+    app:contentInsetRight="@dimen/toolbar_content_inset"
+    app:contentInsetEnd="@dimen/toolbar_content_inset"
+    style="@style/ToolbarStyle"
     app:theme="@style/ThemeOverlay.AppCompat.ActionBar">
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/statusCard"
         style="@style/CardStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/margin_small"
         android:layout_marginStart="@dimen/margin_small"
         android:layout_marginRight="@dimen/margin_small"
         android:layout_marginEnd="@dimen/margin_small"
         android:layout_marginTop="@dimen/margin"
-        android:layout_marginBottom="@dimen/margin"
-        android:elevation="@dimen/elevation">
+        android:layout_marginBottom="@dimen/margin">
         <TextView
             android:id="@+id/status_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/margin"
-            android:textStyle="bold"/>
+            style="@style/BoldTextStyle" />
     </android.support.v7.widget.CardView>
 </android.support.v7.widget.Toolbar>

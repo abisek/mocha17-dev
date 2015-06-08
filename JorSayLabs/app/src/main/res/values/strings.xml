@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">JorSay</string>
+    <string name="app_name">JorSayLabs</string>
     <string name="action_settings">Settings</string>
 
     <!-- Status messages -->
-    <string name="status_not_reading_aloud">Not reading any notifications aloud.</string>
+    <string name="status_not_reading_aloud">Not reading any notifications aloud</string>
     <string name="status_reading_aloud">Reading notifications aloud</string>
 
     <string name="status_android_wear_on">after Shake Detection</string>
@@ -14,15 +14,18 @@
     <string name="none">none of the</string>
     <string name="status_one_app">for 1 app</string>
 
+    <!-- future features -->
     <string name="status_activity">Reading notifications always</string>
     <string name="status_time_of_day">Reading notifications throughout the day</string>
 
 
     <!-- Preference screen -->
-    <string name="pref_key_global_read_aloud" translatable="false">pref_key_global_read_aloud</string>
+    <string name="pref_key_global_read_aloud" translatable="false">
+        pref_key_global_read_aloud</string>
     <string name="pref_global_read_aloud">Read notifications aloud</string>
 
-    <string name="pref_key_persistent_notification" translatable="false">pref_key_persistent_notification</string>
+    <string name="pref_key_persistent_notification" translatable="false">
+        pref_key_persistent_notification</string>
     <string name="pref_persistent_notification">Show persistent notification</string>
     <string name="pref_persistent_notification_help">Improves reliability</string>
 
@@ -42,8 +45,6 @@
     <string name="pref_key_android_wear" translatable="false">pref_key_android_wear</string>
     <string name="pref_android_wear">Enable Shake Detection</string>
     <string name="pref_android_wear_summary_off">Reads notifications aloud immediately</string>
-    <string name="pref_android_wear_summary_on">Trigger \'read aloud\' by shaking your Android Wear-wearing wrist</string>
-
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pref_android_wear_summary_on">
+        Trigger \'read aloud\' by shaking your Android Wear-wearing wrist</string>
 </resources>
