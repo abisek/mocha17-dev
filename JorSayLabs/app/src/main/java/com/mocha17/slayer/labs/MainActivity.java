@@ -106,8 +106,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         //And so on for other features as and when they are added
 
-        //Finally, add a full stop and return
-        sb.append(".");
         return sb.toString();
     }
 

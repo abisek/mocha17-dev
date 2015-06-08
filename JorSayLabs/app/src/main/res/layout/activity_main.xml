@@ -2,10 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
     tools:context=".MainActivity">
-    <!--clipToPadding was needed for shadows on both cards to show up -->
 
     <!-- Toolbars -->
     <!--http://stackoverflow.com/questions/29239254/extended-toolbar-with-custom-view-not-displaying-with-full-width -->

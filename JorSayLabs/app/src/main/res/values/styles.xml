@@ -1,6 +1,6 @@
 <resources>
 
-    <!-- inherit from the material theme -->
+    <!-- inherit from the material theme, and define all the common elements here -->
     <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <!-- Main theme colors -->
         <!--   app branding color for the app bar -->
@@ -38,9 +38,40 @@
         <item name="android:textColor">@color/text</item>
     </style>
 
-    <style name="CardStyle" parent = "CardView.Light">
+    <style name="CardStyle" parent="CardView.Light">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="cardBackgroundColor">@color/content_background</item>
         <item name="cardCornerRadius">@dimen/card_corner</item>
         <item name="cardElevation">@dimen/elevation</item>
+    </style>
+
+    <style name="CheckedTextViewStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:padding">@dimen/padding</item>
+        <item name="android:drawablePadding">@dimen/padding</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="BorderlessButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="ToolbarStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="elevation">@dimen/elevation</item>
+        <item name="android:background">@color/accent</item>
+    </style>
+
+    <style name="BoldTextStyle">
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>

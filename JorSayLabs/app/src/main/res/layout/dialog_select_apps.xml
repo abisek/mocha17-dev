@@ -9,58 +9,45 @@
         android:layout_height="@dimen/progress_spinner_size"
         android:layout_centerInParent="true"
         style="@style/Widget.AppCompat.ProgressBar"/>
+
     <Button
         android:id="@+id/ok_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@android:string/ok"
+        style="@style/BorderlessButtonStyle"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="@dimen/margin_small"
         android:layout_marginTop="@dimen/margin_small"
-        style="?android:attr/borderlessButtonStyle"
-        android:textColor="@color/accent"
-        android:gravity="center"
-        android:clickable="true"/>
+        android:text="@android:string/ok"
+        android:textColor="@color/accent" />
     <Button
         android:id="@+id/cancel_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@android:string/cancel"
+        style="@style/BorderlessButtonStyle"
         android:layout_toLeftOf="@id/ok_button"
         android:layout_toStartOf="@id/ok_button"
         android:layout_alignTop="@id/ok_button"
-        style="?android:attr/borderlessButtonStyle"
-        android:textColor="@color/text"
-        android:gravity="center"
-        android:clickable="true"/>
+        android:text="@android:string/cancel"
+        android:textColor="@color/text" />
 
     <TextView
         android:id="@+id/select_apps_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/select_apps_title"
-        android:textColor="@color/text"
-        android:textStyle="bold"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:padding="@dimen/padding_small"
-        android:layout_margin="@dimen/margin_small"/>
+        android:layout_margin="@dimen/margin_small"
+        style="@style/BoldTextStyle"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/select_apps_title" />
+
     <CheckedTextView
         android:id="@+id/all_apps"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:checkMark="?android:attr/listChoiceIndicatorSingle"
-        android:padding="@dimen/text_padding"
         android:drawableLeft="@mipmap/all_apps"
-        android:drawablePadding="@dimen/drawable_padding"
         android:text="@string/all_apps"
-        android:textColor="@color/text"
-        android:background="?android:attr/selectableItemBackground"
-        android:layout_below="@id/select_apps_title"/>
+        android:layout_below="@id/select_apps_title"
+        style="@style/CheckedTextViewStyle"
+        android:checkMark="?android:attr/listChoiceIndicatorSingle" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/select_apps_list"
