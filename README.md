@@ -1,6 +1,3 @@
-# mocha17-dev
-A repository for my projects, created and first edited on 05/28/2015
-
 # JorSay
 With this app, user's phone would read notifications aloud (hence the name - JorSay) when user signals it to, by shaking her (well, Android Wear - wearing) wrist.
 
