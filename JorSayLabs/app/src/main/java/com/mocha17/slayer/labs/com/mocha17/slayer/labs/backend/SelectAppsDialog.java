@@ -1,8 +1,10 @@
 package com.mocha17.slayer.labs.com.mocha17.slayer.labs.backend;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -12,6 +14,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -36,6 +39,8 @@ import java.util.Set;
 public class SelectAppsDialog extends DialogFragment implements View.OnClickListener {
 
     private Context context;
+    private SharedPreferences defaultSharedPreferences;
+    private SharedPreferences.Editor editor;
     private DialogInterface.OnDismissListener dismissListener;
 
     //https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html
@@ -44,8 +49,9 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     Button ok, cancel;
     CheckedTextView allApps;
 
+    List<AppInfo> appInfos;
+    Set<String> selectedPackages;
     AppsLoaderTask appsLoaderTask;
-
     private enum UI_STATE {
         ALL_APPS,
         APPS_LIST_LOADING_START,
@@ -53,9 +59,6 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         APPS_LIST_LOADING_FAILURE,
         APPS_LIST_LOADING_CANCELLED;
     };
-
-    List<AppInfo> appInfos;
-    Set<String> selectedPackages;
 
     public static SelectAppsDialog newInstance() {
         return new SelectAppsDialog();
@@ -78,14 +81,19 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        context = getActivity();
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        context = activity;
+
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        editor = defaultSharedPreferences.edit();
 
         //Get previously selected apps
-        Set<String> prevSelected = SettingsManager.get().getPreferenceValue(R.string.pref_key_apps,
-                new HashSet<String>());
-        //The set returned by getPreferenceValue cannot be reliably modified, so copy it into a modifiable one.
+        Set<String> prevSelected = defaultSharedPreferences.getStringSet(
+                getString(R.string.pref_key_apps), new HashSet<String>());
+        //The set returned by getPreferenceValue cannot be reliably modified,
+        // so copy it into a modifiable one.
         selectedPackages = new HashSet<>(prevSelected);
     }
 
@@ -103,8 +111,9 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         //Use a LinearLayoutManager to get ListView-like behavior
         //This is where the magic happens
         //http://developer.android.com/reference/android/support/v7/widget/RecyclerView.LayoutManager.html
-        //"By changing the LayoutManager a RecyclerView can be used to implement a standard vertically
-        //scrolling list, a uniform grid, staggered grids, horizontally scrolling collections and more."
+        //"By changing the LayoutManager a RecyclerView can be used to implement a standard
+        //vertically scrolling list, a uniform grid, staggered grids, horizontally scrolling
+        //collections and more."
         appsList.setLayoutManager(new LinearLayoutManager(context));
 
         appsListLoading = (ProgressBar) view.findViewById(R.id.select_apps_progress);
@@ -119,7 +128,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         allApps = (CheckedTextView)view.findViewById(R.id.all_apps);
         allApps.setOnClickListener(this);
 
-        if (SettingsManager.get().getPreferenceValue(R.string.pref_key_all_apps, false)) {
+        if (defaultSharedPreferences.getBoolean(getString(R.string.pref_key_all_apps), false)) {
             updateUI(UI_STATE.ALL_APPS);
         } else {
             updateUI(UI_STATE.APPS_LIST_LOADING_START);
@@ -131,8 +140,10 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ok_button:
-                SettingsManager.get().setPreferenceValue(R.string.pref_key_apps, selectedPackages);
-                SettingsManager.get().setPreferenceValue(R.string.pref_key_all_apps, allApps.isChecked());
+                editor.putStringSet(getString(R.string.pref_key_apps), selectedPackages).apply();
+                editor.putBoolean(
+                        getString(R.string.pref_key_all_apps), allApps.isChecked()).apply();
+                /*fall through*/
             case R.id.cancel_button:
                 if (appsLoaderTask!= null && !appsLoaderTask.isCancelled()) {
                     appsLoaderTask.cancel(true);
@@ -151,10 +162,9 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     }
 
     private void updateUI(UI_STATE uiState) {
-        //We want to ignore UI state updates when the Task is cancelled - most likely
-        //the user is moving away from this Dialog; but we could enter this
-        //method when this task isn't initialized and hasn't started.
-        //Hence the null check.
+        //We want to ignore UI state updates when the Task is cancelled - most likely the user is
+        //moving away from this Dialog; but we could enter this method when this task isn't
+        //initialized and hasn't started. Hence the null check.
         if (appsLoaderTask!= null && appsLoaderTask.isCancelled()) {
             return;
         }
@@ -168,11 +178,11 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
             case APPS_LIST_LOADING_START:
                 appsList.setVisibility(View.INVISIBLE); //continues to take space
                 appsListLoading.setVisibility(View.VISIBLE);
-                /* We could have chosen to avoid running this Task again if it was
-                done, opting to show the data immediately. We are not doing that because
-                triggering it again updates selected state correctly. If user selects appA
-                while list is displayed, selects all apps and then unselectes all apps,
-                in the list displayed, appA should be shown as selected. */
+                /* We could have chosen to avoid running this Task again if it was done, opting to
+                show the data immediately. We are not doing that because triggering it again updates
+                selected state correctly. If user selects appA while list is displayed, then selects
+                all apps and then unselectes all apps, in the list displayed, appA should be shown
+                as selected. */
                 if (appsLoaderTask == null || appsLoaderTask.isDone()) {
                     appsLoaderTask = new AppsLoaderTask();
                     appsLoaderTask.execute();
@@ -186,13 +196,14 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                     appsList.setVisibility(View.VISIBLE);
 
                     //Adapter for the List
-                    //AppListAdater will work on the class member appInfos - instead of getting a List via Constructor
+                    //works on the class member appInfos instead of getting a List via Constructor
                     AppsListAdapter appsListAdapter = new AppsListAdapter();
                     appsList.setAdapter(appsListAdapter);
                 }
                 break;
             case APPS_LIST_LOADING_FAILURE:
-                Toast.makeText(context, R.string.select_apps_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.select_apps_error,
+                        Toast.LENGTH_SHORT).show();
                 getDialog().dismiss();
                 break;
             case APPS_LIST_LOADING_CANCELLED:
@@ -202,6 +213,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         }
     }
 
+    /** AsyncTask for loading list of apps asyncronously */
     private class AppsLoaderTask extends AsyncTask<Void, Void, UI_STATE> {
         private int iconWidth, iconHeight;
         private Canvas canvas;
@@ -212,6 +224,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
             iconWidth = iconHeight = (int) resources.getDimension(android.R.dimen.app_icon_size);
             canvas = new Canvas();
         }
+
         @Override
         protected UI_STATE doInBackground(Void... params) {
             //Populate appInfos
@@ -219,26 +232,25 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
 
             PackageManager pm = context.getPackageManager();
             List<ApplicationInfo> installedApps = pm.getInstalledApplications(0);
-
             if (installedApps.isEmpty()) {
                 //highly unlikely
                 return UI_STATE.APPS_LIST_LOADING_FAILURE;
             }
             for (ApplicationInfo applicationInfo : installedApps) {
                 if (isCancelled()) {
-                    //When an AsyncTask is cancelled, onPostExecute isn't called,
-                    //instead, onCancelled() is called. We have nothing
-                    //to do once this task is cancelled, so.. we return a value that's
-                    //gonna be ignored anyway.
+                    //When an AsyncTask is cancelled, onPostExecute isn't called, instead,
+                    //onCancelled() is called. We have nothing to do once this task is cancelled,
+                    // so.. we return a value that's gonna be ignored anyway.
                     //We do have a isCancelled() check before we do UI update
                     return UI_STATE.APPS_LIST_LOADING_CANCELLED;
                 }
                 Drawable icon = pm.getApplicationIcon(applicationInfo);
-                appInfos.add(new AppInfo(applicationInfo.packageName, applicationInfo.loadLabel(pm).toString(),
-                        getSizeAdjustedDrawable(icon), selectedPackages.contains(applicationInfo.packageName)));
+                appInfos.add(new AppInfo(applicationInfo.packageName,
+                        applicationInfo.loadLabel(pm).toString(), getSizeAdjustedDrawable(icon),
+                        selectedPackages.contains(applicationInfo.packageName)));
             }
 
-            //Sort
+            //Sort first by checked state and then alphabetically - display selected apps at top
             Collections.sort(appInfos);
 
             return UI_STATE.APPS_LIST_LOADING_SUCCESS;
@@ -292,7 +304,8 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     private class AppsListAdapter extends RecyclerView.Adapter<AppsListAdapter.AppsListViewHolder> {
 
         //Reference to the views for each data item
-        public class AppsListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public class AppsListViewHolder extends RecyclerView.ViewHolder
+                implements View.OnClickListener {
             CheckedTextView row;
             public AppsListViewHolder(View v) {
                 super(v);
@@ -302,16 +315,17 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
 
             @Override
             public void onClick(View v) {
-                    int position = getPosition();
-                    if (v instanceof CheckedTextView) { //we got ViewHolder row
-                        ((CheckedTextView) v).toggle();
-                        AppInfo appInfo = appInfos.get(position);
-                        if (selectedPackages.contains(appInfo.packageName)) {
-                            selectedPackages.remove(appInfo.packageName);
-                        } else {
-                            selectedPackages.add(appInfo.packageName);
-                        }
+                int position = getPosition();
+                if (v instanceof CheckedTextView) { //we got ViewHolder row
+                    ((CheckedTextView) v).toggle();
+                    AppInfo appInfo = appInfos.get(position);
+                    //Update 'selected apps' list.
+                    if (selectedPackages.contains(appInfo.packageName)) {
+                        selectedPackages.remove(appInfo.packageName);
+                    } else {
+                        selectedPackages.add(appInfo.packageName);
                     }
+                }
             }
         }
 
@@ -331,7 +345,8 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
             if (position <= appInfos.size()) {
                 final AppInfo app = appInfos.get(position);
                 viewHolder.row.setText(app.name);
-                viewHolder.row.setCompoundDrawablesWithIntrinsicBounds(app.icon, null, null, null);
+                viewHolder.row.setCompoundDrawablesWithIntrinsicBounds(
+                        app.icon/*left*/, null, null, null);
                 viewHolder.row.setChecked(app.selected);
             }
         }

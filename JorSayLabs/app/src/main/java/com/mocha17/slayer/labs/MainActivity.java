@@ -12,16 +12,8 @@ import android.widget.TextView;
 import java.util.HashSet;
 import java.util.Set;
 
-/* How are Settings displayed?
-We have a FrameLayout in the Activity Layout, and the PreferenceFragment is loaded in it.
-The Fragment itself has a layout - this layout contains the default ListView id used by Android for
-populating preferences. The scaffolding needed comes from the preferences XML and the preferences
-are added by the Fragment code.
-
-Now, we could have extended PreferenceActivity here and called addPreferencesFromResource(), but that
-is deprecated for the Activity. PreferenceFragment is the way to go, with PreferenceActivity acting as
-holder of PreferenceHeaders (with Fragment displayed on tapping each of them). */
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity
+        implements SharedPreferences.OnSharedPreferenceChangeListener {
     TextView statusText;
 
     @Override
@@ -29,16 +21,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
-        setSupportActionBar(toolbar);
+        if (toolbar !=  null) {
+            setSupportActionBar(toolbar);
+        }
+
+        SharedPreferences defaultSharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         //Settings
         SettingsFragment settingsFragment = SettingsFragment.newInstance();
-        getFragmentManager().beginTransaction().replace(R.id.settings_container, settingsFragment, "Settings").commit();
+        getFragmentManager().beginTransaction().replace(R.id.settings_container, settingsFragment,
+                settingsFragment.getClass().getSimpleName()).commit();
 
         //Status
         statusText = (TextView) findViewById(R.id.status_text);
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
         statusText.setText(getStatusString(defaultSharedPreferences));
     }
 
