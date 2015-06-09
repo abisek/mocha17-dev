@@ -25,14 +25,12 @@ public class AppInfo implements Comparable<AppInfo> {
         this.name = name;
         this.icon = icon;
         this.selected = selected;
-
-
     }
 
     @Override
     public int compareTo(AppInfo another) {
-        //We want to sort by selected state and then by name
-        //in effect, getting two alphabetical lists - one of selected, followed by that of unselected
+        //Sort by selected state and then by name; in effect, return two alphabetical lists, one of
+        //selected, followed by that of unselected
         if (another == null) {
             return 1;
         }

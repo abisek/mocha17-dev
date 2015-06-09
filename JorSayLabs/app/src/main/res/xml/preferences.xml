@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- We only need this so that we can access the PreferenceScreen in Java code.
-    This will be populated dynamically over there. -->
+
+    <!-- Global read aloud -->
+    <SwitchPreference
+        android:key="@string/pref_key_global_read_aloud"
+        android:title="@string/pref_global_read_aloud" />
+
+    <!-- Select apps -->
+    <Preference
+        android:key="@string/pref_key_apps"
+        android:title="@string/pref_apps_title" />
+
+    <!-- Persistent notification -->
+    <SwitchPreference
+        android:key="@string/pref_key_persistent_notification"
+        android:title="@string/pref_persistent_notification" />
+
+    <!-- Android Wear -->
+    <SwitchPreference
+        android:key="@string/pref_key_android_wear"
+        android:title="@string/pref_android_wear" />
 </PreferenceScreen>
