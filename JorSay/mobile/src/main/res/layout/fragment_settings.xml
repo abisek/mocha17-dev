@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <!-- We have a default listView here, which would be populated in Java with
+    preferences. This layout then remains a standalone piece which we are
+    integrating into the Activity layout by placing it inside a Card.
+    Reference:  http://stackoverflow.com/questions/2697233/how-to-add-a-button-to-preferencescreen -->
+
+    <ListView android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</RelativeLayout>

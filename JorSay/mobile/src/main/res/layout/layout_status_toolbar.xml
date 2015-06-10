@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:minHeight="?attr/actionBarSize"
+    app:contentInsetLeft="@dimen/toolbar_content_inset"
+    app:contentInsetStart="@dimen/toolbar_content_inset"
+    app:contentInsetRight="@dimen/toolbar_content_inset"
+    app:contentInsetEnd="@dimen/toolbar_content_inset"
+    style="@style/ToolbarStyle"
+    app:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+    <android.support.v7.widget.CardView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/statusCard"
+        style="@style/CardStyle"
+        android:layout_marginLeft="@dimen/margin_small"
+        android:layout_marginStart="@dimen/margin_small"
+        android:layout_marginRight="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:layout_marginTop="@dimen/margin"
+        android:layout_marginBottom="@dimen/margin">
+        <!-- android:lines ensures fixed height for the TextView. Else, we get weird height
+        adjustments as text changes. The number should increase if the there's more text later. -->
+        <TextView
+            android:id="@+id/status_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin"
+            android:layout_gravity="center_vertical"
+            android:lines="@integer/max_status_lines"
+            style="@style/BoldTextStyle" />
+    </android.support.v7.widget.CardView>
+</android.support.v7.widget.Toolbar>

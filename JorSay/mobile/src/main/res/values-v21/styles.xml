@@ -1,0 +1,6 @@
+<resources>
+    <!-- Inherit from our base theme and customize v-21 properties -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <item name="android:navigationBarColor">@color/navigationBar</item>
+    </style>
+</resources>

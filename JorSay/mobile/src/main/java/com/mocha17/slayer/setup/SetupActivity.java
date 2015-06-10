@@ -1,4 +1,4 @@
-package com.mocha17.slayer.ui.setup;
+package com.mocha17.slayer.setup;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -20,7 +20,7 @@ import com.google.android.gms.wearable.Wearable;
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.SlayerApp;
 import com.mocha17.slayer.etc.Logger;
-import com.mocha17.slayer.ui.MainActivity;
+import com.mocha17.slayer.MainActivity;
 
 
 //https://developer.android.com/google/auth/api-client.html#Starting
