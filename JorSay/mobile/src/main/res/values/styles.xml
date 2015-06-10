@@ -1,8 +1,83 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <!-- inherit from the material theme, and define all the common elements here -->
+    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <!-- Main theme colors -->
+        <!--   app branding color for the app bar -->
+        <item name="colorPrimary">@color/primary</item>
+        <!--   darker variant for the status bar and contextual app bars -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!--   theme UI controls like checkboxes and text fields -->
+        <item name="colorAccent">@color/accent</item>
+        <!-- Overall background -->
+        <item name="android:windowBackground">@color/background</item>
+        <!-- text color -->
+        <!-- primary branding - for app name etc. in Toolbar -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <!-- overall text color -->
+        <item name="android:textColor">@color/text</item>
+        <!-- Theme for Dialog -->
+        <item name="android:alertDialogTheme">@style/AppDialogTheme</item>
+        <item name="android:dialogTheme">@style/AppDialogTheme</item>
     </style>
 
+    <style name="AppTheme" parent="AppBaseTheme" />
+    <!-- Android doesn't set accent colors properly for Dialogs - you get the
+    default Material color, and your app's accent color is ignored. This is a long-standing
+    bug, and people have come up with multiple solutions:
+    https://code.google.com/p/android/issues/detail?id=72717
+    http://stackoverflow.com/questions/26608390/android-v21-theme-appcompat-color-accent-is-ignored-no-padding-on-dialogs
+    https://github.com/afollestad/material-dialogs
+    The solution we are using gets us what we want with least cost - we
+    have a theme defined for Dialogs that explicitly sets colorAccent. -->
+    <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/background</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:textColor">@color/text</item>
+    </style>
+
+    <style name="CardStyle" parent="CardView.Light">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="cardBackgroundColor">@color/content_background</item>
+        <item name="cardCornerRadius">@dimen/card_corner</item>
+        <item name="cardElevation">@dimen/elevation</item>
+    </style>
+
+    <style name="CheckedTextViewStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:padding">@dimen/padding</item>
+        <item name="android:drawablePadding">@dimen/padding</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="BorderlessButtonStyle" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:clickable">true</item>
+    </style>
+
+    <style name="ToolbarStyle" parent="Widget.AppCompat.Toolbar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="elevation">@dimen/elevation</item>
+        <item name="android:background">@color/accent</item>
+    </style>
+
+    <style name="BoldTextStyle">
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ProgressBarStyle" parent="Widget.AppCompat.ProgressBar">
+        <item name="android:layout_width">@dimen/progress_spinner_size</item>
+        <item name="android:layout_height">@dimen/progress_spinner_size</item>
+        <item name="android:layout_centerInParent">true</item>
+    </style>
 </resources>
