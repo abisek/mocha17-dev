@@ -1,4 +1,4 @@
-package com.mocha17.slayer.backend;
+package com.mocha17.slayer.communication;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -20,8 +20,9 @@ import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.SlayerApp;
-import com.mocha17.slayer.etc.Constants;
-import com.mocha17.slayer.etc.Logger;
+import com.mocha17.slayer.tts.JorSayReader;
+import com.mocha17.slayer.utils.Constants;
+import com.mocha17.slayer.utils.Logger;
 
 import java.util.List;
 import java.util.Set;

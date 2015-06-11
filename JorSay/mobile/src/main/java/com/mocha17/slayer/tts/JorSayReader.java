@@ -1,4 +1,4 @@
-package com.mocha17.slayer.backend;
+package com.mocha17.slayer.tts;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -7,8 +7,8 @@ import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 
 import com.mocha17.slayer.SlayerApp;
-import com.mocha17.slayer.etc.Constants;
-import com.mocha17.slayer.etc.Logger;
+import com.mocha17.slayer.utils.Constants;
+import com.mocha17.slayer.utils.Logger;
 
 import java.util.Locale;
 

@@ -17,14 +17,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="com.mocha17.slayer.backend.WearCommunicator">
+        <service android:name="com.mocha17.slayer.communication.WearCommunicator">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
-            </intent-filter>
-        </service>
-        <service android:name="com.mocha17.slayer.backend.TriggerMonitor">
-            <intent-filter>
-                <action android:name="com.mocha17.slayer.START_TRIGGER_MONITORING" />
             </intent-filter>
         </service>
 
