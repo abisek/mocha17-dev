@@ -19,7 +19,7 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.wearable.Wearable;
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.SlayerApp;
-import com.mocha17.slayer.etc.Logger;
+import com.mocha17.slayer.utils.Logger;
 import com.mocha17.slayer.MainActivity;
 
 

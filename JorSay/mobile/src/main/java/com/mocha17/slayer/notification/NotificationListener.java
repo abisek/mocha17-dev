@@ -1,4 +1,4 @@
-package com.mocha17.slayer.backend;
+package com.mocha17.slayer.notification;
 
 import android.app.Notification;
 import android.app.Service;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -18,26 +17,19 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.mocha17.slayer.SlayerApp;
-import com.mocha17.slayer.etc.Constants;
-import com.mocha17.slayer.etc.Logger;
+import com.mocha17.slayer.utils.Constants;
+import com.mocha17.slayer.utils.Logger;
 
 /**
  * Created by mocha on 5/2/15.
  */
 public class NotificationListener extends NotificationListenerService implements
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private LocalBroadcastManager localBroadcastManager;
 
     GoogleApiClient googleApiClient;
 
     private static final String NOTIFICATION_RECEIVED_MESSAGE_PATH = "/notification-received";
     private static final String NOTIFICATION_KEY = "notification_key";
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        localBroadcastManager = LocalBroadcastManager.getInstance(this);
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -50,6 +42,7 @@ public class NotificationListener extends NotificationListenerService implements
             googleApiClient.connect();
         }
 
+        Logger.v("NotificationListener onStartCommand");
         return Service.START_NOT_STICKY;
     }
 
@@ -73,9 +66,8 @@ public class NotificationListener extends NotificationListenerService implements
         notifBroadcastIntent.putExtra(Constants.KEY_DETAILS, getNotifString(statusBarNotification));
         notifBroadcastIntent.putExtra(Constants.KEY_ADDED, true/*added*/);
         Logger.v("onNotificationPosted: " + statusBarNotification.toString());
-        localBroadcastManager.sendBroadcast(notifBroadcastIntent);
 
-        //TODO replace this with a DB. We are recording the last notification posted using the App instance
+        //TODO replace this with a Queue. We are recording the last notification posted using the App instance
         SlayerApp.getInstance().setNotificationString(getNotifString(statusBarNotification));
 
         sendMessage(getNotifString(statusBarNotification));
@@ -87,12 +79,12 @@ public class NotificationListener extends NotificationListenerService implements
         notifBroadcastIntent.putExtra(Constants.KEY_DETAILS, getNotifString(statusBarNotification));
         notifBroadcastIntent.putExtra(Constants.KEY_ADDED, false/*removed*/);
         Logger.v("onNotificationRemoved: " + statusBarNotification.toString());
-        localBroadcastManager.sendBroadcast(notifBroadcastIntent);
     }
 
     private static String getNotifString(StatusBarNotification sbn) {
         //String ticker = sbn.getNotification().tickerText.toString();
         Bundle extras = sbn.getNotification().extras;
+        Notification n = sbn.getNotification();
         StringBuilder sb = new StringBuilder();
         sb.append("Package: ").append(sbn.getPackageName())
                 .append(", Title: ").append(extras.getString(Notification.EXTRA_TITLE)).append(", Text: ").

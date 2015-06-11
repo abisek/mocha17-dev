@@ -13,7 +13,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mocha17.slayer.backend.NotificationListener;
+import com.mocha17.slayer.notification.NotificationListener;
 import com.mocha17.slayer.settings.SettingsFragment;
 
 import java.util.HashSet;

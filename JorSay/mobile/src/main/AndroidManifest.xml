@@ -27,19 +27,19 @@
         </activity>
 
         <service
-            android:name="com.mocha17.slayer.backend.NotificationListener"
+            android:name=".notification.NotificationListener"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-        <service android:name=".backend.WearCommunicator">
+        <service android:name=".communication.WearCommunicator">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
-        <service android:name="com.mocha17.slayer.backend.JorSayReader">
+        <service android:name=".tts.JorSayReader">
             <intent-filter>
                 <action android:name="com.mocha17.slayer.JORSAY" />
             </intent-filter>

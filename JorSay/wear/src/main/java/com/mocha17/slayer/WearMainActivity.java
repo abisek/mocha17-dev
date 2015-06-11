@@ -16,8 +16,8 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.mocha17.slayer.backend.TriggerMonitor;
-import com.mocha17.slayer.etc.Constants;
-import com.mocha17.slayer.etc.Logger;
+import com.mocha17.slayer.utils.Constants;
+import com.mocha17.slayer.utils.Logger;
 
 public class WearMainActivity extends Activity implements View.OnClickListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {

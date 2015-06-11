@@ -1,4 +1,4 @@
-package com.mocha17.slayer.etc;
+package com.mocha17.slayer.utils;
 
 /**
  * Created by mocha on 5/2/15.

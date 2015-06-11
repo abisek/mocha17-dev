@@ -3,7 +3,7 @@ package com.mocha17.slayer;
 import android.app.Application;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.mocha17.slayer.etc.Logger;
+import com.mocha17.slayer.utils.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
