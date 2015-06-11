@@ -8,7 +8,7 @@
     app:contentInsetRight="@dimen/toolbar_content_inset"
     app:contentInsetEnd="@dimen/toolbar_content_inset"
     style="@style/ToolbarStyle"
-    app:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+    android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
     <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/statusCard"

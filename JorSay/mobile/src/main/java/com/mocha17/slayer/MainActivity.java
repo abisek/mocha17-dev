@@ -2,6 +2,7 @@ package com.mocha17.slayer;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mocha17.slayer.backend.NotificationListener;
 import com.mocha17.slayer.settings.SettingsFragment;
 
 import java.util.HashSet;
@@ -19,16 +21,20 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
-    TextView statusText;
+    private Intent notificationListenerIntent;
+    private TextView statusText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_toolbar);
-        if (toolbar !=  null) {
+        if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
+
+        //Intent for NotificationListener
+        notificationListenerIntent = new Intent(this, NotificationListener.class);
 
         SharedPreferences defaultSharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(this);
@@ -76,7 +82,7 @@ public class MainActivity extends AppCompatActivity
                 .setPriority(Notification.PRIORITY_MAX);
         Notification notification = notificationBuilder.build();
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                .notify((int)System.currentTimeMillis(), notification);
+                .notify((int) System.currentTimeMillis(), notification);
     }
 
     private String getStatusString(SharedPreferences sharedPreferences) {
@@ -126,6 +132,13 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (getString(R.string.pref_key_global_read_aloud).equals(key)) {
+            if (sharedPreferences.getBoolean(key, false)) {
+                startService(notificationListenerIntent);
+            } else {
+                stopService(notificationListenerIntent);
+            }
+        }
         statusText.setText(getStatusString(sharedPreferences));
     }
 }
