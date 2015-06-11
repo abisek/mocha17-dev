@@ -46,12 +46,12 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     //https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html
     private RecyclerView appsList;
     private ProgressBar appsListLoading;
-    Button ok, cancel;
-    CheckedTextView allApps;
+    private Button ok, cancel;
+    private CheckedTextView allApps;
 
-    List<AppInfo> appInfos;
-    Set<String> selectedPackages;
-    AppsLoaderTask appsLoaderTask;
+    private List<AppInfo> appInfos;
+    private Set<String> selectedPackages;
+    private AppsLoaderTask appsLoaderTask;
     private enum UI_STATE {
         ALL_APPS,
         APPS_LIST_LOADING_START,
@@ -60,7 +60,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         APPS_LIST_LOADING_CANCELLED;
     };
 
-    public static SelectAppsDialog newInstance() {
+    static SelectAppsDialog newInstance() {
         return new SelectAppsDialog();
     }
 
@@ -68,7 +68,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     public SelectAppsDialog() {
     }
 
-    public void setOnDismissListener(DialogInterface.OnDismissListener dismissListener) {
+    void setOnDismissListener(DialogInterface.OnDismissListener dismissListener) {
         this.dismissListener = dismissListener;
     }
 
@@ -304,7 +304,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     private class AppsListAdapter extends RecyclerView.Adapter<AppsListAdapter.AppsListViewHolder> {
 
         //Reference to the views for each data item
-        public class AppsListViewHolder extends RecyclerView.ViewHolder
+        class AppsListViewHolder extends RecyclerView.ViewHolder
                 implements View.OnClickListener {
             CheckedTextView row;
             public AppsListViewHolder(View v) {
