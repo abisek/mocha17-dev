@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 
 import com.mocha17.slayer.communication.MobileDataSender;
 
 public class WearMainActivity extends Activity implements View.OnClickListener {
-    private Button buttonJorSay;
+    //This FrameLayout contains a CircledImageView with a TextView at the center
+    private FrameLayout buttonJorSay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +21,7 @@ public class WearMainActivity extends Activity implements View.OnClickListener {
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                buttonJorSay = (Button) stub.findViewById(R.id.button_jorsay);
+                buttonJorSay = (FrameLayout) stub.findViewById(R.id.button_jorsay);
                 if (buttonJorSay != null) {
                     buttonJorSay.setOnClickListener(WearMainActivity.this);
                 }

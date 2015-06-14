@@ -7,10 +7,10 @@
     android:orientation="vertical"
     tools:context=".WearMainActivity"
     tools:deviceIds="wear_square"
-    android:background="@color/accent">
+    android:background="@color/app_light">
     <include
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_centerInParent="true"
-        layout="@layout/button_jorsay" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        layout="@layout/button_jorsay"
+        android:layout_centerInParent="true"/>
 </RelativeLayout>

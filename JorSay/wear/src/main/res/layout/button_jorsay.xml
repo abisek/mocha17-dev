@@ -1,5 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Button xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:id="@+id/button_jorsay"
-    style="@style/Button.Borderless.Fullscreen"
-    android:text="@string/read_aloud" />
+    android:layout_centerInParent="true"
+    android:clickable="true">
+    <android.support.wearable.view.CircledImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:circle_color="@color/app_dark"
+        app:circle_radius="@dimen/circle_radius"
+        app:circle_radius_pressed="@dimen/circle_radius_pressed"
+        app:shadow_width="@dimen/circle_shadow_width"/>
+    <TextView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/read_aloud"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textColor="@color/app_light"
+        android:layout_gravity="center" />
+</FrameLayout>
