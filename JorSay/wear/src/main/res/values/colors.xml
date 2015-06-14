@@ -2,6 +2,6 @@
 <!-- http://developer.android.com/training/material/images/ThemeColors.png
 http://www.google.com/design/spec/style/color.html#color-color-palette -->
 <resources>
-    <color name="text">#FFFFFF</color>
-    <color name="accent">#FF6347</color>
+    <color name="app_light">#FFFFFF</color> <!--same as @color/text in module mobile -->
+    <color name="app_dark">#FF6347</color> <!-- same as @color/accent in module mobile -->
 </resources>
