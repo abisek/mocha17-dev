@@ -11,9 +11,11 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault" >
 
+        <!-- android:label attribute is used for 'start' voice command.
+        For JorSay, user would say 'Start notification reader'. -->
         <activity
             android:name="com.mocha17.slayer.WearMainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/voice_action_read_aloud" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

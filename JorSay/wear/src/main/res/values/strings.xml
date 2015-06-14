@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">JorSay</string>
     <string name="read_aloud">JorSay!</string>
+    <string name="voice_action_read_aloud">notification reader</string>
 </resources>
