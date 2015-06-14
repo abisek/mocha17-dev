@@ -8,7 +8,7 @@ import com.mocha17.slayer.utils.Logger;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by mocha on 5/2/15.
+ * Created by Chaitanya on 5/2/15.
  */
 public class SlayerApp extends Application {
     private static SlayerApp instance;

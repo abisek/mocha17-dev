@@ -1,12 +1,4 @@
 <resources>
     <string name="app_name">JorSay</string>
-    <string name="hello_round">Hello Round World!</string>
-    <string name="hello_square">Hello Square World!</string>
-
-    <string name="capability_read_aloud_notification">capability_read_aloud_notification</string>
-
-    <string name="not_connected_title">Not connected</string>
-    <string name="not_connected_desc">Not connected to a device that can read notifications aloud</string>
-
-    <string name="send_message">Send Message</string>
+    <string name="read_aloud">Jorsay!</string>
 </resources>

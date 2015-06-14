@@ -1,14 +1,23 @@
 package com.mocha17.slayer.utils;
 
 /**
- * Created by mocha on 5/2/15.
+ * Created by Chaitanya on 5/2/15.
  */
 public class Constants {
-    public static final String BROADCAST_NOTIF = "com.mocha17.slayer.intent.BROADCAST_NOTIF";
-    public static final String KEY_DETAILS = "com.mocha17.slayer.KEY_DETAILS";
-    public static final String KEY_ADDED = "com.mocha17.slayer.KEY_ADDED";
+    //timeout for GoogleApiClient blocking connect() calls
+    /*We are working near-realtime on the notifications received. Waiting longer than this wouldn't
+    make much sense */
+    public static final int CONNECT_TIMEOUT = 5000; //5 seconds
 
-    public static final String ACTION_SEND_MESSAGE = "com.mocha17.slayer.ACTION_SEND_MESSAGE";
+    public static final String KEY_TIMESTAMP = "key_timestamp";
 
-    public static final String ACTION_READ_ALOUD = "com.mocha17.slayer.JORSAY";
+    //shake
+    public static final String ACTION_MSG_START_SHAKE_DETECTION =
+            "com.mocha17.slayer.ACTION_MSG_START_SHAKE_DETECTION";
+    public static final String PATH_MSG_START_SHAKE_DETECTION = "/start_shake_detection";
+
+    //read aloud
+    public static final String ACTION_MSG_START_READ_ALOUD =
+            "com.mocha17.slayer.ACTION_MSG_START_READ_ALOUD";
+    public static final String PATH_MSG_READ_ALOUD = "/jorsay";
 }

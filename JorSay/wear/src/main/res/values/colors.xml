@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- http://developer.android.com/training/material/images/ThemeColors.png
+http://www.google.com/design/spec/style/color.html#color-color-palette -->
+<resources>
+    <color name="text">#FFFFFF</color>
+    <color name="accent">#FF6347</color>
+</resources>
