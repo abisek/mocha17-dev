@@ -10,13 +10,14 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".setup.SetupActivity"
+            android:name="com.mocha17.slayer.setup.SetupActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.mocha17.slayer.MainActivity"
             android:label="@string/app_name">
@@ -27,23 +28,37 @@
         </activity>
 
         <service
-            android:name=".notification.NotificationListener"
+            android:name="com.mocha17.slayer.notification.NotificationListener"
+            android:exported="false"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-        <service android:name=".communication.WearCommunicator">
+
+        <service
+            android:name="com.mocha17.slayer.communication.WearDataSender"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.mocha17.slayer.ACTION_MSG_START_SHAKE_DETECTION" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="com.mocha17.slayer.communication.WearDataReceiver">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
-        <service android:name=".tts.JorSayReader">
+
+        <service
+            android:name="com.mocha17.slayer.tts.JorSayReader"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.mocha17.slayer.JORSAY" />
+                <action android:name="com.mocha17.slayer.ACTION_MSG_START_READ_ALOUD" />
             </intent-filter>
         </service>
-    </application>
 
+    </application>
 </manifest>

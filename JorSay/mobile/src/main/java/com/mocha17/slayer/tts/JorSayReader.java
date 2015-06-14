@@ -1,6 +1,7 @@
 package com.mocha17.slayer.tts;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.speech.tts.TextToSpeech;
@@ -35,31 +36,37 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
         }
     }
 
+    public static void startReadAloud(Context context) {
+        Intent intent = new Intent(context, JorSayReader.class);
+        intent.setAction(Constants.ACTION_MSG_START_READ_ALOUD);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        if (Constants.ACTION_READ_ALOUD.equals(intent.getAction())) {
+        if (Constants.ACTION_MSG_START_READ_ALOUD.equals(intent.getAction())) {
             String toSay = SlayerApp.getInstance().getNotificationString();
 
             if (isTTSReady) {
-                Logger.v("Speaking...");
+                Logger.d(this, "Speaking...");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     tts.speak(toSay, TextToSpeech.QUEUE_ADD, null, null);
                 } else {
                     tts.speak(toSay, TextToSpeech.QUEUE_ADD, null);
                 }
             } else {
-                Logger.v("TTS NOT READY");
+                Logger.d(this, "TTS NOT READY");
                 toReadOnceReady = toSay;
             }
         }
-        Logger.v("shutting down self");
+        Logger.d(this, "shutting down self");
         shutdownSelf();
     }
 
     private void shutdownSelf() {
         if (isTTSReady) {
-            Logger.v("TTS shutdown");
+            Logger.d(this, "TTS shutdown");
             tts.shutdown();
         }
         stopSelf();
@@ -70,13 +77,13 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
     @Override
     public void onInit(int status) {
         if (status == TextToSpeech.SUCCESS) {
-            // Change this to match user
-            // locale
+            //TODO Change this to match user locale
             tts.setLanguage(Locale.US);
+
             isTTSReady = true;
-            Logger.v("TTS READY!");
+            Logger.d(this, "TTS READY!");
             if (!TextUtils.isEmpty(toReadOnceReady)) {
-                Logger.v("TTS READY! READING NOW!");
+                Logger.d(this, "TTS READY! READING NOW!");
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     tts.speak(toReadOnceReady, TextToSpeech.QUEUE_ADD, null, null);
                 } else {
@@ -84,7 +91,7 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
                 }
             }
         } else {
-            Logger.v("TTS NOT READY");
+            Logger.d(this, "TTS NOT READY");
             isTTSReady = false;
         }
     }

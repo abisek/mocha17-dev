@@ -4,25 +4,44 @@
 
     <uses-feature android:name="android.hardware.type.watch" />
     <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault" >
+
         <activity
-            android:name=".WearMainActivity"
+            android:name="com.mocha17.slayer.WearMainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="com.mocha17.slayer.communication.WearCommunicator">
+
+        <service
+            android:name="com.mocha17.slayer.trigger.ShakeDetector"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.mocha17.slayer.ACTION_START_SHAKE_DETECTION" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".communication.MobileDataSender"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.mocha17.slayer.ACTION_MSG_READ_ALOUDD" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".communication.MobileDataReceiver">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
 
     </application>
-
 </manifest>
