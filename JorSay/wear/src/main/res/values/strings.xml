@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">JorSay</string>
-    <string name="read_aloud">Jorsay!</string>
+    <string name="read_aloud">JorSay!</string>
 </resources>

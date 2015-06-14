@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.mocha17.slayer.communication.MobileDataSender;
