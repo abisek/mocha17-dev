@@ -4,4 +4,8 @@ http://www.google.com/design/spec/style/color.html#color-color-palette -->
 <resources>
     <color name="app_light">#FFFFFF</color> <!--same as @color/text in module mobile -->
     <color name="app_dark">#FF6347</color> <!-- same as @color/accent in module mobile -->
+
+    <color name="ambient_background">#000000</color>
+    <color name="ambient_content_background">#616161</color>
+    <color name="ambient_text">#FFFFFF</color>
 </resources>

@@ -2,12 +2,19 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/wear_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".WearMainActivity"
     tools:deviceIds="wear_square"
     android:background="@color/app_light">
+    <TextView
+        android:id="@+id/ambient_date"
+        style="@style/TextStyle"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/margin"
+        android:visibility="gone"/>
     <include
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
