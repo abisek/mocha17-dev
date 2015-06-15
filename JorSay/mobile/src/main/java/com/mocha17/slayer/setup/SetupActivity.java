@@ -40,7 +40,7 @@ public class SetupActivity extends AppCompatActivity
 
     private static final int TTS_DATA_CHECK_CODE = 1002;
 
-    private enum STATE {
+    private enum State {
         INIT,
         CHECKING_GPS,
         GPS_RESOLVING_ERROR,
@@ -56,7 +56,7 @@ public class SetupActivity extends AppCompatActivity
         TTS_SUCCESS,
         SUCCESS;
     }
-    private STATE state;
+    private State state;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,44 +64,44 @@ public class SetupActivity extends AppCompatActivity
         setContentView(R.layout.activity_setup);
         progressText = (TextView)findViewById(R.id.progressText);
 
-        updateState(STATE.INIT);
+        updateState(State.INIT);
 
         if (savedInstanceState != null
                 && savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false)) {
-            updateState(STATE.GPS_RESOLVING_ERROR);
+            updateState(State.GPS_RESOLVING_ERROR);
         }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (state != STATE.GPS_RESOLVING_ERROR) {
-            updateState(STATE.CHECKING_GPS);
+        if (state != State.GPS_RESOLVING_ERROR) {
+            updateState(State.CHECKING_GPS);
         }
     }
 
     @Override
     protected void onStop() {
-        updateState(STATE.GPS_DISCONNECTED);
+        updateState(State.GPS_DISCONNECTED);
         super.onStop();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_RESOLVE_ERROR) {
-            updateState(STATE.GPS_ERROR_RESOLVED);
+            updateState(State.GPS_ERROR_RESOLVED);
             if (resultCode == RESULT_OK) {
                 // Make sure the app is not already connected or attempting to connect
                 if (!googleApiClient.isConnecting() &&
                         !googleApiClient.isConnected()) {
-                    updateState(STATE.CHECKING_GPS);
+                    updateState(State.CHECKING_GPS);
                 }
             }
         } else if (requestCode == TTS_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                updateState(STATE.TTS_SUCCESS);
+                updateState(State.TTS_SUCCESS);
             } else {
-                updateState(STATE.TTS_SETUP);
+                updateState(State.TTS_SETUP);
             }
         }
     }
@@ -109,13 +109,13 @@ public class SetupActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (state == STATE.GPS_RESOLVING_ERROR) {
+        if (state == State.GPS_RESOLVING_ERROR) {
             outState.putBoolean(STATE_RESOLVING_ERROR, true);
         }
     }
 
     //Handles UI updates and state transitions.
-    private void updateState(STATE s) {
+    private void updateState(State s) {
         state = s;
         switch(state) {
             case INIT:
@@ -144,7 +144,7 @@ public class SetupActivity extends AppCompatActivity
                 break;
             case GPS_SUCCESS:
                 //Start with checking TTS
-                updateState(STATE.CHECKING_TTS);
+                updateState(State.CHECKING_TTS);
                 break;
             case GPS_SUSPENDED:
                 break;
@@ -190,24 +190,24 @@ public class SetupActivity extends AppCompatActivity
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         if (result.getErrorCode() == ConnectionResult.API_UNAVAILABLE) {
-            updateState(STATE.GPS_WEAR_UNAVAILABLE);
+            updateState(State.GPS_WEAR_UNAVAILABLE);
             return;
         }
-        if (state == STATE.GPS_RESOLVING_ERROR) {
+        if (state == State.GPS_RESOLVING_ERROR) {
             // Already attempting to resolve an error.
             return;
         } else if (result.hasResolution()) {
             try {
-                updateState(STATE.GPS_RESOLVING_ERROR);
+                updateState(State.GPS_RESOLVING_ERROR);
                 result.startResolutionForResult(this, REQUEST_RESOLVE_ERROR);
             } catch (IntentSender.SendIntentException e) {
                 // There was an error with the resolution intent. Try again.
-                updateState(STATE.CHECKING_GPS);
+                updateState(State.CHECKING_GPS);
             }
         } else {
             // Show dialog using GooglePlayServicesUtil.getErrorDialog()
             showErrorDialog(result.getErrorCode());
-            updateState(STATE.GPS_RESOLVING_ERROR);
+            updateState(State.GPS_RESOLVING_ERROR);
         }
     }
 
@@ -226,12 +226,12 @@ public class SetupActivity extends AppCompatActivity
 
     @Override
     public void onConnected(Bundle bundle) {
-        updateState(STATE.GPS_SUCCESS);
+        updateState(State.GPS_SUCCESS);
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        updateState(STATE.GPS_SUSPENDED);
+        updateState(State.GPS_SUSPENDED);
     }
 
     /* A fragment to display an error dialog */
@@ -248,7 +248,7 @@ public class SetupActivity extends AppCompatActivity
 
         @Override
         public void onDismiss(DialogInterface dialog) {
-            ((SetupActivity)getActivity()).updateState(STATE.GPS_USER_REJECT);
+            ((SetupActivity)getActivity()).updateState(State.GPS_USER_REJECT);
         }
     }
 }

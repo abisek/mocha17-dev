@@ -52,7 +52,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     private List<AppInfo> appInfos;
     private Set<String> selectedPackages;
     private AppsLoaderTask appsLoaderTask;
-    private enum UI_STATE {
+    private enum UIState {
         ALL_APPS,
         APPS_LIST_LOADING_START,
         APPS_LIST_LOADING_SUCCESS,
@@ -129,9 +129,9 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         allApps.setOnClickListener(this);
 
         if (defaultSharedPreferences.getBoolean(getString(R.string.pref_key_all_apps), false)) {
-            updateUI(UI_STATE.ALL_APPS);
+            updateUI(UIState.ALL_APPS);
         } else {
-            updateUI(UI_STATE.APPS_LIST_LOADING_START);
+            updateUI(UIState.APPS_LIST_LOADING_START);
         }
         return view;
     }
@@ -153,15 +153,15 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
             case R.id.all_apps:
                 allApps.toggle();
                 if (allApps.isChecked()) {
-                    updateUI(UI_STATE.ALL_APPS);
+                    updateUI(UIState.ALL_APPS);
                 } else {
-                    updateUI(UI_STATE.APPS_LIST_LOADING_START);
+                    updateUI(UIState.APPS_LIST_LOADING_START);
                 }
                 break;
         }
     }
 
-    private void updateUI(UI_STATE uiState) {
+    private void updateUI(UIState uiState) {
         //We want to ignore UI state updates when the Task is cancelled - most likely the user is
         //moving away from this Dialog; but we could enter this method when this task isn't
         //initialized and hasn't started. Hence the null check.
@@ -214,7 +214,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     }
 
     /** AsyncTask for loading list of apps asyncronously */
-    private class AppsLoaderTask extends AsyncTask<Void, Void, UI_STATE> {
+    private class AppsLoaderTask extends AsyncTask<Void, Void, UIState> {
         private int iconWidth, iconHeight;
         private Canvas canvas;
         private boolean done;
@@ -226,7 +226,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         }
 
         @Override
-        protected UI_STATE doInBackground(Void... params) {
+        protected UIState doInBackground(Void... params) {
             //Populate appInfos
             appInfos = new LinkedList<AppInfo>();
 
@@ -234,7 +234,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
             List<ApplicationInfo> installedApps = pm.getInstalledApplications(0);
             if (installedApps.isEmpty()) {
                 //highly unlikely
-                return UI_STATE.APPS_LIST_LOADING_FAILURE;
+                return UIState.APPS_LIST_LOADING_FAILURE;
             }
             for (ApplicationInfo applicationInfo : installedApps) {
                 if (isCancelled()) {
@@ -242,7 +242,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                     //onCancelled() is called. We have nothing to do once this task is cancelled,
                     // so.. we return a value that's gonna be ignored anyway.
                     //We do have a isCancelled() check before we do UI update
-                    return UI_STATE.APPS_LIST_LOADING_CANCELLED;
+                    return UIState.APPS_LIST_LOADING_CANCELLED;
                 }
                 Drawable icon = pm.getApplicationIcon(applicationInfo);
                 appInfos.add(new AppInfo(applicationInfo.packageName,
@@ -253,13 +253,13 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
             //Sort first by checked state and then alphabetically - display selected apps at top
             Collections.sort(appInfos);
 
-            return UI_STATE.APPS_LIST_LOADING_SUCCESS;
+            return UIState.APPS_LIST_LOADING_SUCCESS;
         }
 
         @Override
-        protected void onPostExecute(UI_STATE result) {
+        protected void onPostExecute(UIState result) {
             updateUI(result);
-            if (result == UI_STATE.APPS_LIST_LOADING_SUCCESS) {
+            if (result == UIState.APPS_LIST_LOADING_SUCCESS) {
                 done = true;
             }
         }
