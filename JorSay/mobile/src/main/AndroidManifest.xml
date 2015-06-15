@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mocha17.slayer">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:name="com.mocha17.slayer.SlayerApp"
         android:allowBackup="true"

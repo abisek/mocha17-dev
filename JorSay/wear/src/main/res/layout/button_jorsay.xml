@@ -7,19 +7,18 @@
     android:clickable="true">
     <android.support.wearable.view.CircledImageView
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/button_jorsay_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:circle_color="@color/app_dark"
         app:circle_radius="@dimen/circle_radius"
         app:circle_radius_pressed="@dimen/circle_radius_pressed"
-        app:shadow_width="@dimen/circle_shadow_width"/>
+        app:shadow_width="@dimen/circle_shadow_width" />
     <TextView
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/button_jorsay_text"
         android:text="@string/read_aloud"
-        android:textAppearance="@android:style/TextAppearance.Large"
-        android:textStyle="bold"
         android:textColor="@color/app_light"
+        style="@style/TextStyle"
         android:layout_gravity="center" />
 </FrameLayout>
