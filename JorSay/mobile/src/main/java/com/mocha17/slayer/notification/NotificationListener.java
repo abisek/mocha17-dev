@@ -1,6 +1,7 @@
 package com.mocha17.slayer.notification;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,13 +9,17 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
+import com.mocha17.slayer.MainActivity;
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.SlayerApp;
 import com.mocha17.slayer.communication.WearDataSender;
 import com.mocha17.slayer.tts.JorSayReader;
+import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
+import com.mocha17.slayer.utils.Utils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,6 +57,12 @@ public class NotificationListener extends NotificationListenerService
         initPrefValues(defaultSharedPreferences);
 
         if (prefGlobalReadAloud) {
+            if (prefPersistentNotification) {
+                startForeground(Constants.PERSISTENT_NOTIFICATION_ID,
+                        getPersistentNotification(defaultSharedPreferences));
+            } else {
+                stopForeground(true /*removeNotification*/);
+            }
             return Service.START_STICKY;
         } else {
             Logger.d(this, "onStartCommand, global_read_aloud is off, stopping self");
@@ -171,9 +182,33 @@ public class NotificationListener extends NotificationListenerService
             setPrefSelectedPackages(sharedPreferences);
         } else if (getString(R.string.pref_key_persistent_notification).equals(key)) {
             setPrefPersistentNotification(sharedPreferences);
+            if (prefPersistentNotification) {
+                startForeground(Constants.PERSISTENT_NOTIFICATION_ID,
+                        getPersistentNotification(defaultSharedPreferences));
+            } else {
+                stopForeground(true /*removeNotification*/);
+            }
         } else if (getString(R.string.pref_key_android_wear).equals(key)) {
             setPrefAndroidWear(sharedPreferences);
         }
+    }
+
+    private Notification getPersistentNotification(SharedPreferences sharedPreferences) {
+        //Intent to start MainActivity from Notification
+        PendingIntent notificationIntent = PendingIntent.getActivity(this,
+                Constants.PERSISTENT_NOTIFICATION_ACTION_REQUEST_CODE,
+                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setPriority(Notification.PRIORITY_MIN) //so that an icon isn't seen in the top bar
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.persistent_notification_text))
+                .setTicker(getString(R.string.persistent_notification_text))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(
+                        Utils.getStatusText(this, sharedPreferences)))
+                .setContentIntent(notificationIntent);
+        return builder.build();
     }
 
     @Override

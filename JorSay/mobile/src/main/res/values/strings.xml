@@ -62,4 +62,6 @@
     <string name="pref_android_wear_summary_off">Reads notifications aloud immediately</string>
     <string name="pref_android_wear_summary_on">
         Trigger \'read aloud\' by shaking your Android Wear-wearing wrist</string>
+
+    <string name="persistent_notification_text">at your service</string>
 </resources>

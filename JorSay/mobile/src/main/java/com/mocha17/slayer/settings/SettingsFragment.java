@@ -67,7 +67,7 @@ public class SettingsFragment extends PreferenceFragment implements
         if (prefGlobalReadAloud != null) {
             prefGlobalReadAloud.setOnPreferenceChangeListener(this);
             //Set 'checked' state
-            prefGlobalReadAloud.setChecked(defaultSharedPreferences.getBoolean(key, true));
+            prefGlobalReadAloud.setChecked(defaultSharedPreferences.getBoolean(key, false));
         }
 
         //Select apps
