@@ -61,7 +61,7 @@ public class NotificationListener extends NotificationListenerService
                 startForeground(Constants.PERSISTENT_NOTIFICATION_ID,
                         getPersistentNotification(defaultSharedPreferences));
             } else {
-                stopForeground(true /*removeNotification*/);
+                stopForeground(true/*removeNotification*/);
             }
             return Service.START_STICKY;
         } else {
@@ -215,6 +215,7 @@ public class NotificationListener extends NotificationListenerService
     public void onDestroy() {
         Logger.d(this, "onDestroy");
         defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        stopForeground(true /*removeNotification*/);
         super.onDestroy();
     }
 }
