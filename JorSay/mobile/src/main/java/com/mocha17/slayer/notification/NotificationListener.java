@@ -1,6 +1,7 @@
 package com.mocha17.slayer.notification;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -51,6 +52,14 @@ public class NotificationListener extends NotificationListenerService
         START_READ_ALOUD;
     }
 
+    public static void start(Context context) {
+        context.startService(new Intent(context, NotificationListener.class));
+    }
+
+    public static void stop(Context context) {
+        context.stopService(new Intent(context, NotificationListener.class));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -60,9 +69,13 @@ public class NotificationListener extends NotificationListenerService
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+
+        //Set the isRunning value in Application instance
+        SlayerApp.getInstance().setNotificationListenerRunning(true);
 
         initPrefValues(defaultSharedPreferences);
 
@@ -236,8 +249,20 @@ public class NotificationListener extends NotificationListenerService
     @Override
     public void onDestroy() {
         Logger.d(this, "onDestroy");
+
         defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
         stopForeground(true /*removeNotification*/);
+        SlayerApp.getInstance().setNotificationListenerRunning(false);
+
+        //For debugging. TODO remove this
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setPriority(Notification.PRIORITY_MAX) //so that an icon isn't seen in the top bar
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText("onDestroy called at: " + System.currentTimeMillis());
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(9999, builder.build());
+
         super.onDestroy();
     }
 }

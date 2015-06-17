@@ -2,7 +2,6 @@ package com.mocha17.slayer;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,7 +18,6 @@ import com.mocha17.slayer.utils.Utils;
 
 public class MainActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private Intent notificationListenerIntent;
     private TextView statusText;
 
     @Override
@@ -30,9 +28,6 @@ public class MainActivity extends AppCompatActivity
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
-
-        //Intent for NotificationListener
-        notificationListenerIntent = new Intent(this, NotificationListener.class);
 
         SharedPreferences defaultSharedPreferences =
                 PreferenceManager.getDefaultSharedPreferences(this);
@@ -87,9 +82,9 @@ public class MainActivity extends AppCompatActivity
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (getString(R.string.pref_key_global_read_aloud).equals(key)) {
             if (sharedPreferences.getBoolean(key, false)) {
-                startService(notificationListenerIntent);
+                NotificationListener.start(this);
             } else {
-                stopService(notificationListenerIntent);
+                NotificationListener.stop(this);
             }
         }
         statusText.setText(Utils.getStatusText(this, sharedPreferences));
