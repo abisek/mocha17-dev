@@ -3,8 +3,10 @@ package com.mocha17.slayer.notification;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
@@ -30,14 +32,17 @@ import java.util.Set;
 public class NotificationListener extends NotificationListenerService
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    SharedPreferences defaultSharedPreferences;
+    private SharedPreferences defaultSharedPreferences;
     /* We use these members for recording current state of settings. These are evaluated when the
     Service starts, and updated onSharedPreferenceChanged. Why this? We do not want to retrieve and
     process preference data for every notification, but we do need to check the parameters. This
     approach gives us that balance - data available for evaluating every notification, kept
     up-to-date by tracking preference change. */
-    boolean prefGlobalReadAloud, prefAllApps, prefPersistentNotification, prefAndroidWear;
-    Set<String> prefSelectedPackages;
+    private boolean prefGlobalReadAloud, prefAllApps, prefMaxVolume,
+            prefPersistentNotification, prefAndroidWear;
+    private Set<String> prefSelectedPackages;
+
+    private AudioManager audioManager;
 
     //Action to be taken on received notification
     private enum NextAction {
@@ -47,12 +52,17 @@ public class NotificationListener extends NotificationListenerService
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        //TODO Add foreground notification based on user preference
+    public void onCreate() {
+        super.onCreate();
 
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
 
         initPrefValues(defaultSharedPreferences);
 
@@ -121,6 +131,7 @@ public class NotificationListener extends NotificationListenerService
         setPrefSelectedPackages(sharedPreferences);
         setPrefPersistentNotification(sharedPreferences);
         setPrefAndroidWear(sharedPreferences);
+        setPrefMaxVolume(sharedPreferences);
     }
 
     private void setPrefGlobalReadAloud(SharedPreferences sharedPreferences) {
@@ -148,10 +159,19 @@ public class NotificationListener extends NotificationListenerService
                 getString(R.string.pref_key_android_wear), false);
     }
 
+    private void setPrefMaxVolume(SharedPreferences sharedPreferences) {
+        prefMaxVolume = sharedPreferences.getBoolean(
+                getString(R.string.pref_key_max_volume), false);
+    }
+
     private NextAction getNextAction(StatusBarNotification statusBarNotification) {
         //Start with global_read_aloud
         if (!prefGlobalReadAloud) {
             Logger.d(this, "Global read_aloud is off, ignoring");
+            return NextAction.IGNORE;
+        }
+        if (!prefMaxVolume && (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0)) {
+            Logger.d(this, "Max volume isn't selected and device volume is at 0, ignoring");
             return NextAction.IGNORE;
         }
         //global_read_aloud is on
@@ -190,6 +210,8 @@ public class NotificationListener extends NotificationListenerService
             }
         } else if (getString(R.string.pref_key_android_wear).equals(key)) {
             setPrefAndroidWear(sharedPreferences);
+        }  else if (getString(R.string.pref_key_max_volume).equals(key)) {
+            setPrefMaxVolume(sharedPreferences);
         }
     }
 

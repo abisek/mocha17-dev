@@ -21,13 +21,16 @@
     <string name="status_not_reading_aloud">Not reading any notifications aloud</string>
     <string name="status_reading_aloud">Reading notifications aloud</string>
 
-    <string name="status_android_wear_on">after Shake Detection</string>
-    <string name="status_android_wear_off">without involving Android Wear device(s)</string>
-
     <string name="status_apps">for %s apps</string>
     <string name="all">all</string>
     <string name="none">none of the</string>
     <string name="status_one_app">for 1 app</string>
+
+    <string name="status_max_volume_on">at maximum volume</string>
+    <string name="status_max_volume_off">at device volume</string>
+
+    <string name="status_android_wear_on">after Shake Detection</string>
+    <string name="status_android_wear_off">without involving Android Wear device(s)</string>
 
     <!-- future features -->
     <string name="status_activity">Reading notifications always</string>
@@ -51,11 +54,14 @@
     'zero' for english does not work. -->
     <string name="pref_apps_summary_one">Reading notifications for 1 app</string>
     <string name="pref_apps_summary">Reading notifications for %1$s apps</string>
-
     <string name="pref_apps_summary_none">No apps selected</string>
     <string name="select_apps_title">Select apps</string>
     <string name="all_apps">All apps</string>
     <string name="select_apps_error">Could not load list of apps. Please try again!</string>
+
+    <string name="pref_key_max_volume" translatable="false">pref_key_max_volume</string>
+    <string name="pref_max_volume">Use maximum volume</string>
+    <string name="pref_max_volume_summary">Read notifications at maximum volume</string>
 
     <string name="pref_key_android_wear" translatable="false">pref_key_android_wear</string>
     <string name="pref_android_wear">Enable Shake Detection</string>

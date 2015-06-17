@@ -25,7 +25,8 @@ public class SettingsFragment extends PreferenceFragment implements
     private SharedPreferences defaultSharedPreferences;
     private SharedPreferences.Editor editor;
 
-    private SwitchPreference prefGlobalReadAloud, prefPersistentNotification, prefAndroidWear;
+    private SwitchPreference prefGlobalReadAloud, prefMaxVolume,
+            prefPersistentNotification,prefAndroidWear;
     private Preference prefApps;
 
     public static SettingsFragment newInstance() {
@@ -77,6 +78,14 @@ public class SettingsFragment extends PreferenceFragment implements
             prefApps.setOnPreferenceClickListener(this);
         }
 
+        //Volume
+        key = getString(R.string.pref_key_max_volume);
+        prefMaxVolume = (SwitchPreference)findPreference(key);
+        if (prefMaxVolume != null) {
+            prefMaxVolume.setOnPreferenceChangeListener(this);
+            prefMaxVolume.setChecked(defaultSharedPreferences.getBoolean(key, false));
+        }
+
         //Persistent notification
         key = getString(R.string.pref_key_persistent_notification);
         prefPersistentNotification = (SwitchPreference)findPreference(key);
@@ -108,6 +117,10 @@ public class SettingsFragment extends PreferenceFragment implements
                 prefApps.setEnabled(true);
                 setPrefAppsSummary();
 
+                prefMaxVolume.setEnabled(true);
+                prefMaxVolume.setChecked(defaultSharedPreferences.getBoolean(
+                        getString(R.string.pref_key_max_volume), true));
+
                 prefAndroidWear.setEnabled(true);
                 prefAndroidWear.setChecked(defaultSharedPreferences.getBoolean(
                         getString(R.string.pref_key_android_wear), true));
@@ -115,6 +128,7 @@ public class SettingsFragment extends PreferenceFragment implements
             } else {
                 prefPersistentNotification.setEnabled(false);
                 prefApps.setEnabled(false);
+                prefMaxVolume.setEnabled(false);
                 prefAndroidWear.setEnabled(false);
             }
         }
@@ -162,6 +176,12 @@ public class SettingsFragment extends PreferenceFragment implements
         if (getString(R.string.pref_key_persistent_notification).equals(key)) {
             boolean value = (boolean) newValue;
             prefPersistentNotification.setChecked(value);
+            editor.putBoolean(key, value).apply();
+            return true;
+        }
+        if (getString(R.string.pref_key_max_volume).equals(key)) {
+            boolean value = (boolean) newValue;
+            prefMaxVolume.setChecked(value);
             editor.putBoolean(key, value).apply();
             return true;
         }
