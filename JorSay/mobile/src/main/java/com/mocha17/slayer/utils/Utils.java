@@ -26,7 +26,16 @@ public class Utils {
         //'global read aloud' is true from now on
         sb.append(context.getString(R.string.status_reading_aloud));
 
-        //2. Add Android Wear info
+        //2. Add volume info
+        sb.append(" ");
+        key = context.getString(R.string.pref_key_max_volume);
+        if (sharedPreferences.getBoolean(key, false)) {
+            sb.append(context.getString(R.string.status_max_volume_on));
+        } else {
+            sb.append(context.getString(R.string.status_max_volume_off));
+        }
+
+        //3. Add Android Wear info
         sb.append(" ");
         key = context.getString(R.string.pref_key_android_wear);
         if (sharedPreferences.getBoolean(key, false)) {
@@ -35,7 +44,7 @@ public class Utils {
             sb.append(context.getString(R.string.status_android_wear_off));
         }
 
-        //3. Add 'apps' info
+        //4. Add 'apps' info
         sb.append(", ");
         key = context.getString(R.string.pref_key_all_apps);
         if (sharedPreferences.getBoolean(key, false)) {

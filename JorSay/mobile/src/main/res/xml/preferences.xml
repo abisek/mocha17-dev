@@ -11,6 +11,12 @@
         android:key="@string/pref_key_apps"
         android:title="@string/pref_apps_title" />
 
+    <!-- volume -->
+    <SwitchPreference
+        android:key="@string/pref_key_max_volume"
+        android:title="@string/pref_max_volume"
+        android:summary="@string/pref_max_volume_summary"/>
+
     <!-- Persistent notification -->
     <SwitchPreference
         android:key="@string/pref_key_persistent_notification"
