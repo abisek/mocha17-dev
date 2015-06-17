@@ -1,8 +1,10 @@
 package com.mocha17.slayer;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
-import com.google.android.gms.common.api.GoogleApiClient;
+import com.mocha17.slayer.notification.NotificationListener;
 import com.mocha17.slayer.utils.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,38 +15,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SlayerApp extends Application {
     private static SlayerApp instance;
 
-    private AtomicBoolean isTTSAvailable = new AtomicBoolean();
-
-    private GoogleApiClient googleApiClient;
-
-    public String getNotificationString() {
-        return notificationString;
-    }
-
-    public void setNotificationString(String notificationString) {
-        this.notificationString = notificationString;
-    }
-
     private String notificationString;
 
-    public String getConnectedNodeId() {
-        return connectedNodeId;
-    }
-
-    public void setConnectedNodeId(String connectedNodeId) {
-        this.connectedNodeId = connectedNodeId;
-    }
-
-    private String connectedNodeId;
-
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        synchronized (SlayerApp.class) {
-            instance = this;
-        }
-    }
+    private AtomicBoolean isNotificationListenerRunning = new AtomicBoolean();
+    SharedPreferences defaultSharedPreferences;
 
     public static SlayerApp getInstance() {
         synchronized (SlayerApp.class) {
@@ -52,20 +26,36 @@ public class SlayerApp extends Application {
         }
     }
 
-    public void setTTSAvailable(boolean value) {
-        isTTSAvailable.compareAndSet(false, value);
-        Logger.v("SlayerApp isTTSAvailable: " + getTTSAvailable());
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        synchronized (SlayerApp.class) {
+            instance = this;
+        }
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean prefGlobalReadAloud = defaultSharedPreferences.getBoolean(
+                getString(R.string.pref_key_global_read_aloud), false);
+        if (prefGlobalReadAloud && !isNotificationListenerRunning()) {
+            /*At application start, the service isn't running even though globalReadAloud is
+            selected by user. Start it now. */
+            Logger.d(this, "Starting NotificationListener");
+            NotificationListener.start(this);
+        }
     }
 
-    public boolean getTTSAvailable() {
-        return isTTSAvailable.get();
+    public boolean isNotificationListenerRunning() {
+        return isNotificationListenerRunning.get();
     }
 
-    public GoogleApiClient getGoogleApiClient() {
-        return googleApiClient;
+    public void setNotificationListenerRunning(boolean isRunning) {
+        isNotificationListenerRunning.compareAndSet(false, true);
     }
 
-    public void setGoogleApiClient(GoogleApiClient client) {
-        googleApiClient = client;
+    public String getNotificationString() {
+        return notificationString;
+    }
+
+    public void setNotificationString(String notificationString) {
+        this.notificationString = notificationString;
     }
 }

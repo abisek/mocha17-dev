@@ -17,10 +17,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.wearable.Wearable;
-import com.mocha17.slayer.R;
-import com.mocha17.slayer.SlayerApp;
-import com.mocha17.slayer.utils.Logger;
 import com.mocha17.slayer.MainActivity;
+import com.mocha17.slayer.R;
 
 
 //https://developer.android.com/google/auth/api-client.html#Starting
@@ -125,10 +123,6 @@ public class SetupActivity extends AppCompatActivity
                         .addConnectionCallbacks(this)
                         .addOnConnectionFailedListener(this)
                         .build();
-                //Set it in Application class so that it can be shared with the Service
-                //TODO This doesn't seem necessary
-                SlayerApp.getInstance().setGoogleApiClient(googleApiClient);
-
                 break;
             case CHECKING_GPS:
                 progressText.setText(getString(R.string.progress_gps));
@@ -171,12 +165,8 @@ public class SetupActivity extends AppCompatActivity
             case TTS_SUCCESS:
                 //This is same as overall setup success as of now.
             case SUCCESS:
-                SlayerApp.getInstance().setTTSAvailable(true);
-                Logger.v("SetupActivity GoogleAPIClient connected? " + googleApiClient.isConnected()
-                        + " " + SlayerApp.getInstance().getGoogleApiClient().isConnected());
-                Logger.v("SetupActivity GoogleAPIClient equals? " + googleApiClient + " "
-                        + SlayerApp.getInstance().getGoogleApiClient());
-                Toast.makeText(this, "Will read notifications \"JorSay\"", Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        this, "Will read notifications \"JorSay\"", Toast.LENGTH_SHORT).show();
                 //start MainActivity
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
@@ -184,7 +174,6 @@ public class SetupActivity extends AppCompatActivity
             default:
                 break;
         }
-
     }
 
     @Override
