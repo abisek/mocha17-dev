@@ -52,6 +52,7 @@ public class SetupActivity extends AppCompatActivity
         TTS_SETUP,
         TTS_USER_REJECT,
         TTS_SUCCESS,
+        CHECKING_NOTIFICATION_ACCESS,
         SUCCESS;
     }
     private State state;
@@ -163,7 +164,10 @@ public class SetupActivity extends AppCompatActivity
             case TTS_USER_REJECT:
                 break;
             case TTS_SUCCESS:
-                //This is same as overall setup success as of now.
+                updateState(State.CHECKING_NOTIFICATION_ACCESS);
+                break;
+            case CHECKING_NOTIFICATION_ACCESS:
+
             case SUCCESS:
                 Toast.makeText(
                         this, "Will read notifications \"JorSay\"", Toast.LENGTH_SHORT).show();
