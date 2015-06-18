@@ -25,6 +25,7 @@ import com.mocha17.slayer.utils.Logger;
 import com.mocha17.slayer.utils.Utils;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -261,7 +262,8 @@ public class NotificationListener extends NotificationListenerService
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText("onDestroy called at: " + System.currentTimeMillis());
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(9999, builder.build());
+        Random r = new Random();
+        nm.notify(r.nextInt(), builder.build());
 
         super.onDestroy();
     }
