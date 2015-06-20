@@ -6,6 +6,14 @@
     tools:context=".SetupActivity"
     tools:ignore="MergeRootFrame">
 
+    <!-- ActionBar -->
+    <include
+        android:id="@+id/app_toolbar_setup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/layout_app_toolbar"
+        android:layout_alignParentTop="true" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_marginTop="@dimen/margin_xxlarge"

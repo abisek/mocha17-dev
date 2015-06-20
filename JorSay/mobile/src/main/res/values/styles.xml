@@ -26,7 +26,8 @@
     default Material color, and your app's accent color is ignored. This is a long-standing
     bug, and people have come up with multiple solutions:
     https://code.google.com/p/android/issues/detail?id=72717
-    http://stackoverflow.com/questions/26608390/android-v21-theme-appcompat-color-accent-is-ignored-no-padding-on-dialogs
+    http://stackoverflow.com/questions/26608390/
+    android-v21-theme-appcompat-color-accent-is-ignored-no-padding-on-dialogs
     https://github.com/afollestad/material-dialogs
     The solution we are using gets us what we want with least cost - we
     have a theme defined for Dialogs that explicitly sets colorAccent. -->

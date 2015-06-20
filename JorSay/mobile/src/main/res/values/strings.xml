@@ -11,6 +11,7 @@
     <string name="progress_init">Initializing</string>
     <string name="progress_gps">Checking Google Play Services</string>
     <string name="progress_tts">Checking Text to Speech</string>
+    <string name="progress_notifications">Checking Notifications access</string>
 
     <string name="capability_read_aloud_notification">capability_read_aloud_notification</string>
 
@@ -70,4 +71,13 @@
         Trigger \'read aloud\' by shaking your Android Wear-wearing wrist</string>
 
     <string name="persistent_notification_text">at your service</string>
+
+    <string name="notification_access_dialog_title">Notification access</string>
+    <string name="notification_access_dialog_text">JorSay needs access to your notifications so that
+        it can read them aloud.</string>
+    <string name="notification_access_dialog_error_text">JorSay cannot find the settings for
+        notification access, and cannot function without it. Please enable notification access for
+        JorSay and then relaunch the app.</string>
+    <string name="notification_access_dialog_ok">Notification Settings</string>
+
 </resources>
