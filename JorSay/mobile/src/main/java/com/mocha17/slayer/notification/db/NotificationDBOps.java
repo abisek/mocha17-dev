@@ -200,7 +200,11 @@ public class NotificationDBOps {
 
     public void shutdown() {
         Logger.d(this, "shutdown closing DB connection");
-        notificationDB.close();
-        notificationDBOpenHelper.close();
+        if (notificationDBOpenHelper != null) {
+            notificationDBOpenHelper.close();
+        }
+        if (notificationDB != null && notificationDB.isOpen()) {
+            notificationDB.close();
+        }
     }
 }
