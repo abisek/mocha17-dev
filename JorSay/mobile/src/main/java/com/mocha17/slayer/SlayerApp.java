@@ -15,8 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SlayerApp extends Application {
     private static SlayerApp instance;
 
-    private String notificationString;
-
     private AtomicBoolean isNotificationListenerRunning = new AtomicBoolean();
     SharedPreferences defaultSharedPreferences;
 
@@ -49,13 +47,5 @@ public class SlayerApp extends Application {
 
     public void setNotificationListenerRunning(boolean isRunning) {
         isNotificationListenerRunning.compareAndSet(false, true);
-    }
-
-    public String getNotificationString() {
-        return notificationString;
-    }
-
-    public void setNotificationString(String notificationString) {
-        this.notificationString = notificationString;
     }
 }

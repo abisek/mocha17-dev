@@ -8,17 +8,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
 
 import com.mocha17.slayer.MainActivity;
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.SlayerApp;
 import com.mocha17.slayer.communication.WearDataSender;
+import com.mocha17.slayer.notification.db.NotificationDBOps;
 import com.mocha17.slayer.tts.JorSayReader;
 import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
@@ -53,6 +52,8 @@ public class NotificationListener extends NotificationListenerService
         START_READ_ALOUD;
     }
 
+    NotificationDBOps notificationDBOps;
+
     public static void start(Context context) {
         context.startService(new Intent(context, NotificationListener.class));
     }
@@ -69,6 +70,8 @@ public class NotificationListener extends NotificationListenerService
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        notificationDBOps = NotificationDBOps.get(this);
     }
 
     @Override
@@ -97,46 +100,77 @@ public class NotificationListener extends NotificationListenerService
 
     @Override
     public void onNotificationPosted(StatusBarNotification statusBarNotification) {
-        /*TODO
-        replace 'setNotificationString()' with a Queue. We are recording the last notification
-        posted using the App instance */
+        NextAction nextAction = getNextAction(statusBarNotification);
         switch (getNextAction(statusBarNotification)) {
             case START_SHAKE_DETECTION:
-                SlayerApp.getInstance().setNotificationString(
-                        getNotifString(statusBarNotification));
+                notificationDBOps.storeNotification(statusBarNotification);
                 WearDataSender.startShakeDetection(this);
                 break;
             case START_READ_ALOUD:
-                SlayerApp.getInstance().setNotificationString(
-                        getNotifString(statusBarNotification));
+                notificationDBOps.storeNotification(statusBarNotification);
                 JorSayReader.startReadAloud(this);
                 break;
             case IGNORE:
-            default:
                 //do nothing
+            default:
                 break;
-
         }
     }
 
     @Override
     public void onNotificationRemoved(StatusBarNotification statusBarNotification) {
-        //we will remove the notification from queue here
+        notificationDBOps.removeNotification(statusBarNotification.getPackageName(),
+                statusBarNotification.getId());
     }
 
-    private static String getNotifString(StatusBarNotification sbn) {
-        //String ticker = sbn.getNotification().tickerText.toString();
-        Bundle extras = sbn.getNotification().extras;
-        Notification n = sbn.getNotification();
-        StringBuilder sb = new StringBuilder();
-        sb.append("Package: ").append(sbn.getPackageName())
-                .append(", Title: ").append(extras.getString(Notification.EXTRA_TITLE))
-                .append(", Text: ").append(extras.getCharSequence(Notification.EXTRA_TEXT));
-        String bigText = extras.getString(Notification.EXTRA_BIG_TEXT);
-        if (!TextUtils.isEmpty(bigText)) {
-            sb.append("Big text: ").append(bigText);
+    private NextAction getNextAction(StatusBarNotification statusBarNotification) {
+        //Start with global_read_aloud
+        if (!prefGlobalReadAloud) {
+            Logger.d(this, "Global read_aloud is off, ignoring");
+            return NextAction.IGNORE;
         }
-        return sb.toString();
+        if (!prefMaxVolume && (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0)) {
+            Logger.d(this, "Max volume isn't selected and device volume is at 0, ignoring");
+            return NextAction.IGNORE;
+        }
+        //global_read_aloud is on
+        //Check packageName - 'all apps' is selected or the notification is from a selected app
+        if (prefAllApps ||
+                (prefSelectedPackages != null && !prefSelectedPackages.isEmpty() &&
+                        prefSelectedPackages.contains(
+                                statusBarNotification.getPackageName()))) {
+            if (shouldIgnore(statusBarNotification)) {
+                return NextAction.IGNORE;
+            }
+            if (prefAndroidWear) {
+                //shake detection enabled
+                return NextAction.START_SHAKE_DETECTION;
+            } else {
+                return NextAction.START_READ_ALOUD;
+            }
+        }
+        Logger.d(this, "Package " + statusBarNotification.getPackageName() +
+                " not selected, ignoring");
+        return NextAction.IGNORE;
+    }
+
+    private boolean shouldIgnore(StatusBarNotification statusBarNotification) {
+        if (statusBarNotification == null) {
+            return true; //should ignore
+        }
+        Notification notification = statusBarNotification.getNotification();
+        /*We do not read non-clearable notifications, or notifications for foreground service, or
+        notifications posted with minimum priority*/
+        if (!statusBarNotification.isClearable() ||
+                ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE)
+                        == Notification.FLAG_FOREGROUND_SERVICE) ||
+                notification.priority == Notification.PRIORITY_MIN) {
+            Logger.d(this, "Notification from " + statusBarNotification.getPackageName() +
+                    " isn't clearable/is for foreground service/is posted with minimum priority, " +
+                    "will be ignored");
+            return true;
+        }
+        return false;
     }
 
     private void initPrefValues(SharedPreferences sharedPreferences) {
@@ -178,34 +212,6 @@ public class NotificationListener extends NotificationListenerService
                 getString(R.string.pref_key_max_volume), false);
     }
 
-    private NextAction getNextAction(StatusBarNotification statusBarNotification) {
-        //Start with global_read_aloud
-        if (!prefGlobalReadAloud) {
-            Logger.d(this, "Global read_aloud is off, ignoring");
-            return NextAction.IGNORE;
-        }
-        if (!prefMaxVolume && (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0)) {
-            Logger.d(this, "Max volume isn't selected and device volume is at 0, ignoring");
-            return NextAction.IGNORE;
-        }
-        //global_read_aloud is on
-        //Check packageName - 'all apps' is selected or the notification is from a selected app
-        if (prefAllApps ||
-                (prefSelectedPackages != null &&!prefSelectedPackages.isEmpty() &&
-                        prefSelectedPackages.contains(
-                                statusBarNotification.getPackageName()))) {
-            if (prefAndroidWear) {
-                //shake detection enabled
-                return NextAction.START_SHAKE_DETECTION;
-            } else {
-                return NextAction.START_READ_ALOUD;
-            }
-        }
-        Logger.d(this, "Package " + statusBarNotification.getPackageName() +
-                " not selected, ignoring");
-        return NextAction.IGNORE;
-    }
-
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (getString(R.string.pref_key_global_read_aloud).equals(key)) {
@@ -237,7 +243,7 @@ public class NotificationListener extends NotificationListenerService
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setPriority(Notification.PRIORITY_MIN) //so that an icon isn't seen in the top bar
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.mipmap.ic_notification)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.persistent_notification_text))
                 .setTicker(getString(R.string.persistent_notification_text))
@@ -264,6 +270,8 @@ public class NotificationListener extends NotificationListenerService
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Random r = new Random();
         nm.notify(r.nextInt(), builder.build());
+
+        notificationDBOps.shutdown();
 
         super.onDestroy();
     }
