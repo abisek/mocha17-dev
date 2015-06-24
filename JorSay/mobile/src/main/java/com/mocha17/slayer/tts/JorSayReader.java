@@ -4,14 +4,19 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
+import android.text.TextUtils;
 
 import com.mocha17.slayer.R;
-import com.mocha17.slayer.SlayerApp;
+import com.mocha17.slayer.notification.db.NotificationDBContract.NotificationData;
+import com.mocha17.slayer.notification.db.NotificationDBOps;
 import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
 
@@ -31,6 +36,8 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
     private boolean prefMaxVolume;
     private AudioManager audioManager;
 
+    private PackageManager packageManager;
+
     public JorSayReader() {
         super("JorSayReader");
     }
@@ -44,6 +51,8 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
         prefMaxVolume = defaultSharedPreferences.getBoolean(
                 getString(R.string.pref_key_max_volume), false);
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+
+        packageManager = getPackageManager();
     }
 
     public static void startReadAloud(Context context) {
@@ -68,8 +77,7 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
             Logger.d(this, "TTS ready");
             /*TODO
             Volume settings check needs to be done for each notification.
-            If the user turns the volume off, we should abort immediately.
-             */
+            If the user turns the volume off, we should abort immediately.*/
             originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
             if (prefMaxVolume) {
                 Logger.d(this, "setting volume to max");
@@ -82,19 +90,93 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
                     return;
                 }
             }
-            String toRead = SlayerApp.getInstance().getNotificationString();
-            Logger.d(this, "TTS reading now");
-            //Utterance ID should be unique per notification. Could be stored in the DB, or,
-            //alternatively, could be DB row ID.
-            String utteranceID = Long.toString(System.currentTimeMillis());
-            tts.setOnUtteranceProgressListener(new JorSayReaderUtteranceProgressListener());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                tts.speak(toRead,TextToSpeech.QUEUE_ADD, null, utteranceID);
-            } else {
-                HashMap<String, String> params = new HashMap<>();
-                params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
-                tts.speak(toRead, TextToSpeech.QUEUE_ADD, params);
+            Cursor notificationCursor = NotificationDBOps.get(this).getMostRecentNotification();
+            if (notificationCursor != null && notificationCursor.moveToFirst()) {
+                Logger.d(this, "TTS reading now");
+                //Utterance ID should be unique per notification.
+                String utteranceID = Long.toString(System.currentTimeMillis());
+                tts.setOnUtteranceProgressListener(new JorSayReaderUtteranceProgressListener());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, null,
+                            utteranceID);
+                } else {
+                    HashMap<String, String> params = new HashMap<>();
+                    params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
+                    //noinspection deprecation - turned off as we have a version check around this
+                    tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, params);
+                }
             }
+            notificationCursor.close();
+        }
+    }
+
+    private String getStringToRead(Cursor cursor) {
+        /*Why are we using Strings directly rather than defining them as static finals? Because...
+        defining BY makes little sense, definition and string are not different here. The name for
+        the variable isn't supposed to mean anything - it isn't a key, it isn't a path, it isn't an
+        intent action etc. For the Strings used in this method, we would instead rely on GC to claim
+        the memory back, rather than keeping something permanently occupied.
+         */
+        StringBuilder sb = new StringBuilder("By ");
+
+        String titleBig = cursor.getString(
+                cursor.getColumnIndex(NotificationData.COLUMN_NAME_TITLE_BIG));
+        String title = cursor.getString(cursor.getColumnIndex(NotificationData.COLUMN_NAME_TITLE));
+
+        //Use TITLE_BIG if available, else TITLE
+        title = (!TextUtils.isEmpty(titleBig))?titleBig:title;
+
+        String appName = getAppName(cursor.getString(
+                cursor.getColumnIndex(NotificationData.COLUMN_NAME_PACKAGE_NAME)));
+
+        if (TextUtils.isEmpty(title) || appName.equals(title)) {
+            sb.append(appName).append(".\n");
+            String summary = cursor.getString(
+                    cursor.getColumnIndex(NotificationData.COLUMN_NAME_SUMMARY));
+            if (!TextUtils.isEmpty(summary)) {
+                sb.append(summary).append(".\n");
+            }
+        } else {
+            sb.append(appName).append(".\n").append(title).append(".\n");
+        }
+
+        String details = "Details: ";
+        String textLines = cursor.getString(
+                cursor.getColumnIndex(NotificationData.COLUMN_NAME_TEXT_LINES));
+        if (!TextUtils.isEmpty(textLines)) {
+            sb.append(details).append(textLines).append(".");
+        } else {
+            //These checks are nested because we want to avoid getting data we are not going to use,
+            //and we want to do isEmpty() checks too.
+            String bigText = cursor.getString(
+                    cursor.getColumnIndex(NotificationData.COLUMN_NAME_BIG_TEXT));
+            if (!TextUtils.isEmpty(bigText)) {
+                sb.append(details).append(bigText).append(".");
+            } else {
+                String text = cursor.getString(
+                        cursor.getColumnIndex(NotificationData.COLUMN_NAME_TEXT));
+                if (!TextUtils.isEmpty(text)) {
+                    sb.append(details).append(text).append(".");
+                } else {
+                    String tickerText = cursor.getString(
+                            cursor.getColumnIndex(NotificationData.COLUMN_NAME_TICKER_TEXT));
+                    if (!TextUtils.isEmpty(tickerText)) {
+                        sb.append(details).append(tickerText).append(".");
+                    }
+                }
+            }
+        }
+        return sb.toString();
+    }
+
+    private String getAppName(String packageName) {
+        try {
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(
+                    packageName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
+            return applicationInfo.loadLabel(packageManager).toString();
+        } catch (PackageManager.NameNotFoundException e) {
+            Logger.e(this, "getAppName NameNotFound for " + packageName + ", returning it");
+            return packageName;
         }
     }
 
@@ -104,15 +186,6 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
         //After TTS is done, set volume back to original level
         Logger.d(this, "ttsDone restoring original volume");
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalVolume, 0);
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (getString(R.string.pref_key_max_volume).equals(key)) {
-            prefMaxVolume = defaultSharedPreferences.getBoolean(
-                    getString(R.string.pref_key_max_volume), false);
-        }
-
     }
 
     private class JorSayReaderUtteranceProgressListener extends UtteranceProgressListener {
@@ -129,6 +202,14 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
         @Override
         public void onError(String utteranceId) {
             ttsDone();
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (getString(R.string.pref_key_max_volume).equals(key)) {
+            prefMaxVolume = defaultSharedPreferences.getBoolean(
+                    getString(R.string.pref_key_max_volume), false);
         }
     }
 }

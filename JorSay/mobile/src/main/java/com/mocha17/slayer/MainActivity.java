@@ -20,6 +20,9 @@ public class MainActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     private TextView statusText;
 
+    //For introducing change in successive notifications
+    private int debug_notification_count = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,19 +66,23 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.action_notification) {
             postNotification();
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     private void postNotification() {
+        String bigText = "A longer line of text, count is " + debug_notification_count;
+        String text = "Count is " + debug_notification_count;
         Notification.Builder notificationBuilder = new Notification.Builder(this)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(statusText.getText())
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("This is how we speak!")
+                .setContentText(text)
+                .setTicker(text)
+                .setStyle(new Notification.BigTextStyle().bigText(bigText))
+                .setSmallIcon(R.mipmap.ic_notification)
                 .setPriority(Notification.PRIORITY_MAX);
         Notification notification = notificationBuilder.build();
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                .notify((int) System.currentTimeMillis(), notification);
+                .notify(10001, notification); //same ID so that the same notification is updated
+        debug_notification_count++;
     }
 
     @Override
