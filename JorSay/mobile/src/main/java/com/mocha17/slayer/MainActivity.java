@@ -1,5 +1,6 @@
 package com.mocha17.slayer;
 
+import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
@@ -37,9 +38,12 @@ public class MainActivity extends AppCompatActivity
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         //Settings
-        SettingsFragment settingsFragment = SettingsFragment.newInstance();
-        getFragmentManager().beginTransaction().replace(R.id.settings_container, settingsFragment,
-                settingsFragment.getClass().getSimpleName()).commit();
+        String settingsFragmentName = SettingsFragment.class.getSimpleName();
+        FragmentManager fragmentManager = getFragmentManager();
+        if (fragmentManager.findFragmentByTag(settingsFragmentName) == null) {
+            fragmentManager.beginTransaction().add(R.id.settings_container,
+                    SettingsFragment.newInstance(), settingsFragmentName).commit();
+        }
 
         //Status
         statusText = (TextView) findViewById(R.id.status_text);
