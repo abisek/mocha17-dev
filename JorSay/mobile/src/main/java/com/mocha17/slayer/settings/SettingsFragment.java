@@ -1,8 +1,7 @@
 package com.mocha17.slayer.settings;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -20,7 +19,7 @@ import java.util.Set;
 
 public class SettingsFragment extends PreferenceFragment implements
         Preference.OnPreferenceChangeListener,
-        Preference.OnPreferenceClickListener, Dialog.OnDismissListener {
+        Preference.OnPreferenceClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private SharedPreferences defaultSharedPreferences;
     private SharedPreferences.Editor editor;
@@ -42,7 +41,14 @@ public class SettingsFragment extends PreferenceFragment implements
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
         editor = defaultSharedPreferences.edit();
+    }
+
+    @Override
+    public void onDetach() {
+        defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
+        super.onDetach();
     }
 
     @Override
@@ -199,11 +205,12 @@ public class SettingsFragment extends PreferenceFragment implements
     public boolean onPreferenceClick(Preference preference) {
         String key = preference.getKey();
         if (key.equals(prefApps.getKey())) {
-            if (getFragmentManager().findFragmentByTag(SelectAppsDialog.class.getSimpleName()) == null) {
+            FragmentManager fragmentManager = getFragmentManager();
+            String selectAppsDialogName = SelectAppsDialog.class.getSimpleName();
+            if (fragmentManager.findFragmentByTag(selectAppsDialogName) == null) {
                 SelectAppsDialog selectAppsDialog = SelectAppsDialog.newInstance();
-                selectAppsDialog.setOnDismissListener(this);
-                getFragmentManager().beginTransaction().add(
-                        selectAppsDialog, SelectAppsDialog.class.getSimpleName()).commit();
+                getFragmentManager().beginTransaction().add(selectAppsDialog,
+                        selectAppsDialogName).commit();
             }
             return true;
         }
@@ -211,8 +218,11 @@ public class SettingsFragment extends PreferenceFragment implements
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        //Update summary text when the 'select apps' dialog goes away
-        setPrefAppsSummary();
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (getString(R.string.pref_key_all_apps).equals(key) ||
+                getString(R.string.pref_key_apps).equals(key)) {
+            //Update summary text when apps selection data changes
+            setPrefAppsSummary();
+        }
     }
 }

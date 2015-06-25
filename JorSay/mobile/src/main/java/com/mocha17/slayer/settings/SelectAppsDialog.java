@@ -3,7 +3,6 @@ package com.mocha17.slayer.settings;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -41,7 +40,6 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     private Context context;
     private SharedPreferences defaultSharedPreferences;
     private SharedPreferences.Editor editor;
-    private DialogInterface.OnDismissListener dismissListener;
 
     //https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html
     private RecyclerView appsList;
@@ -68,33 +66,13 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
     public SelectAppsDialog() {
     }
 
-    void setOnDismissListener(DialogInterface.OnDismissListener dismissListener) {
-        this.dismissListener = dismissListener;
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
-        if (dismissListener != null) {
-            dismissListener.onDismiss(dialog);
-        }
-    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
         context = activity;
 
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         editor = defaultSharedPreferences.edit();
-
-        //Get previously selected apps
-        Set<String> prevSelected = defaultSharedPreferences.getStringSet(
-                getString(R.string.pref_key_apps), new HashSet<String>());
-        //The set returned by getPreferenceValue cannot be reliably modified,
-        // so copy it into a modifiable one.
-        selectedPackages = new HashSet<>(prevSelected);
     }
 
     @Override
@@ -110,7 +88,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         appsList.setHasFixedSize(true);
         //Use a LinearLayoutManager to get ListView-like behavior
         //This is where the magic happens
-        //http://developer.android.com/reference/android/support/v7/widget/RecyclerView.LayoutManager.html
+        //developer.android.com/reference/android/support/v7/widget/RecyclerView.LayoutManager.html
         //"By changing the LayoutManager a RecyclerView can be used to implement a standard
         //vertically scrolling list, a uniform grid, staggered grids, horizontally scrolling
         //collections and more."
@@ -128,12 +106,58 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         allApps = (CheckedTextView)view.findViewById(R.id.all_apps);
         allApps.setOnClickListener(this);
 
-        if (defaultSharedPreferences.getBoolean(getString(R.string.pref_key_all_apps), false)) {
-            updateUI(UIState.ALL_APPS);
-        } else {
-            updateUI(UIState.APPS_LIST_LOADING_START);
+        //Update UI based on savedInstanceState (if available) and the info in SharedPreferences
+
+        //Get previously selected apps
+        //The set returned by getPreferenceValue cannot be reliably modified.
+        //We will copy it into a modifiable one as needed.
+        Set<String> prevSelected = defaultSharedPreferences.getStringSet(
+                getString(R.string.pref_key_apps), new HashSet<String>());
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getBoolean(getString(R.string.pref_key_all_apps))) {
+                //All apps are selected by the user, populated selectedApps from SharedPreferences
+                selectedPackages = new HashSet<>(prevSelected);
+                updateUI(UIState.ALL_APPS);
+            } else {
+                //User has potentially selected some apps. Restore the UI apppropriately.
+                String [] tempSelectedPackages =
+                        savedInstanceState.getStringArray(getString(R.string.pref_key_apps));
+                if (tempSelectedPackages != null) {
+                    selectedPackages = new HashSet<>();
+                    for (String tempSelectedPackage : tempSelectedPackages) {
+                        selectedPackages.add(tempSelectedPackage);
+                    }
+                } else {
+                    //We do not have saved selected packages, use the set from sharedPreferences
+                    selectedPackages = new HashSet<>(prevSelected);
+                }
+                updateUI(UIState.APPS_LIST_LOADING_START);
+            }
+        } else { //When we don't have a saved state, set UI state based on SharedPreferences data
+            selectedPackages = new HashSet<>(prevSelected);
+
+            if (defaultSharedPreferences.getBoolean(getString(R.string.pref_key_all_apps), false)) {
+                updateUI(UIState.ALL_APPS);
+            } else {
+                updateUI(UIState.APPS_LIST_LOADING_START);
+            }
         }
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState (Bundle outState) {
+        //Store if 'all apps' is selected
+        outState.putBoolean(getString(R.string.pref_key_all_apps), allApps.isChecked());
+        if (!allApps.isChecked()) {
+            if (selectedPackages != null && !selectedPackages.isEmpty()) {
+                //Store currently selected packages
+                outState.putStringArray(getString(R.string.pref_key_apps),
+                        selectedPackages.toArray(new String[selectedPackages.size()]));
+            }
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -269,7 +293,8 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         }
 
         //The code in this method comes from AOSP:
-        //https://github.com/android/platform_frameworks_base/blob/master/policy/src/com/android/internal/policy/impl/IconUtilities.java
+        //https://github.com/android/platform_frameworks_base/blob/master/policy/src/com/android/
+        // internal/policy/impl/IconUtilities.java
         Drawable getSizeAdjustedDrawable(Drawable icon) {
             int sourceWidth = icon.getIntrinsicWidth();
             int sourceHeight = icon.getIntrinsicHeight();
@@ -291,8 +316,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 }
             }
 
-            final Bitmap bitmap = Bitmap.createBitmap(width, height,
-                    Bitmap.Config.ARGB_8888);
+            final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             canvas.setBitmap(bitmap);
 
             icon.setBounds(0, 0, width, height);
@@ -347,7 +371,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 viewHolder.row.setText(app.name);
                 viewHolder.row.setCompoundDrawablesWithIntrinsicBounds(
                         app.icon/*left*/, null, null, null);
-                viewHolder.row.setChecked(app.selected);
+                viewHolder.row.setChecked(selectedPackages.contains(app.packageName));
             }
         }
 
