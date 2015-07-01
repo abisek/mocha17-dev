@@ -16,7 +16,8 @@
     <string name="capability_read_aloud_notification">capability_read_aloud_notification</string>
 
     <string name="not_connected_title">Not connected</string>
-    <string name="not_connected_desc">Not connected to a device that can read notifications aloud</string>
+    <string name="not_connected_desc">Not connected to a device that can
+        read notifications aloud</string>
 
     <!-- Status messages -->
     <string name="status_not_reading_aloud">Not reading any notifications aloud</string>
@@ -32,6 +33,8 @@
 
     <string name="status_android_wear_on">after Shake Detection</string>
     <string name="status_android_wear_off">without involving Android Wear device(s)</string>
+
+    <string name="global_read_aloud_hint">Turn on \'%s\' and configure other options.</string>
 
     <!-- future features -->
     <string name="status_activity">Reading notifications always</string>

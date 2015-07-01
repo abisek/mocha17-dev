@@ -8,8 +8,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,10 +23,17 @@ import com.mocha17.slayer.utils.Utils;
 
 public class MainActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
+
     private TextView statusText;
 
     //For introducing change in successive notifications
     private int debug_notification_count = 1;
+
+    SharedPreferences defaultSharedPreferences;
+
+    //For not showing the hint on orientation changes
+    private final String keyGlobalReadAloudHintShown = "keyGlobalReadAloudHintShown";
+    private boolean globalReadAloudHintShown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +44,7 @@ public class MainActivity extends AppCompatActivity
             setSupportActionBar(toolbar);
         }
 
-        SharedPreferences defaultSharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(this);
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         //Settings
@@ -48,6 +58,30 @@ public class MainActivity extends AppCompatActivity
         //Status
         statusText = (TextView) findViewById(R.id.status_text);
         statusText.setText(Utils.getStatusText(this, defaultSharedPreferences));
+
+        //hint shown?
+        if (savedInstanceState != null) {
+            globalReadAloudHintShown =
+                    savedInstanceState.getBoolean(keyGlobalReadAloudHintShown);
+        } else {
+            globalReadAloudHintShown = false;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!globalReadAloudHintShown && !defaultSharedPreferences.getBoolean(
+                getString(R.string.pref_key_global_read_aloud), false)) {
+            showGlobalReadAloudHint();
+            globalReadAloudHintShown = true;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState (Bundle outState) {
+        outState.putBoolean(keyGlobalReadAloudHintShown, globalReadAloudHintShown);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -87,6 +121,24 @@ public class MainActivity extends AppCompatActivity
         ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
                 .notify(10001, notification); //same ID so that the same notification is updated
         debug_notification_count++;
+    }
+
+    private void showGlobalReadAloudHint() {
+        Toast toast = new Toast(this);
+
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.layout_toast,
+                (ViewGroup) findViewById(R.id.toast_layout_root));
+
+        TextView text = (TextView) layout.findViewById(R.id.toast_text);
+        text.setText(getString(
+                R.string.global_read_aloud_hint,
+                getString(R.string.pref_global_read_aloud)));
+
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(layout);
+        toast.show();
     }
 
     @Override
