@@ -21,6 +21,7 @@ import com.mocha17.slayer.notification.db.NotificationDBOps;
 import com.mocha17.slayer.tts.JorSayReader;
 import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
+import com.mocha17.slayer.utils.Status;
 import com.mocha17.slayer.utils.Utils;
 
 import java.util.HashSet;
@@ -43,11 +44,13 @@ public class NotificationListener extends NotificationListenerService
             prefPersistentNotification, prefAndroidWear;
     private Set<String> prefSelectedPackages;
 
+    private NotificationManager notificationManager;
     private AudioManager audioManager;
 
     //Action to be taken on received notification
     private enum NextAction {
         IGNORE,
+        IGNORE_VOLUME,
         START_SHAKE_DETECTION,
         START_READ_ALOUD;
     }
@@ -69,6 +72,7 @@ public class NotificationListener extends NotificationListenerService
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
         notificationDBOps = NotificationDBOps.get(this);
@@ -110,6 +114,9 @@ public class NotificationListener extends NotificationListenerService
                 notificationDBOps.storeNotification(statusBarNotification);
                 JorSayReader.startReadAloud(this);
                 break;
+            case IGNORE_VOLUME:
+                postVolumeErrorNotification(statusBarNotification);
+                break;
             case IGNORE:
                 //do nothing
             default:
@@ -129,19 +136,24 @@ public class NotificationListener extends NotificationListenerService
             Logger.d(this, "Global read_aloud is off, ignoring");
             return NextAction.IGNORE;
         }
-        if (!prefMaxVolume && (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0)) {
-            Logger.d(this, "Max volume isn't selected and device volume is at 0, ignoring");
-            return NextAction.IGNORE;
-        }
         //global_read_aloud is on
         //Check packageName - 'all apps' is selected or the notification is from a selected app
         if (prefAllApps ||
                 (prefSelectedPackages != null && !prefSelectedPackages.isEmpty() &&
                         prefSelectedPackages.contains(
                                 statusBarNotification.getPackageName()))) {
+            //For the notifications from selected apps,
+            //check if volume settings prevent us from reading
+            if (!prefMaxVolume && (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) == 0)) {
+                Logger.d(this, "Max volume isn't selected and device volume is at 0, ignoring");
+                return NextAction.IGNORE_VOLUME;
+            }
+            //Next, check if the notification should be ignored - if it is for an ongoing operation,
+            //or if it is posted with minimum priority
             if (shouldIgnore(statusBarNotification)) {
                 return NextAction.IGNORE;
             }
+            //We are good to take action on the notification
             if (prefAndroidWear) {
                 //shake detection enabled
                 return NextAction.START_SHAKE_DETECTION;
@@ -171,6 +183,42 @@ public class NotificationListener extends NotificationListenerService
             return true;
         }
         return false;
+    }
+
+    private void postVolumeErrorNotification(StatusBarNotification statusBarNotification) {
+        String packageName = statusBarNotification.getPackageName();
+        //We are posting debug notifications from JorSay during development. This check is to avoid
+        //posting volume error notification for notifications from JorSay. If we don't do this, we'd
+        //be in an infinite loop, constantly posting this volume error notification.
+        if (packageName.equals(getPackageName())) {
+            return;
+        }
+        //Intent to start MainActivity from Notification
+        PendingIntent notificationIntent = PendingIntent.getActivity(this,
+                Constants.REQUEST_CODE_SHOW_MAIN_SCREEN,
+                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        String text = getString(R.string.text_volume_notification, Utils.getAppName(packageName));
+        String textDetails = new StringBuilder(text)
+                .append(".\n")
+                .append(getString(R.string.status_error_volume,
+                        getString(R.string.pref_max_volume)))
+                .toString();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setPriority(Notification.PRIORITY_DEFAULT)
+                .setSmallIcon(R.mipmap.ic_notification)
+                /*.setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                        R.mipmap.ic_notification))*/
+                .setColor(getResources().getColor(R.color.accent))
+                .setCategory(Notification.CATEGORY_ERROR)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(textDetails)
+                .setTicker(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(textDetails))
+                .setAutoCancel(true)
+                .setContentIntent(notificationIntent);
+
+        notificationManager.notify(Constants.NOTIFICATION_ID_VOLUME, builder.build());
     }
 
     private void initPrefValues(SharedPreferences sharedPreferences) {
@@ -214,13 +262,7 @@ public class NotificationListener extends NotificationListenerService
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (getString(R.string.pref_key_global_read_aloud).equals(key)) {
-            setPrefGlobalReadAloud(sharedPreferences);
-        } else if (getString(R.string.pref_key_all_apps).equals(key)) {
-            setPrefAllApps(sharedPreferences);
-        } else if (getString(R.string.pref_key_apps).equals(key)) {
-            setPrefSelectedPackages(sharedPreferences);
-        } else if (getString(R.string.pref_key_persistent_notification).equals(key)) {
+        if (getString(R.string.pref_key_persistent_notification).equals(key)) {
             setPrefPersistentNotification(sharedPreferences);
             if (prefPersistentNotification) {
                 startForeground(Constants.PERSISTENT_NOTIFICATION_ID,
@@ -228,29 +270,48 @@ public class NotificationListener extends NotificationListenerService
             } else {
                 stopForeground(true /*removeNotification*/);
             }
-        } else if (getString(R.string.pref_key_android_wear).equals(key)) {
-            setPrefAndroidWear(sharedPreferences);
-        }  else if (getString(R.string.pref_key_max_volume).equals(key)) {
-            setPrefMaxVolume(sharedPreferences);
+        } else {
+            if (getString(R.string.pref_key_global_read_aloud).equals(key)) {
+                setPrefGlobalReadAloud(sharedPreferences);
+            } else if (getString(R.string.pref_key_all_apps).equals(key)) {
+                setPrefAllApps(sharedPreferences);
+            } else if (getString(R.string.pref_key_apps).equals(key)) {
+                setPrefSelectedPackages(sharedPreferences);
+            } else if (getString(R.string.pref_key_android_wear).equals(key)) {
+                setPrefAndroidWear(sharedPreferences);
+            } else if (getString(R.string.pref_key_max_volume).equals(key)) {
+                setPrefMaxVolume(sharedPreferences);
+            }
+            //Update the status Text for persistent notification
+            updatePersistentNotification(sharedPreferences);
         }
     }
 
     private Notification getPersistentNotification(SharedPreferences sharedPreferences) {
         //Intent to start MainActivity from Notification
         PendingIntent notificationIntent = PendingIntent.getActivity(this,
-                Constants.PERSISTENT_NOTIFICATION_ACTION_REQUEST_CODE,
+                Constants.REQUEST_CODE_SHOW_MAIN_SCREEN,
                 new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setPriority(Notification.PRIORITY_MIN) //so that an icon isn't seen in the top bar
                 .setSmallIcon(R.mipmap.ic_notification)
+                /*.setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                        R.mipmap.ic_notification))*/
+                .setColor(getResources().getColor(R.color.accent))
+                .setCategory(Notification.CATEGORY_SERVICE)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.persistent_notification_text))
                 .setTicker(getString(R.string.persistent_notification_text))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(
-                        Utils.getStatusText(this, sharedPreferences)))
+                        Status.getStatus(this, sharedPreferences).getStatusText()))
                 .setContentIntent(notificationIntent);
         return builder.build();
+    }
+
+    private void updatePersistentNotification(SharedPreferences sharedPreferences) {
+        notificationManager.notify(Constants.PERSISTENT_NOTIFICATION_ID,
+                getPersistentNotification(sharedPreferences));
     }
 
     @Override
