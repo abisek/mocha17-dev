@@ -1,5 +1,9 @@
 package com.mocha17.slayer;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -7,33 +11,29 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mocha17.slayer.notification.NotificationListener;
 import com.mocha17.slayer.settings.SettingsFragment;
-import com.mocha17.slayer.utils.Utils;
+import com.mocha17.slayer.utils.Constants;
+import com.mocha17.slayer.utils.Status;
 
 public class MainActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private CardView statusCard;
     private TextView statusText;
 
     //For introducing change in successive notifications
     private int debug_notification_count = 1;
 
     SharedPreferences defaultSharedPreferences;
-
-    //For not showing the hint on orientation changes
-    private final String keyGlobalReadAloudHintShown = "keyGlobalReadAloudHintShown";
-    private boolean globalReadAloudHintShown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,32 +56,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         //Status
+        statusCard = (CardView) findViewById(R.id.statusCard);
         statusText = (TextView) findViewById(R.id.status_text);
-        statusText.setText(Utils.getStatusText(this, defaultSharedPreferences));
-
-        //hint shown?
-        if (savedInstanceState != null) {
-            globalReadAloudHintShown =
-                    savedInstanceState.getBoolean(keyGlobalReadAloudHintShown);
-        } else {
-            globalReadAloudHintShown = false;
-        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (!globalReadAloudHintShown && !defaultSharedPreferences.getBoolean(
-                getString(R.string.pref_key_global_read_aloud), false)) {
-            showGlobalReadAloudHint();
-            globalReadAloudHintShown = true;
-        }
-    }
 
-    @Override
-    public void onSaveInstanceState (Bundle outState) {
-        outState.putBoolean(keyGlobalReadAloudHintShown, globalReadAloudHintShown);
-        super.onSaveInstanceState(outState);
+        //Update status view
+        updateStatus(defaultSharedPreferences);
     }
 
     @Override
@@ -123,24 +107,6 @@ public class MainActivity extends AppCompatActivity
         debug_notification_count++;
     }
 
-    private void showGlobalReadAloudHint() {
-        Toast toast = new Toast(this);
-
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(R.layout.layout_toast,
-                (ViewGroup) findViewById(R.id.toast_layout_root));
-
-        TextView text = (TextView) layout.findViewById(R.id.toast_text);
-        text.setText(getString(
-                R.string.global_read_aloud_hint,
-                getString(R.string.pref_global_read_aloud)));
-
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.setDuration(Toast.LENGTH_LONG);
-        toast.setView(layout);
-        toast.show();
-    }
-
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (getString(R.string.pref_key_global_read_aloud).equals(key)) {
@@ -150,6 +116,40 @@ public class MainActivity extends AppCompatActivity
                 NotificationListener.stop(this);
             }
         }
-        statusText.setText(Utils.getStatusText(this, sharedPreferences));
+        updateStatus(sharedPreferences);
+    }
+
+    private void updateStatus(SharedPreferences sharedPreferences) {
+        Status status = Status.getStatus(this, sharedPreferences);
+
+        statusCard.setCardBackgroundColor(getResources().getColor(R.color.content_background));
+        statusText.setTextColor(getResources().getColor(R.color.text));
+        statusText.setText(status.getStatusText());
+
+        if (!status.isReadAloud()) {
+            //Animate to indicate 'not reading aloud' state
+            final Integer textColorFrom = getResources().getColor(R.color.text);
+            final Integer textColorTo = getResources().getColor(R.color.error);
+            ValueAnimator colorBlinkAnimation = ValueAnimator.ofObject(
+                    new ArgbEvaluator(), textColorFrom, textColorTo);
+            colorBlinkAnimation.setRepeatCount(Constants.NOT_READING_ALOUD_ANIMATION_REPEAT_COUNT);
+            colorBlinkAnimation.setRepeatMode(Animation.REVERSE);
+            colorBlinkAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animator) {
+                    statusText.setTextColor((Integer) animator.getAnimatedValue());
+                }
+            });
+            colorBlinkAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    statusText.setTextColor(textColorTo);
+                    statusCard.setCardBackgroundColor(
+                            getResources().getColor(R.color.content_error_background));
+                }
+            });
+            colorBlinkAnimation.start();
+        }
     }
 }

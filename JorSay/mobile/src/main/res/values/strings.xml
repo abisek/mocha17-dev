@@ -25,7 +25,6 @@
 
     <string name="status_apps">for %s apps</string>
     <string name="all">all</string>
-    <string name="none">none of the</string>
     <string name="status_one_app">for 1 app</string>
 
     <string name="status_max_volume_on">at maximum volume</string>
@@ -34,7 +33,9 @@
     <string name="status_android_wear_on">after Shake Detection</string>
     <string name="status_android_wear_off">without involving Android Wear device(s)</string>
 
-    <string name="global_read_aloud_hint">Turn on \'%s\' and configure other options.</string>
+    <string name="status_error_read_aloud">Select \'%s\' and configure other options</string>
+    <string name="status_error_volume">Select \'%s\' or increase your Media volume</string>
+    <string name="status_error_apps">Select some apps</string>
 
     <!-- future features -->
     <string name="status_activity">Reading notifications always</string>
@@ -74,13 +75,14 @@
         Trigger \'read aloud\' by shaking your Android Wear-wearing wrist</string>
 
     <string name="persistent_notification_text">at your service</string>
+    <string name="text_volume_notification">Did not read %s notification</string>
 
     <string name="notification_access_dialog_title">Notification access</string>
-    <string name="notification_access_dialog_text">JorSay needs access to your notifications so that
-        it can read them aloud.</string>
+    <string name="notification_access_dialog_text">JorSay needs access to notifications so that
+        it can read them aloud.\n\nEnable it from device notification settings. Tap
+        \'back\' once done.</string>
     <string name="notification_access_dialog_error_text">JorSay cannot find the settings for
         notification access, and cannot function without it. Please enable notification access for
         JorSay and then relaunch the app.</string>
-    <string name="notification_access_dialog_ok">Notification Settings</string>
-
+    <string name="notification_access_dialog_ok">Device notification settings</string>
 </resources>

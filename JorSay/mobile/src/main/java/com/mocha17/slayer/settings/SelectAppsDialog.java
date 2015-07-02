@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.mocha17.slayer.R;
+import com.mocha17.slayer.SlayerApp;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -254,7 +255,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
             //Populate appInfos
             appInfos = new LinkedList<AppInfo>();
 
-            PackageManager pm = context.getPackageManager();
+            PackageManager pm = SlayerApp.getInstance().getPackageManager();
             List<ApplicationInfo> installedApps = pm.getInstalledApplications(0);
             if (installedApps.isEmpty()) {
                 //highly unlikely

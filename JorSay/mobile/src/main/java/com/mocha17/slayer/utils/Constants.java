@@ -21,7 +21,12 @@ public class Constants {
             "com.mocha17.slayer.ACTION_MSG_START_READ_ALOUD";
     public static final String PATH_MSG_READ_ALOUD = "/jorsay";
 
+    public static final int REQUEST_CODE_SHOW_MAIN_SCREEN = 1002;
     //Persistent notification
     public static final int PERSISTENT_NOTIFICATION_ID = 1001;
-    public static final int PERSISTENT_NOTIFICATION_ACTION_REQUEST_CODE = 1002;
+    //Other notifications
+    public static final int NOTIFICATION_ID_VOLUME = 1003;
+
+    //Animation repeat count
+    public static final int NOT_READING_ALOUD_ANIMATION_REPEAT_COUNT = 6;
 }

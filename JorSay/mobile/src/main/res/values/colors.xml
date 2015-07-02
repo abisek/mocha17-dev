@@ -6,9 +6,11 @@ http://www.google.com/design/spec/style/color.html#color-color-palette -->
     <color name="primary_dark">#FF5033</color>
     <color name="background">#F5F5F5</color>
     <color name="content_background">#EEEEEE</color>
-    <color name="background_transparent">#E6424242</color>
     <color name="navigationBar">#9E9E9E</color>
     <color name="text_primary">#FFFFFF</color>
     <color name="text">#424242</color>
     <color name="accent">#FF6347</color>
+
+    <color name="content_error_background">#263238</color>
+    <color name="error">#F44336</color>
 </resources>

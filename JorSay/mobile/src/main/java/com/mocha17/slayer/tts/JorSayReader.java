@@ -4,8 +4,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Build;
@@ -19,6 +17,7 @@ import com.mocha17.slayer.notification.db.NotificationDBContract.NotificationDat
 import com.mocha17.slayer.notification.db.NotificationDBOps;
 import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
+import com.mocha17.slayer.utils.Utils;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -36,8 +35,6 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
     private boolean prefMaxVolume;
     private AudioManager audioManager;
 
-    private PackageManager packageManager;
-
     public JorSayReader() {
         super("JorSayReader");
     }
@@ -51,8 +48,6 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
         prefMaxVolume = defaultSharedPreferences.getBoolean(
                 getString(R.string.pref_key_max_volume), false);
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-
-        packageManager = getPackageManager();
     }
 
     public static void startReadAloud(Context context) {
@@ -126,7 +121,7 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
         //Use TITLE_BIG if available, else TITLE
         title = (!TextUtils.isEmpty(titleBig))?titleBig:title;
 
-        String appName = getAppName(cursor.getString(
+        String appName = Utils.getAppName(cursor.getString(
                 cursor.getColumnIndex(NotificationData.COLUMN_NAME_PACKAGE_NAME)));
 
         if (TextUtils.isEmpty(title) || appName.equals(title)) {
@@ -167,17 +162,6 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
             }
         }
         return sb.toString();
-    }
-
-    private String getAppName(String packageName) {
-        try {
-            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(
-                    packageName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT);
-            return applicationInfo.loadLabel(packageManager).toString();
-        } catch (PackageManager.NameNotFoundException e) {
-            Logger.e(this, "getAppName NameNotFound for " + packageName + ", returning it");
-            return packageName;
-        }
     }
 
     private void ttsDone() {
