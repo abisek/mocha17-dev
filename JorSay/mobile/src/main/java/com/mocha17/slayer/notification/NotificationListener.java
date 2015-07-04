@@ -282,8 +282,10 @@ public class NotificationListener extends NotificationListenerService
             } else if (getString(R.string.pref_key_max_volume).equals(key)) {
                 setPrefMaxVolume(sharedPreferences);
             }
-            //Update the status Text for persistent notification
-            updatePersistentNotification(sharedPreferences);
+            if (prefPersistentNotification) {
+                //Update the status Text for persistent notification if it is already posted
+                updatePersistentNotification(sharedPreferences);
+            }
         }
     }
 
