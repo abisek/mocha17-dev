@@ -10,7 +10,8 @@ http://www.google.com/design/spec/style/color.html#color-color-palette -->
     <color name="text_primary">#FFFFFF</color>
     <color name="text">#424242</color>
     <color name="accent">#FF6347</color>
-
-    <color name="content_error_background">#263238</color>
-    <color name="error">#F44336</color>
+    <color name="text_error_from">#424242</color>
+    <color name="text_error_to">#FFFFFF</color>
+    <color name="background_error">#BDBDBD</color>
+    <color name="background_error_to">#F44336</color>
 </resources>
