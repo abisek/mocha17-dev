@@ -27,6 +27,7 @@ public class Constants {
     //Other notifications
     public static final int NOTIFICATION_ID_VOLUME = 1003;
 
-    //Animation repeat count
-    public static final int NOT_READING_ALOUD_ANIMATION_REPEAT_COUNT = 6;
+    //For Status animation
+    public static final int STATUS_ANIMATION_REPEAT_COUNT = 3;
+    public static final long STATUS_ANIMATION_DELAY_MILLI = 500;
 }

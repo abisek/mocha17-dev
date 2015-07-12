@@ -2,12 +2,14 @@ package com.mocha17.slayer;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -27,8 +29,10 @@ import com.mocha17.slayer.utils.Status;
 public class MainActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    //For Status view
     private CardView statusCard;
     private TextView statusText;
+    AnimatorSet statusAnimation;
 
     //For introducing change in successive notifications
     private int debug_notification_count = 1;
@@ -58,14 +62,16 @@ public class MainActivity extends AppCompatActivity
         //Status
         statusCard = (CardView) findViewById(R.id.statusCard);
         statusText = (TextView) findViewById(R.id.status_text);
+        statusAnimation = setupAndGetStatusAnimation();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        //Update status view
-        updateStatus(defaultSharedPreferences);
+        //Update status view with a delay, so that the animation runs after the
+        //Activity UI is rendered
+        updateStatus(defaultSharedPreferences, true/*withDelay*/);
     }
 
     @Override
@@ -116,40 +122,77 @@ public class MainActivity extends AppCompatActivity
                 NotificationListener.stop(this);
             }
         }
-        updateStatus(sharedPreferences);
+        updateStatus(sharedPreferences, false/*withDelay*/);
     }
 
-    private void updateStatus(SharedPreferences sharedPreferences) {
+    private void updateStatus(SharedPreferences sharedPreferences, boolean withDelay) {
         Status status = Status.getStatus(this, sharedPreferences);
 
-        statusCard.setCardBackgroundColor(getResources().getColor(R.color.content_background));
-        statusText.setTextColor(getResources().getColor(R.color.text));
         statusText.setText(status.getStatusText());
 
         if (!status.isReadAloud()) {
             //Animate to indicate 'not reading aloud' state
-            final Integer textColorFrom = getResources().getColor(R.color.text);
-            final Integer textColorTo = getResources().getColor(R.color.error);
-            ValueAnimator colorBlinkAnimation = ValueAnimator.ofObject(
-                    new ArgbEvaluator(), textColorFrom, textColorTo);
-            colorBlinkAnimation.setRepeatCount(Constants.NOT_READING_ALOUD_ANIMATION_REPEAT_COUNT);
-            colorBlinkAnimation.setRepeatMode(Animation.REVERSE);
-            colorBlinkAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animator) {
-                    statusText.setTextColor((Integer) animator.getAnimatedValue());
-                }
-            });
-            colorBlinkAnimation.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    statusText.setTextColor(textColorTo);
-                    statusCard.setCardBackgroundColor(
-                            getResources().getColor(R.color.content_error_background));
-                }
-            });
-            colorBlinkAnimation.start();
+            if (statusAnimation.isRunning()) {
+                statusAnimation.cancel();
+            }
+            if (withDelay) {
+                statusAnimation.setStartDelay(Constants.STATUS_ANIMATION_DELAY_MILLI);
+            } else {
+                statusAnimation.setStartDelay(0/*no delay*/);
+            }
+            statusAnimation.start();
+        } else { //For 'read aloud'
+            statusText.setTextColor(getResources().getColor(R.color.text));
+            statusCard.setCardBackgroundColor(getResources().getColor(R.color.content_background));
         }
+    }
+
+    private AnimatorSet setupAndGetStatusAnimation() {
+        Resources r = getResources();
+
+        //For Status Text
+        ValueAnimator statusTextAnimation = ValueAnimator.ofObject(
+                new ArgbEvaluator(), r.getColor(R.color.text_error_from),
+                r.getColor(R.color.text_error_to));
+        statusTextAnimation.setRepeatCount(Constants.STATUS_ANIMATION_REPEAT_COUNT);
+        statusTextAnimation.setRepeatMode(Animation.REVERSE);
+        statusTextAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+                statusText.setTextColor((Integer) animator.getAnimatedValue());
+            }
+        });
+        statusTextAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                statusText.setTextColor(getResources().getColor(R.color.text));
+            }
+        });
+
+        //For Status Card
+        ValueAnimator statusCardAnimation = ValueAnimator.ofObject(
+                new ArgbEvaluator(), r.getColor(R.color.background_error),
+                r.getColor(R.color.background_error_to));
+        statusCardAnimation.setRepeatCount(Constants.STATUS_ANIMATION_REPEAT_COUNT);
+        statusCardAnimation.setRepeatMode(Animation.REVERSE);
+        statusCardAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animator) {
+                statusCard.setCardBackgroundColor((Integer) animator.getAnimatedValue());
+            }
+        });
+        statusCardAnimation.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                statusCard.setCardBackgroundColor(
+                        getResources().getColor(R.color.background_error));
+            }
+        });
+
+        AnimatorSet statusAnimations = new AnimatorSet();
+        statusAnimations.playTogether(statusTextAnimation, statusCardAnimation);
+        return statusAnimations;
     }
 }
