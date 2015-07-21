@@ -12,7 +12,7 @@ public class Constants {
     public static final String KEY_TIMESTAMP = "key_timestamp";
 
     //shake
-    public static final int SHAKE_MONITORING_DURATION_MILLI = 10000; //10 seconds
+    public static final int SHAKE_MONITORING_DURATION_MILLI = 15000; //15 seconds
     public static final String PATH_MSG_START_SHAKE_DETECTION = "/start_shake_detection";
     public static final String ACTION_START_SHAKE_DETECTION =
             "com.mocha17.slayer.ACTION_START_SHAKE_DETECTION";

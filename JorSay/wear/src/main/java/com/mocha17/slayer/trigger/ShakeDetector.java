@@ -19,18 +19,18 @@ import com.mocha17.slayer.utils.Logger;
  * Created by Chaitanya on 5/19/15.
  */
 public class ShakeDetector extends IntentService implements SensorEventListener {
-    private static final int VIBRATE_DURATION_MILLI = 1000;
+    private static final int VIBRATE_DURATION_MILLI = 500;
 
-    private static final double MAX_ACCELERATION_THRESHOLD = 7.5;
-    private static final int SHAKE_WINDOW_MILLI = 1000;
-    private static final int SHAKE_COUNT = 2;
-
-    private static final float ALPHA = 0.8f;
     private SensorManager sensorManager;
     private Sensor accelerometer;
-    private long startTime, elapsedTime;
-    private int shakeCounter;
-    private boolean triggerMessageSent;
+
+    private float currX, currY, currZ;
+    private float prevX, prevY, prevZ;
+
+    private final float shakeThreshold = 6f;
+    private int shakeCount = 0;
+    private int TOTAL_SHAKES = 2;
+    private boolean triggerMessageSent = false;
 
     public ShakeDetector() {
         super("ShakeDetector");
@@ -63,14 +63,14 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
     private void startMonitoringForShake() {
         //Indicate to the user that shake monitoring has started and she can start triggering
         //events i.e. start shaking her wrist.
-        indicateTriggerMonitoringStart();
+        performUserIndication();
 
         //register listener for Accelerometer events
         sensorManager.registerListener(this,
                 accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    private void indicateTriggerMonitoringStart() {
+    private void performUserIndication() {
         Vibrator vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(VIBRATE_DURATION_MILLI);
     }
@@ -99,60 +99,45 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float [] currentAcceleration = getCurrentAcceleration(event);
-        float maxAcceleration = getMaxAcceleration(currentAcceleration);
-        if (maxAcceleration > MAX_ACCELERATION_THRESHOLD) {
-            if (startTime == 0) {
-                //startTime isn't initialized and this is first candidate sensorEvent
-                startTime = System.currentTimeMillis();
-                shakeCounter++;
-                Logger.d(this, "onSensorChanged shakeCounter init "
-                        + shakeCounter + ", max: " + maxAcceleration);
-            } else {
-                elapsedTime = System.currentTimeMillis() - startTime;
-                if (elapsedTime < SHAKE_WINDOW_MILLI) {
-                    Logger.d(this, "onSensorChanged elapsedTime: " +
-                            elapsedTime + ", max: " + maxAcceleration);
-                    if (++shakeCounter >= SHAKE_COUNT) {
-                        Logger.d("**************** SHAKE!!! ****************");
-                        shakeCounter = 0;
-                        elapsedTime = 0;
-                        if (!triggerMessageSent) {
-                            //Do this only once.
-                            //such safeguards are needed when working with Sensors.
-                            MobileDataSender.sendReadAloud(ShakeDetector.this);
-                            unregisterSensorListener();
-                            triggerMessageSent = true;
-                        }
-                        return;
-                    }
-                    Logger.d(this, "onSensorChanged shakeCounter: " + shakeCounter);
+        updateAccelerationParameters(event);
+        if (accelerationChanged()) {
+            if (++shakeCount == TOTAL_SHAKES) {
+                Logger.d("*********************** SHAKE!!! ***********************");
+                if (!triggerMessageSent) {
+                    performUserIndication();
+                    //Do this only once.
+                    //such safeguards are needed when working with Sensors.
+                    MobileDataSender.sendReadAloud(ShakeDetector.this);
+                    unregisterSensorListener();
+                    triggerMessageSent = true;
+                    return;
                 }
             }
         }
-
     }
 
-    private float getMaxAcceleration(float [] acceleration) {
-        float temp = Math.max(acceleration[0], acceleration[1]);
-        return Math.max(temp, acceleration[2]);
+    private void updateAccelerationParameters(SensorEvent event) {
+        prevX = currX;
+        prevY = currY;
+        prevZ = currZ;
+
+        currX = event.values[0];
+        currY = event.values[1];
+        currZ = event.values[2];
     }
 
-    private float[] getCurrentAcceleration(SensorEvent event) {
-        float[] gravity = new float[3];
-        float[] linear_acceleration = new float[3];
-
-        // Isolate the force of gravity with the low-pass filter.
-        gravity[0] = ALPHA * gravity[0] + (1 - ALPHA) * event.values[0];
-        gravity[1] = ALPHA * gravity[1] + (1 - ALPHA) * event.values[1];
-        gravity[2] = ALPHA * gravity[2] + (1 - ALPHA) * event.values[2];
-
-        // Remove the gravity contribution with the high-pass filter.
-        linear_acceleration[0] = event.values[0] - gravity[0];
-        linear_acceleration[1] = event.values[1] - gravity[1];
-        linear_acceleration[2] = event.values[2] - gravity[2];
-
-        return linear_acceleration;
+    private boolean accelerationChanged() {
+        float deltaX = Math.abs(currX - prevX);
+        float deltaY = Math.abs(currY - prevY);
+        float deltaZ = Math.abs(currZ - prevZ);
+        if (((deltaX > shakeThreshold) && (deltaY > shakeThreshold)) ||
+                ((deltaY > shakeThreshold) && (deltaZ > shakeThreshold)) ||
+                ((deltaX > shakeThreshold) && (deltaZ > shakeThreshold))) {
+            Logger.d("accelerationChanged "
+                    + deltaX + " " + deltaY + " " + deltaZ);
+            return true;
+        }
+        return false;
     }
 
     @Override
