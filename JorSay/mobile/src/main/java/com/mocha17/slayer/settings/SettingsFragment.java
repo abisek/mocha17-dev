@@ -24,13 +24,11 @@ public class SettingsFragment extends PreferenceFragment implements
     private SharedPreferences defaultSharedPreferences;
     private SharedPreferences.Editor editor;
 
-    private SwitchPreference prefGlobalReadAloud, prefMaxVolume,
-            prefPersistentNotification,prefAndroidWear;
-    private Preference prefApps;
+    private SwitchPreference prefGlobalReadAloud, prefMaxVolume, prefPersistentNotification;
+    private Preference prefApps, prefShakeDetection;
 
     public static SettingsFragment newInstance() {
-        SettingsFragment fragment = new SettingsFragment();
-        return fragment;
+        return new SettingsFragment();
     }
 
     public SettingsFragment() {
@@ -100,12 +98,11 @@ public class SettingsFragment extends PreferenceFragment implements
             prefPersistentNotification.setChecked(defaultSharedPreferences.getBoolean(key, false));
         }
 
-        //Android Wear
-        key = getString(R.string.pref_key_android_wear);
-        prefAndroidWear = (SwitchPreference)findPreference(key);
-        if (prefAndroidWear != null) {
-            prefAndroidWear.setOnPreferenceChangeListener(this);
-            prefAndroidWear.setChecked(defaultSharedPreferences.getBoolean(key, false));
+        //Shake Detection
+        key = getString(R.string.pref_key_shake_detection);
+        prefShakeDetection = findPreference(key);
+        if (prefShakeDetection != null) {
+            prefShakeDetection.setOnPreferenceClickListener(this);
         }
 
         updatePreferenceUIState();
@@ -127,24 +124,13 @@ public class SettingsFragment extends PreferenceFragment implements
                 prefMaxVolume.setChecked(defaultSharedPreferences.getBoolean(
                         getString(R.string.pref_key_max_volume), true));
 
-                prefAndroidWear.setEnabled(true);
-                prefAndroidWear.setChecked(defaultSharedPreferences.getBoolean(
-                        getString(R.string.pref_key_android_wear), true));
-                setPrefAndroidWearSummary();
+                prefShakeDetection.setEnabled(true);
             } else {
                 prefPersistentNotification.setEnabled(false);
                 prefApps.setEnabled(false);
                 prefMaxVolume.setEnabled(false);
-                prefAndroidWear.setEnabled(false);
+                prefShakeDetection.setEnabled(false);
             }
-        }
-    }
-
-    private void setPrefAndroidWearSummary() {
-        if (!prefAndroidWear.isChecked()) {
-            prefAndroidWear.setSummary(R.string.pref_android_wear_summary_off);
-        } else {
-            prefAndroidWear.setSummary(R.string.pref_android_wear_summary_on);
         }
     }
 
@@ -191,13 +177,6 @@ public class SettingsFragment extends PreferenceFragment implements
             editor.putBoolean(key, value).apply();
             return true;
         }
-        if (getString(R.string.pref_key_android_wear).equals(key)) {
-            boolean value = (boolean) newValue;
-            prefAndroidWear.setChecked(value);
-            editor.putBoolean(key, value).apply();
-            setPrefAndroidWearSummary();
-            return true;
-        }
         return false;
     }
 
@@ -208,9 +187,16 @@ public class SettingsFragment extends PreferenceFragment implements
             FragmentManager fragmentManager = getFragmentManager();
             String selectAppsDialogName = SelectAppsDialog.class.getSimpleName();
             if (fragmentManager.findFragmentByTag(selectAppsDialogName) == null) {
-                SelectAppsDialog selectAppsDialog = SelectAppsDialog.newInstance();
-                getFragmentManager().beginTransaction().add(selectAppsDialog,
+                fragmentManager.beginTransaction().add(SelectAppsDialog.newInstance(),
                         selectAppsDialogName).commit();
+            }
+            return true;
+        } else if (key.equals(prefShakeDetection.getKey())) {
+            FragmentManager fragmentManager = getFragmentManager();
+            String shakeDetectionFragmentName = ShakeDetectionDialog.class.getSimpleName();
+            if (fragmentManager.findFragmentByTag(shakeDetectionFragmentName) == null) {
+                fragmentManager.beginTransaction().add(ShakeDetectionDialog.newInstance(),
+                        shakeDetectionFragmentName).commit();
             }
             return true;
         }

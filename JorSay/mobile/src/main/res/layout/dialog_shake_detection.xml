@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+
+    <!-- OK and Cancel buttons -->
+    <include
+        android:id="@+id/action_buttons"
+        layout="@layout/action_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="@dimen/margin_small"
+        android:layout_marginTop="@dimen/margin_small" />
+
+    <TextView
+        android:id="@+id/title_shake_detection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:padding="@dimen/padding_small"
+        android:layout_margin="@dimen/margin_small"
+        style="@style/BoldTextStyle"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/pref_shake_detection_title" />
+
+    <Switch
+        android:id="@+id/shake_detection_enable"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin"
+        android:layout_below="@id/title_shake_detection"
+        android:switchPadding="@dimen/padding"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:text="@string/pref_android_wear"/>
+
+    <ScrollView
+        android:id="@+id/options_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/shake_detection_enable"
+        android:layout_above="@id/action_buttons">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/shake_intensity_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin"
+                android:layout_marginTop="@dimen/margin"
+                android:text="@string/shake_intensity"
+                android:textAppearance="@android:style/TextAppearance.Small" />
+            <RadioGroup
+                android:id="@+id/shake_intensity_choice"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_below="@id/shake_intensity_title"
+                android:layout_marginStart="@dimen/margin"
+                android:layout_marginBottom="@dimen/margin_small">
+                <RadioButton
+                    android:id="@+id/shake_intensity_low"
+                    style="@style/RadioButtonStyle"
+                    android:text="@string/shake_intensity_low" />
+                <RadioButton
+                    android:id="@+id/shake_intensity_med"
+                    style="@style/RadioButtonStyle"
+                    android:text="@string/shake_intensity_med" />
+                <RadioButton
+                    android:id="@+id/shake_intensity_high"
+                    style="@style/RadioButtonStyle"
+                    android:text="@string/shake_intensity_high" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/shake_duration_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/margin"
+                android:layout_marginTop="@dimen/margin"
+                android:layout_below="@id/shake_intensity_choice"
+                android:text="@string/shake_duration"
+                android:textAppearance="@android:style/TextAppearance.Small" />
+            <RadioGroup
+                android:id="@+id/shake_duration_choice"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_below="@id/shake_duration_title"
+                android:layout_marginStart="@dimen/margin"
+                android:layout_marginBottom="@dimen/margin_small">
+                <RadioButton
+                    android:id="@+id/shake_duration_low"
+                    style="@style/RadioButtonStyle" />
+                <RadioButton
+                    android:id="@+id/shake_duration_med"
+                    style="@style/RadioButtonStyle" />
+                <RadioButton
+                    android:id="@+id/shake_duration_high"
+                    style="@style/RadioButtonStyle" />
+            </RadioGroup>
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

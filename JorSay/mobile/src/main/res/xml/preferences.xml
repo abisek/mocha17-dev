@@ -17,13 +17,13 @@
         android:title="@string/pref_max_volume"
         android:summary="@string/pref_max_volume_summary"/>
 
+    <!-- Shake Detection -->
+    <Preference
+        android:key="@string/pref_key_shake_detection"
+        android:title="@string/pref_shake_detection_title" />
+
     <!-- Persistent notification -->
     <SwitchPreference
         android:key="@string/pref_key_persistent_notification"
         android:title="@string/pref_persistent_notification" />
-
-    <!-- Android Wear -->
-    <SwitchPreference
-        android:key="@string/pref_key_android_wear"
-        android:title="@string/pref_android_wear" />
 </PreferenceScreen>
