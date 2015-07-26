@@ -12,10 +12,21 @@ public class Constants {
     public static final String KEY_TIMESTAMP = "key_timestamp";
 
     //shake
-    public static final int SHAKE_MONITORING_DURATION_MILLI = 15000; //15 seconds
-    public static final String PATH_MSG_START_SHAKE_DETECTION = "/start_shake_detection";
+    public static final int SHAKE_MONITORING_DURATION_MILLI = 20000; //20 seconds
     public static final String ACTION_START_SHAKE_DETECTION =
             "com.mocha17.slayer.ACTION_START_SHAKE_DETECTION";
+    public static final String PATH_MSG_START_SHAKE_DETECTION = "/start_shake_detection";
+    public static final String PATH_MSG_SET_SHAKE_INTENSITY = "/set_shake_intensity";
+    public static final String KEY_SHAKE_INTENSITY_VALUE = "shake_intensity_value";
+    public static final String PATH_MSG_SET_SHAKE_DURATION = "/set_shake_duration";
+    public static final String KEY_SHAKE_DURATION_VALUE = "shake_duration_value";
+    public static final String SHAKE_INTENSITY_LOW = "SHAKE_INTENSITY_LOW";
+    public static final String SHAKE_INTENSITY_MED = "SHAKE_INTENSITY_MED";
+    public static final String SHAKE_INTENSITY_HIGH = "SHAKE_INTENSITY_HIGH";
+    public static final float SHAKE_INTENSITY_LOW_VALUE = 2f;
+    public static final float SHAKE_INTENSITY_MED_VALUE = 6f;
+    public static final float SHAKE_INTENSITY_HIGH_VALUE = 8f;
+    public static final float SHAKE_INTENSITY_DEFAULT = SHAKE_INTENSITY_MED_VALUE;
 
     //read aloud
     public static final String ACTION_MSG_READ_ALOUD =

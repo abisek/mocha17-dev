@@ -10,8 +10,9 @@
 
     <dimen name="text_margin">4dp</dimen>
 
-    <dimen name="margin">16dp</dimen>
+    <dimen name="margin_tiny">4dp</dimen>
     <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin">16dp</dimen>
     <dimen name="margin_xxlarge">64dp</dimen>
 
     <dimen name="elevation">4dp</dimen>

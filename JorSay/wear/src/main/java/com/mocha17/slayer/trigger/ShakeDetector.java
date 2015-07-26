@@ -27,7 +27,8 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
     private float currX, currY, currZ;
     private float prevX, prevY, prevZ;
 
-    private final float shakeThreshold = 6f;
+    private static float shakeThreshold = Constants.SHAKE_INTENSITY_DEFAULT;
+    private static int shakeDurationMilli = Constants.SHAKE_MONITORING_DURATION_MILLI;
     private int shakeCount = 0;
     private int TOTAL_SHAKES = 2;
     private boolean triggerMessageSent = false;
@@ -40,6 +41,22 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
         Intent intent = new Intent(context, ShakeDetector.class);
         intent.setAction(Constants.ACTION_START_SHAKE_DETECTION);
         context.startService(intent);
+    }
+
+    public static void setShakeIntensity(String shakeIntensity) {
+        if (Constants.SHAKE_INTENSITY_LOW.equals(shakeIntensity)) {
+            shakeThreshold = Constants.SHAKE_INTENSITY_LOW_VALUE;
+        } else if (Constants.SHAKE_INTENSITY_MED.equals(shakeIntensity)) {
+            shakeThreshold = Constants.SHAKE_INTENSITY_MED_VALUE;
+        } else if (Constants.SHAKE_INTENSITY_HIGH.equals(shakeIntensity)) {
+            shakeThreshold = Constants.SHAKE_INTENSITY_HIGH_VALUE;
+        }
+        Logger.d("ShakeDetector shakeThreshold set to " + shakeThreshold);
+    }
+
+    public static void setShakeDuration(int shakeDuration) {
+        shakeDurationMilli = shakeDuration*1000;
+        Logger.d("ShakeDetector shakeDuration set to " + shakeDurationMilli);
     }
 
     @Override
@@ -82,7 +99,7 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
                 unregisterSensorListener();
             }
         };
-        new Handler().postDelayed(r, Constants.SHAKE_MONITORING_DURATION_MILLI);
+        new Handler().postDelayed(r, shakeDurationMilli);
     }
 
     private void unregisterSensorListener() {

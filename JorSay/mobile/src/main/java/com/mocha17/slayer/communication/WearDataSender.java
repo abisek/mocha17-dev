@@ -38,6 +38,20 @@ public class WearDataSender extends IntentService implements GoogleApiClient.Con
         context.startService(intent);
     }
 
+    public static void setShakeIntensity(Context context, String shakeIntensity) {
+        Intent intent = new Intent(context, WearDataSender.class);
+        intent.setAction(Constants.ACTION_MSG_SET_SHAKE_INTENSITY);
+        intent.putExtra(Constants.KEY_SHAKE_INTENSITY_VALUE, shakeIntensity);
+        context.startService(intent);
+    }
+
+    public static void setShakeDuration(Context context, int shakeDuration) {
+        Intent intent = new Intent(context, WearDataSender.class);
+        intent.setAction(Constants.ACTION_MSG_SET_SHAKE_DURATION);
+        intent.putExtra(Constants.KEY_SHAKE_DURATION_VALUE, shakeDuration);
+        context.startService(intent);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -50,7 +64,10 @@ public class WearDataSender extends IntentService implements GoogleApiClient.Con
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (Constants.ACTION_MSG_START_SHAKE_DETECTION.equals(intent.getAction())) {
+        String action = intent.getAction();
+        if (Constants.ACTION_MSG_START_SHAKE_DETECTION.equals(action) ||
+                Constants.ACTION_MSG_SET_SHAKE_INTENSITY.equals(action) ||
+                Constants.ACTION_MSG_SET_SHAKE_DURATION.equals(action)) {
             if (!googleApiClient.isConnected()) {
                 /* blockingConnect() allows us to park here till we have a connection, and then we
                 do the actual work. It is safe to block because IntentService handles an intent
@@ -60,24 +77,39 @@ public class WearDataSender extends IntentService implements GoogleApiClient.Con
             }
             if (googleApiClient.isConnected()) {
                 //do work
+                PutDataMapRequest putDataMapReq = null;
                 Logger.d(this, "GoogleApiClient connected, notifying Wear");
-                PutDataMapRequest putDataMapReq = PutDataMapRequest.create(
-                        Constants.PATH_MSG_START_SHAKE_DETECTION);
+                if (Constants.ACTION_MSG_START_SHAKE_DETECTION.equals(action)) {
+                    putDataMapReq = PutDataMapRequest.create(
+                            Constants.PATH_MSG_START_SHAKE_DETECTION);
+                } else if (Constants.ACTION_MSG_SET_SHAKE_INTENSITY.equals(action)) {
+                    putDataMapReq = PutDataMapRequest.create(
+                            Constants.PATH_MSG_SET_SHAKE_INTENSITY);
+                    putDataMapReq.getDataMap().putString(Constants.KEY_SHAKE_INTENSITY_VALUE,
+                            intent.getStringExtra(Constants.KEY_SHAKE_INTENSITY_VALUE));
+                } else if (Constants.ACTION_MSG_SET_SHAKE_DURATION.equals(action)) {
+                    putDataMapReq = PutDataMapRequest.create(Constants.PATH_MSG_SET_SHAKE_DURATION);
+                    putDataMapReq.getDataMap().putInt(Constants.KEY_SHAKE_DURATION_VALUE,
+                            intent.getIntExtra(Constants.KEY_SHAKE_DURATION_VALUE,
+                                    Constants.SHAKE_DURATION_DEFAULT));
+                }
                 /*DataAPI isn't about message-passing in the traditional sense. We are basically
                 modifying a shared, synced data store. The framework wouldn't (and shouldn't,
                 under this model) invoke the 'data received' flow if there's no change. Putting
                 a guaranteed unique value in the DataRequest ensures that there *is* a change.*/
-                putDataMapReq.getDataMap().putLong(
-                        Constants.KEY_TIMESTAMP, System.currentTimeMillis());
-                PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-                DataApi.DataItemResult result =
-                        Wearable.DataApi.putDataItem(googleApiClient, putDataReq).await();
-                Status resultStatus = result.getStatus();
-                if (resultStatus.isSuccess()) {
-                    Logger.d(this, "successfully sent 'start shake detection' message");
-                } else {
-                    Logger.d(this, "failed to send 'start shake detection' message," +
-                            " resultStatus: " + resultStatus.getStatusMessage());
+                if (putDataMapReq != null) {
+                    putDataMapReq.getDataMap().putLong(
+                            Constants.KEY_TIMESTAMP, System.currentTimeMillis());
+                    PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+                    DataApi.DataItemResult result =
+                            Wearable.DataApi.putDataItem(googleApiClient, putDataReq).await();
+                    Status resultStatus = result.getStatus();
+                    if (resultStatus.isSuccess()) {
+                        Logger.d(this, "successfully performed " + action);
+                    } else {
+                        Logger.d(this, "failed to perform " + action + "," +
+                                " resultStatus: " + resultStatus.getStatusMessage());
+                    }
                 }
             }
         }

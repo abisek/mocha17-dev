@@ -68,11 +68,23 @@
     <string name="pref_max_volume">Use maximum volume</string>
     <string name="pref_max_volume_summary">Read notifications at maximum volume</string>
 
+    <string name="pref_key_shake_detection" translatable="false">pref_key_shake_detection</string>
+    <string name="pref_shake_detection_title">Configure Shake Detection</string>
     <string name="pref_key_android_wear" translatable="false">pref_key_android_wear</string>
-    <string name="pref_android_wear">Enable Shake Detection</string>
-    <string name="pref_android_wear_summary_off">Reads notifications aloud immediately</string>
+    <string name="pref_android_wear">Enable Shake Detection using Android Wear</string>
+    <string name="pref_android_wear_summary_off">Will read notifications aloud immediately</string>
     <string name="pref_android_wear_summary_on">
         Trigger \'read aloud\' by shaking your Android Wear-wearing wrist</string>
+    <string name="pref_key_shake_intensity" translatable="false">pref_key_shake_intensity</string>
+
+    <string name="pref_key_shake_duration" translatable="false">pref_key_shake_duration</string>
+    <string name="shake_intensity">Shake intensity</string>
+    <string name="shake_intensity_low">Low</string>
+    <string name="shake_intensity_med">Medium</string>
+    <string name="shake_intensity_high">High</string>
+
+    <string name="shake_duration">Shake detection duration</string>
+    <string name="shake_duration_value">%s seconds</string>
 
     <string name="persistent_notification_text">at your service</string>
     <string name="text_volume_notification">Did not read %s notification</string>
