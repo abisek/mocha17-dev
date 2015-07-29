@@ -194,6 +194,16 @@ public class NotificationDBOps {
         if(TextUtils.isEmpty(packageName)) {
             return;
         }
+        synchronized (instance) {
+            //the null check is also synchronized, preventing multiple initializations.
+            //In all likelihood, the storeNotification() method would have initialized this as
+            //queries happen from the reader, which is triggered from the notification listener.
+            if (notificationDB == null || !notificationDB.isOpen()) {
+                Logger.d(NotificationDBOps.this, "removeNotification - " +
+                        "getting WritableDatabase");
+                notificationDB = notificationDBOpenHelper.getWritableDatabase();
+            }
+        }
         String [] selectionArgs = new String[] {packageName, Integer.toString(notificationId)};
         notificationDB.delete(NotificationData.TABLE_NAME, IS_PRESENT_SELECTION, selectionArgs);
     }
