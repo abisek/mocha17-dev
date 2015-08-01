@@ -57,6 +57,7 @@ public class WearMainActivity extends WearableActivity implements View.OnClickLi
         Resources resources = getResources();
         appScreen.setBackgroundColor(resources.getColor(R.color.ambient_background));
         buttonJorsayCircle.setCircleColor(resources.getColor(R.color.ambient_content_background));
+        buttonJorsayCircle.setCircleRadius(resources.getDimension(R.dimen.circle_radius_ambient));
         buttonJorsayText.setTextColor(resources.getColor(R.color.ambient_text));
 
         //Update date
@@ -72,6 +73,7 @@ public class WearMainActivity extends WearableActivity implements View.OnClickLi
         Resources resources = getResources();
         appScreen.setBackgroundColor(resources.getColor(R.color.app_light));
         buttonJorsayCircle.setCircleColor(resources.getColor(R.color.app_dark));
+        buttonJorsayCircle.setCircleRadius(resources.getDimension(R.dimen.circle_radius));
         buttonJorsayText.setTextColor(resources.getColor(R.color.app_light));
     }
 
