@@ -25,7 +25,7 @@ public class Constants {
     public static final String SHAKE_INTENSITY_HIGH = "SHAKE_INTENSITY_HIGH";
     public static final float SHAKE_INTENSITY_LOW_VALUE = 2f;
     public static final float SHAKE_INTENSITY_MED_VALUE = 6f;
-    public static final float SHAKE_INTENSITY_HIGH_VALUE = 8f;
+    public static final float SHAKE_INTENSITY_HIGH_VALUE = 9f;
     public static final float SHAKE_INTENSITY_DEFAULT = SHAKE_INTENSITY_MED_VALUE;
 
     //read aloud

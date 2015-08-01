@@ -133,7 +133,7 @@ public class NotificationListener extends NotificationListenerService
     private NextAction getNextAction(StatusBarNotification statusBarNotification) {
         //Start with global_read_aloud
         if (!prefGlobalReadAloud) {
-            Logger.d(this, "Global read_aloud is off, ignoring");
+            Logger.d(this, "global_read_aloud is off, ignoring");
             return NextAction.IGNORE;
         }
         //global_read_aloud is on
@@ -264,9 +264,9 @@ public class NotificationListener extends NotificationListenerService
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (getString(R.string.pref_key_persistent_notification).equals(key)) {
             setPrefPersistentNotification(sharedPreferences);
-            if (prefPersistentNotification) {
-                startForeground(Constants.PERSISTENT_NOTIFICATION_ID,
-                        getPersistentNotification(defaultSharedPreferences));
+            if (prefPersistentNotification && prefGlobalReadAloud) {
+                    startForeground(Constants.PERSISTENT_NOTIFICATION_ID,
+                            getPersistentNotification(defaultSharedPreferences));
             } else {
                 stopForeground(true /*removeNotification*/);
             }
@@ -334,7 +334,7 @@ public class NotificationListener extends NotificationListenerService
         Random r = new Random();
         nm.notify(r.nextInt(), builder.build());
 
-        notificationDBOps.shutdown();
+        notificationDBOps.shutdown(this);
 
         super.onDestroy();
     }

@@ -3,12 +3,14 @@ package com.mocha17.slayer.trigger;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 
 import com.mocha17.slayer.communication.MobileDataSender;
 import com.mocha17.slayer.utils.Constants;
@@ -19,7 +21,14 @@ import com.mocha17.slayer.utils.Logger;
  * Created by Chaitanya on 5/19/15.
  */
 public class ShakeDetector extends IntentService implements SensorEventListener {
-    private static final int VIBRATE_DURATION_MILLI = 500;
+    private static final int START_STOP_VIBRATE_DURATION_MILLI = 400;
+    private static final int SHAKE_VIBRATE_DURATION_MILLI = 700;
+
+    private static final String PREF_SHAKE_THRESHOLD = "pref_shake_threshold";
+    private static final String PREF_SHAKE_DURATION = "pref_shake_duration";
+
+    private SharedPreferences defaultSharedPreferences;
+    private static SharedPreferences.Editor editor;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -51,11 +60,13 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
         } else if (Constants.SHAKE_INTENSITY_HIGH.equals(shakeIntensity)) {
             shakeThreshold = Constants.SHAKE_INTENSITY_HIGH_VALUE;
         }
+        editor.putFloat(PREF_SHAKE_THRESHOLD, shakeThreshold).apply();
         Logger.d("ShakeDetector shakeThreshold set to " + shakeThreshold);
     }
 
     public static void setShakeDuration(int shakeDuration) {
         shakeDurationMilli = shakeDuration*1000;
+        editor.putInt(PREF_SHAKE_DURATION, shakeDurationMilli).apply();
         Logger.d("ShakeDetector shakeDuration set to " + shakeDurationMilli);
     }
 
@@ -65,37 +76,44 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
 
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = defaultSharedPreferences.edit();
+        shakeThreshold = defaultSharedPreferences.getFloat(
+                PREF_SHAKE_THRESHOLD, Constants.SHAKE_INTENSITY_DEFAULT);
+        shakeDurationMilli = defaultSharedPreferences.getInt(
+                PREF_SHAKE_DURATION, Constants.SHAKE_MONITORING_DURATION_MILLI);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         if(Constants.ACTION_START_SHAKE_DETECTION.equals(intent.getAction())) {
             startMonitoringForShake();
-            /* TODO
-            For every shake detected, vibrate quickly like 300 ms.
-            So that user knows that shakes are being registered. */
         }
     }
 
     private void startMonitoringForShake() {
         //Indicate to the user that shake monitoring has started and she can start triggering
         //events i.e. start shaking her wrist.
-        performUserIndication();
+        performUserIndication(START_STOP_VIBRATE_DURATION_MILLI);
 
         //register listener for Accelerometer events
         sensorManager.registerListener(this,
                 accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    private void performUserIndication() {
+    private void performUserIndication(int shakeDurationMilli) {
         Vibrator vibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(VIBRATE_DURATION_MILLI);
+        vibrator.vibrate(shakeDurationMilli);
     }
 
     private void scheduleMonitoringStop() {
         Runnable r = new Runnable() {
             @Override
             public void run() {
+                //We would like to vibrate to signal end-of-monitoring, but in practice,
+                //this is just distracting and feels very out of place.
+                //performUserIndication(START_STOP_VIBRATE_DURATION_MILLI);
                 unregisterSensorListener();
             }
         };
@@ -121,7 +139,7 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
             if (++shakeCount == TOTAL_SHAKES) {
                 Logger.d("*********************** SHAKE!!! ***********************");
                 if (!triggerMessageSent) {
-                    performUserIndication();
+                    performUserIndication(SHAKE_VIBRATE_DURATION_MILLI);
                     //Do this only once.
                     //such safeguards are needed when working with Sensors.
                     MobileDataSender.sendReadAloud(ShakeDetector.this);

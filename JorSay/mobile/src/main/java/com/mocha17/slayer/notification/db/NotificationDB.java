@@ -12,7 +12,7 @@ import com.mocha17.slayer.utils.Logger;
  */
 /*package-private*/ class NotificationDB extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "NotificationDB.db";
-    private static int DATABASE_VERSION = 1; //to be updated on schema change
+    private static int DATABASE_VERSION = 2; //to be updated on schema change
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String INTEGER_TYPE = " INTEGER";
@@ -31,7 +31,8 @@ import com.mocha17.slayer.utils.Logger;
                     NotificationData.COLUMN_NAME_TEXT_LINES + TEXT_TYPE + COMMA +
                     NotificationData.COLUMN_NAME_SUBTEXT + TEXT_TYPE + COMMA +
                     NotificationData.COLUMN_NAME_TICKER_TEXT + TEXT_TYPE + COMMA +
-                    NotificationData.COLUMN_NAME_WHEN + TEXT_TYPE + " )";
+                    NotificationData.COLUMN_NAME_WHEN + TEXT_TYPE + COMMA +
+                    NotificationData.COLUMN_NAME_NOTIFICATION_READ + INTEGER_TYPE + " )";
 
     private static final String SQL_DELETE_ENTRIES_NOTIFICATION_DATA =
             "DROP TABLE IF EXISTS " + NotificationData.TABLE_NAME;
@@ -48,6 +49,10 @@ import com.mocha17.slayer.utils.Logger;
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Logger.d(this, "onUpgrade from " + oldVersion + " to " + newVersion);
+        /*Version 2 adds NOTIFICATION_READ flag to DB. We could do something fancy here, like
+        marking all the notifications in the table READ. But, we don't care all that much about
+        prior notifications anyways - they are not going to read later. We are going to delete READ
+        notifications periodically; dropping the table is same as marking notifications as READ. */
         db.execSQL(SQL_DELETE_ENTRIES_NOTIFICATION_DATA);
         DATABASE_VERSION = newVersion;
         onCreate(db);

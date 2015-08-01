@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
@@ -23,11 +24,16 @@ public class NotificationDBOps {
     private SQLiteDatabase notificationDB;
     private SQLiteOpenHelper notificationDBOpenHelper;
 
+    private static final int NOTIFICATION_UNREAD = 1;
+    private static final int NOTIFICATION_READ = 2;
+
     private static final String [] COLUMN_ROW_ID = {NotificationData._ID};
     //(package+notificationID)
     private static final String IS_PRESENT_SELECTION = NotificationData.COLUMN_NAME_PACKAGE_NAME
             + "=?" + " and " + NotificationData.COLUMN_NAME_NOTIFICATION_ID + "=?";
     private static final String WHERE_ROW_ID = NotificationData._ID + "=?";
+    private static final String IS_UNREAD_SELECTION =
+            NotificationData.COLUMN_NAME_NOTIFICATION_READ + "=?";
     private static final String ORDER_BY_WHEN = NotificationData.COLUMN_NAME_WHEN + " DESC";
     private static final String LIMIT_FOR_MOST_RECENT = "1";
 
@@ -35,6 +41,7 @@ public class NotificationDBOps {
     public static synchronized NotificationDBOps get(Context context) {
         if (instance == null) {
             instance = new NotificationDBOps(context);
+            NotificationDBCleaner.start(context);
         }
         return instance;
     }
@@ -77,6 +84,7 @@ public class NotificationDBOps {
             cv.put(NotificationData.COLUMN_NAME_TICKER_TEXT, notification.tickerText.toString());
         }
         cv.put(NotificationData.COLUMN_NAME_WHEN, Long.toString(notification.when));
+        cv.put(NotificationData.COLUMN_NAME_NOTIFICATION_READ, NOTIFICATION_UNREAD);
 
         insertOrUpdate(cv);
     }
@@ -115,7 +123,7 @@ public class NotificationDBOps {
                 //Will happen only when tag is playing a role.
                 //developer.android.com/reference/android/app/NotificationManager.html#
                 // notify(java.lang.String, int, android.app.Notification)
-                //TODO - Add Tag to the uniqueness tes
+                //TODO - Add Tag to the uniqueness test
                 Logger.w(this, "insertOrUpdateInternal found more than one notifications for " +
                         cv.get(NotificationData.COLUMN_NAME_PACKAGE_NAME) + ", " +
                         cv.get(NotificationData.COLUMN_NAME_NOTIFICATION_ID) +
@@ -141,8 +149,8 @@ public class NotificationDBOps {
     }
 
     /**
-     * Queries the database, returns the most recent notification (sorted by 'when'), and removes it
-     * from DB.<br>Do not call this method from main thread as it blocks on initializing the
+     * Queries the database, and returns the most recent unread notification (sorted by 'when').
+     * <br>Do not call this method from main thread as it blocks on initializing the
      * SQLiteDatabase object if needed. */
 
     /*storeNotification() above can be safely called from main thread as it does the
@@ -175,19 +183,18 @@ public class NotificationDBOps {
 
         /* public Cursor query (String table, String[] columns, String selection, String[]
         selectionArgs, String groupBy, String having, String orderBy, String limit) */
-        Cursor cursor =
-                notificationDB.query(NotificationData.TABLE_NAME, null, null, null, null, null,
-                        ORDER_BY_WHEN, LIMIT_FOR_MOST_RECENT); //get 1 most recent notification
-        if (cursor != null && cursor.moveToFirst()) {
-            int rowId =cursor.getInt(
-                    cursor.getColumnIndex(NotificationDBContract.NotificationData._ID));
+        String [] selectionArgs = {Integer.toString(NOTIFICATION_UNREAD)};
+        return notificationDB.query(NotificationData.TABLE_NAME, null, IS_UNREAD_SELECTION,
+                        selectionArgs, null, null, ORDER_BY_WHEN,
+                        LIMIT_FOR_MOST_RECENT); //get 1 most recent notification
+    }
 
-            //Delete the most recent notification entry
-            notificationDB.delete(NotificationData.TABLE_NAME, WHERE_ROW_ID,
-                    new String[]{Integer.toString(rowId)});
-        }
-        //return retrieved data
-        return cursor;
+    public void markNotificationRead(long rowId) {
+        Logger.d(NotificationDBOps.this, "markNotificationRead for rowId: " + rowId);
+        ContentValues cv = new ContentValues();
+        cv.put(NotificationData.COLUMN_NAME_NOTIFICATION_READ, NOTIFICATION_READ);
+        notificationDB.update(NotificationData.TABLE_NAME, cv, WHERE_ROW_ID,
+                new String[]{Long.toString(rowId)});
     }
 
     public void removeNotification(String packageName, int notificationId) {
@@ -195,9 +202,6 @@ public class NotificationDBOps {
             return;
         }
         synchronized (instance) {
-            //the null check is also synchronized, preventing multiple initializations.
-            //In all likelihood, the storeNotification() method would have initialized this as
-            //queries happen from the reader, which is triggered from the notification listener.
             if (notificationDB == null || !notificationDB.isOpen()) {
                 Logger.d(NotificationDBOps.this, "removeNotification - " +
                         "getting WritableDatabase");
@@ -208,7 +212,19 @@ public class NotificationDBOps {
         notificationDB.delete(NotificationData.TABLE_NAME, IS_PRESENT_SELECTION, selectionArgs);
     }
 
-    public void shutdown() {
+    public void removeReadNotifications() {
+        synchronized (instance) {
+            if (notificationDB == null || !notificationDB.isOpen()) {
+                Logger.d(NotificationDBOps.this, "removeReadNotifications - " +
+                        "getting WritableDatabase");
+                notificationDB = notificationDBOpenHelper.getWritableDatabase();
+            }
+        }
+        String [] selectionArgs = new String[] {Integer.toString(NOTIFICATION_READ)};
+        notificationDB.delete(NotificationData.TABLE_NAME, IS_UNREAD_SELECTION, selectionArgs);
+    }
+
+    public void shutdown(Context context) {
         Logger.d(this, "shutdown closing DB connection");
         if (notificationDBOpenHelper != null) {
             notificationDBOpenHelper.close();
@@ -216,5 +232,13 @@ public class NotificationDBOps {
         if (notificationDB != null && notificationDB.isOpen()) {
             notificationDB.close();
         }
+        NotificationDBCleaner.stop(context);
+    }
+
+    //For debugging
+    private String dumpAllRowsToString() {
+        Cursor cursor = notificationDB.query(NotificationData.TABLE_NAME,
+                null, null, null, null, null, null);
+        return DatabaseUtils.dumpCursorToString(cursor);
     }
 }
