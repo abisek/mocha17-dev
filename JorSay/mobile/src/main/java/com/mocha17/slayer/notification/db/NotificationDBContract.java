@@ -32,5 +32,8 @@ public class NotificationDBContract {
         //----- Fields from Notification -----
         public static final String COLUMN_NAME_TICKER_TEXT = "ticketText";
         public static final String COLUMN_NAME_WHEN = "notificationWhen";
+
+        //----- Fields for bookkeeping -----
+        public static final String COLUMN_NAME_NOTIFICATION_READ = "notificationRead";
     }
 }

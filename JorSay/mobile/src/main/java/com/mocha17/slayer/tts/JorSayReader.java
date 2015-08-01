@@ -86,22 +86,32 @@ public class JorSayReader extends IntentService implements TextToSpeech.OnInitLi
                 }
             }
             Cursor notificationCursor = NotificationDBOps.get(this).getMostRecentNotification();
-            if (notificationCursor != null && notificationCursor.moveToFirst()) {
-                Logger.d(this, "TTS reading now");
-                //Utterance ID should be unique per notification.
-                String utteranceID = Long.toString(System.currentTimeMillis());
-                tts.setOnUtteranceProgressListener(new JorSayReaderUtteranceProgressListener());
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, null,
-                            utteranceID);
-                } else {
-                    HashMap<String, String> params = new HashMap<>();
-                    params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
-                    //noinspection deprecation - turned off as we have a version check around this
-                    tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, params);
+            if (notificationCursor != null) {
+                if (notificationCursor.moveToFirst()) {
+                    Logger.d(this, "TTS reading now");
+                    //Utterance ID should be unique per notification.
+                    String utteranceID = Long.toString(System.currentTimeMillis());
+                    tts.setOnUtteranceProgressListener(new JorSayReaderUtteranceProgressListener());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, null,
+                                utteranceID);
+                    } else {
+                        HashMap<String, String> params = new HashMap<>();
+                        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
+                        //Turned off noinspection deprecation as we have a version check around this
+                        tts.speak(getStringToRead(notificationCursor),
+                                TextToSpeech.QUEUE_ADD, params);
+                    }
+                    //Mark the notification as read
+                    /*Retrieving the ID like this is a little tricky, the ID would be included only
+                    when it was part of the columns in the query that generated this Cursor.
+                    Else, it would be -1. Reference: stackoverflow.com/questions/2848056/
+                    how-to-get-a-row-id-from-a-cursor*/
+                    NotificationDBOps.get(this).markNotificationRead(notificationCursor.getLong(
+                            notificationCursor.getColumnIndex(NotificationData._ID)));
                 }
+                notificationCursor.close();
             }
-            notificationCursor.close();
         }
     }
 

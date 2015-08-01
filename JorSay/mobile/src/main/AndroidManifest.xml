@@ -73,5 +73,11 @@
             </intent-filter>
         </service>
 
+        <receiver android:name=".notification.db.NotificationDBCleaner">
+            <intent-filter>
+                <action android:name="com.mocha17.slayer.notification.db.NotificationDBCleaner" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>
