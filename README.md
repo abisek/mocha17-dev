@@ -15,7 +15,11 @@ Wearables today are not big on hands-free interaction. Reading a notification an
 ![JorSay Mobile Screenshot](screenshots/jorsay.png)
 
 #####Wear
-![JorSay Wear Screenshot](screenshots/jorsay_wear_round.png)
+![JorSay Wear Round Screenshot](screenshots/jorsay_wear_round.png)
+
+![JorSay Wear Square Screenshot](screenshots/jorsay_wear_square.png)
 
 #####Wear, Ambient Mode
-![JorSay Wear Ambient Mode Screenshot](screenshots/jorsay_wear_round_ambient.png)
+![JorSay Wear Round Ambient Mode Screenshot](screenshots/jorsay_wear_round_ambient.png)
+
+![JorSay Wear Square Ambient Mode Screenshot](screenshots/jorsay_wear_square_ambient.png)
