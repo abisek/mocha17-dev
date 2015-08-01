@@ -142,6 +142,9 @@ public class MainActivity extends AppCompatActivity
             }
             statusAnimation.start();
         } else { //For 'read aloud'
+            if (statusAnimation.isRunning()) {
+                statusAnimation.cancel();
+            }
             statusText.setTextColor(getResources().getColor(R.color.text));
             statusCard.setCardBackgroundColor(getResources().getColor(R.color.content_background));
         }
