@@ -37,6 +37,16 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.mocha17.slayer.AboutActivity"
+            android:label="@string/about"
+            android:excludeFromRecents="true"
+            android:parentActivityName="com.mocha17.slayer.MainActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <!-- stopWithTask - stop this Service when the Task is removed -->
         <service
