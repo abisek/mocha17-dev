@@ -64,7 +64,8 @@ public class WearMainActivity extends WearableActivity implements View.OnClickLi
         //Show the help text only a few times
         int helpTextCount = defaultSharedPreferences.getInt(KEY_HELP_COUNT, HELP_COUNT_MAX);
         if (helpTextCount-- > 0) {
-            Toast.makeText(this, R.string.read_aloud_help, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.read_aloud_help,
+                    Toast.LENGTH_LONG).show();
             editor.putInt(KEY_HELP_COUNT, helpTextCount).apply();
         }
     }

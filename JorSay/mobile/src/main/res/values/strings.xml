@@ -1,23 +1,11 @@
 <resources>
     <string name="app_name">JorSay</string>
 
-    <string name="action_settings">Settings</string>
-    <string name="action_notification">Post Notification</string>
-
-    <string name="service_name">Notification Listener</string>
-    <string name="start_service">Monitor Notifications</string>
-    <string name="waiting">Waiting for Notifications</string>
-
+    <!-- Setup -->
     <string name="progress_init">Initializing</string>
     <string name="progress_gps">Checking Google Play Services</string>
     <string name="progress_tts">Checking Text to Speech</string>
     <string name="progress_notifications">Checking Notifications access</string>
-
-    <string name="capability_read_aloud_notification">capability_read_aloud_notification</string>
-
-    <string name="not_connected_title">Not connected</string>
-    <string name="not_connected_desc">Not connected to a device that can
-        read notifications aloud</string>
 
     <!-- Status messages -->
     <string name="status_not_reading_aloud">Not reading any notifications aloud</string>
@@ -30,17 +18,22 @@
     <string name="status_max_volume_on">at maximum volume</string>
     <string name="status_max_volume_off">at device volume</string>
 
-    <string name="status_android_wear_on">after Shake Detection</string>
-    <string name="status_android_wear_off">without involving Android Wear device(s)</string>
+    <string name="status_android_wear_on">after Shake Detection using Android Wear</string>
+    <string name="status_android_wear_off">without Shake Detection using Android Wear</string>
 
     <string name="status_error_read_aloud">Select \'%s\' and configure other options</string>
     <string name="status_error_volume">Select \'%s\' or increase your Media volume</string>
     <string name="status_error_apps">Select some apps</string>
 
-    <!-- future features -->
-    <string name="status_activity">Reading notifications always</string>
-    <string name="status_time_of_day">Reading notifications throughout the day</string>
-
+    <string name="notification_access_dialog_title">Notification access</string>
+    <string name="notification_access_dialog_text">JorSay needs access to notifications so that
+        it can read them aloud.\n\nEnable it from device notification settings. Tap
+        \'back\' once done.</string>
+    <string name="notification_access_dialog_error_text">JorSay cannot find the settings for
+        notification access, and cannot function without it. Please enable notification access for
+        JorSay and then relaunch the app.</string>
+    <string name="notification_access_dialog_ok">Device notification settings</string>
+    <string name="notification_access_toast">Select JorSay to enable notification access</string>
 
     <!-- Preference screen -->
     <string name="pref_key_global_read_aloud" translatable="false">
@@ -49,7 +42,7 @@
 
     <string name="pref_key_persistent_notification" translatable="false">
         pref_key_persistent_notification</string>
-    <string name="pref_persistent_notification">Show persistent notification</string>
+    <string name="pref_persistent_notification">Persistent notification</string>
     <string name="pref_persistent_notification_help">Improves reliability</string>
 
     <string name="pref_key_apps" translatable="false">pref_key_apps</string>
@@ -88,18 +81,9 @@
 
     <string name="text_volume_notification">Did not read %s notification</string>
 
-    <string name="notification_access_dialog_title">Notification access</string>
-    <string name="notification_access_dialog_text">JorSay needs access to notifications so that
-        it can read them aloud.\n\nEnable it from device notification settings. Tap
-        \'back\' once done.</string>
-    <string name="notification_access_dialog_error_text">JorSay cannot find the settings for
-        notification access, and cannot function without it. Please enable notification access for
-        JorSay and then relaunch the app.</string>
-    <string name="notification_access_dialog_ok">Device notification settings</string>
-    <string name="notification_access_toast">Select JorSay to enable notification access</string>
-
+    <!-- About -->
     <string name="about">About</string>
-    <string name="about_text_by">Created with ❤️ by Mocha17 team</string>
+    <string name="about_text_by">Crafted with ❤️ by the Mocha17 team</string>
     <string name="about_text_contact">Contact: mocha17apps@gmail.com</string>
     <string name="about_text_community">Community: https://goo.gl/nvUv4h</string>
 
