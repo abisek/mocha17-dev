@@ -1,6 +1,7 @@
 package com.mocha17.slayer.setup;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -40,6 +42,8 @@ public class SetupActivity extends AppCompatActivity
     private static final int TTS_DATA_CHECK_CODE = 1002;
 
     private AlertDialog notificationSettingsDialog;
+
+    private Context context;
 
     private enum State {
         INIT,
@@ -77,6 +81,8 @@ public class SetupActivity extends AppCompatActivity
                 && savedInstanceState.getBoolean(GPS_STATE_RESOLVING_ERROR, false)) {
             updateState(State.GPS_RESOLVING_ERROR);
         }
+
+        context = this;
     }
 
     @Override
@@ -264,6 +270,8 @@ public class SetupActivity extends AppCompatActivity
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 startActivity(notificationSettingsIntent);
+                                Toast.makeText(context, R.string.notification_access_toast,
+                                        Toast.LENGTH_LONG).show();
                             }
                         }).setNegativeButton(android.R.string.cancel,
                         new DialogInterface.OnClickListener() {
