@@ -290,6 +290,10 @@ public class NotificationListener extends NotificationListenerService
     }
 
     private Notification getPersistentNotification(SharedPreferences sharedPreferences) {
+        Status status = Status.getStatus(this, sharedPreferences);
+        String text = status.isReadAloud()?getString(R.string.status_reading_aloud):
+                getString(R.string.status_not_reading_aloud);
+
         //Intent to start MainActivity from Notification
         PendingIntent notificationIntent = PendingIntent.getActivity(this,
                 Constants.REQUEST_CODE_SHOW_MAIN_SCREEN,
@@ -303,10 +307,9 @@ public class NotificationListener extends NotificationListenerService
                 .setColor(getResources().getColor(R.color.accent))
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.persistent_notification_text))
-                .setTicker(getString(R.string.persistent_notification_text))
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(
-                        Status.getStatus(this, sharedPreferences).getStatusText()))
+                .setContentText(text)
+                .setTicker(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(status.getStatusText()))
                 .setContentIntent(notificationIntent);
         return builder.build();
     }
