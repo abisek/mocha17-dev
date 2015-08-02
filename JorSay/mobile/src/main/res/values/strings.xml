@@ -86,7 +86,6 @@
     <string name="shake_duration">Shake detection duration</string>
     <string name="shake_duration_value">%s seconds</string>
 
-    <string name="persistent_notification_text">at your service</string>
     <string name="text_volume_notification">Did not read %s notification</string>
 
     <string name="notification_access_dialog_title">Notification access</string>
