@@ -96,4 +96,10 @@
         notification access, and cannot function without it. Please enable notification access for
         JorSay and then relaunch the app.</string>
     <string name="notification_access_dialog_ok">Device notification settings</string>
+
+    <string name="about">About</string>
+    <string name="about_text_by">Created with ❤️ by Mocha17 team</string>
+    <string name="about_text_contact">Contact: mocha17apps@gmail.com</string>
+    <string name="about_text_community">Community: https://goo.gl/nvUv4h</string>
+
 </resources>

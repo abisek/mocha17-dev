@@ -8,6 +8,7 @@ import android.animation.ValueAnimator;
 import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -93,6 +94,8 @@ public class MainActivity extends AppCompatActivity
             return true;
         } else if (id == R.id.action_notification) {
             postNotification();
+        } else if (id == R.id.action_about) {
+            startActivity(new Intent(this, AboutActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }
