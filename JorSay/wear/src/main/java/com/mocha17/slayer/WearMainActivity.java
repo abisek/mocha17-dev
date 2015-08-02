@@ -1,13 +1,16 @@
 package com.mocha17.slayer;
 
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.CircledImageView;
 import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mocha17.slayer.communication.MobileDataSender;
 
@@ -16,6 +19,9 @@ import java.util.Date;
 import java.util.Locale;
 
 public class WearMainActivity extends WearableActivity implements View.OnClickListener {
+    private static final String KEY_HELP_COUNT = "key_help_count";
+    private static final int HELP_COUNT_MAX = 3;
+
     //This FrameLayout contains a CircledImageView with a TextView at the center
     private FrameLayout buttonJorsay;
 
@@ -25,6 +31,9 @@ public class WearMainActivity extends WearableActivity implements View.OnClickLi
     private TextView buttonJorsayText;
     private TextView dateText;
     SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.US);
+
+    SharedPreferences defaultSharedPreferences;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +57,16 @@ public class WearMainActivity extends WearableActivity implements View.OnClickLi
                 dateText.setVisibility(View.GONE);
             }
         });
+
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = defaultSharedPreferences.edit();
+
+        //Show the help text only a few times
+        int helpTextCount = defaultSharedPreferences.getInt(KEY_HELP_COUNT, HELP_COUNT_MAX);
+        if (helpTextCount-- > 0) {
+            Toast.makeText(this, R.string.read_aloud_help, Toast.LENGTH_LONG).show();
+            editor.putInt(KEY_HELP_COUNT, helpTextCount).apply();
+        }
     }
 
     //set colors and dimensions for ambient mode
@@ -57,7 +76,6 @@ public class WearMainActivity extends WearableActivity implements View.OnClickLi
         Resources resources = getResources();
         appScreen.setBackgroundColor(resources.getColor(R.color.ambient_background));
         buttonJorsayCircle.setCircleColor(resources.getColor(R.color.ambient_content_background));
-        buttonJorsayCircle.setCircleRadius(resources.getDimension(R.dimen.circle_radius_ambient));
         buttonJorsayText.setTextColor(resources.getColor(R.color.ambient_text));
 
         //Update date
@@ -73,7 +91,6 @@ public class WearMainActivity extends WearableActivity implements View.OnClickLi
         Resources resources = getResources();
         appScreen.setBackgroundColor(resources.getColor(R.color.app_light));
         buttonJorsayCircle.setCircleColor(resources.getColor(R.color.app_dark));
-        buttonJorsayCircle.setCircleRadius(resources.getDimension(R.dimen.circle_radius));
         buttonJorsayText.setTextColor(resources.getColor(R.color.app_light));
     }
 
