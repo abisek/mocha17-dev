@@ -96,6 +96,8 @@ public class SettingsFragment extends PreferenceFragment implements
         if (prefPersistentNotification != null) {
             prefPersistentNotification.setOnPreferenceChangeListener(this);
             prefPersistentNotification.setChecked(defaultSharedPreferences.getBoolean(key, false));
+            prefPersistentNotification.setSummary(
+                    getString(R.string.pref_persistent_notification_help));
         }
 
         //Shake Detection

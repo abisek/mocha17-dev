@@ -25,7 +25,6 @@ import com.mocha17.slayer.utils.Status;
 import com.mocha17.slayer.utils.Utils;
 
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -104,7 +103,6 @@ public class NotificationListener extends NotificationListenerService
 
     @Override
     public void onNotificationPosted(StatusBarNotification statusBarNotification) {
-        NextAction nextAction = getNextAction(statusBarNotification);
         switch (getNextAction(statusBarNotification)) {
             case START_SHAKE_DETECTION:
                 notificationDBOps.storeNotification(statusBarNotification);
@@ -326,16 +324,6 @@ public class NotificationListener extends NotificationListenerService
         defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this);
         stopForeground(true /*removeNotification*/);
         SlayerApp.getInstance().setNotificationListenerRunning(false);
-
-        //For debugging. TODO remove this
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setPriority(Notification.PRIORITY_MAX) //so that an icon isn't seen in the top bar
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText("onDestroy called at: " + System.currentTimeMillis());
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Random r = new Random();
-        nm.notify(r.nextInt(), builder.build());
 
         notificationDBOps.shutdown(this);
 

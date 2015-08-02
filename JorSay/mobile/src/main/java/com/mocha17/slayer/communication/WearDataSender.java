@@ -29,9 +29,7 @@ public class WearDataSender extends IntentService implements GoogleApiClient.Con
         super("WearDataSender");
     }
 
-    //A convenience method for callers
-    //This is a good pattern, but it makes more sense when this method has more to do - setting
-    //intent extras for example.
+    //Convenience methods for callers
     public static void startShakeDetection(Context context) {
         Intent intent = new Intent(context, WearDataSender.class);
         intent.setAction(Constants.ACTION_MSG_START_SHAKE_DETECTION);

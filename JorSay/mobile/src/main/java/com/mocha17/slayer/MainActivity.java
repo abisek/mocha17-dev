@@ -6,8 +6,6 @@ import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.FragmentManager;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -20,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mocha17.slayer.notification.NotificationListener;
 import com.mocha17.slayer.settings.SettingsFragment;
@@ -34,9 +31,6 @@ public class MainActivity extends AppCompatActivity
     private CardView statusCard;
     private TextView statusText;
     AnimatorSet statusAnimation;
-
-    //For introducing change in successive notifications
-    private int debug_notification_count = 1;
 
     SharedPreferences defaultSharedPreferences;
 
@@ -84,36 +78,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            Toast.makeText(this, "No Settings!", Toast.LENGTH_SHORT).show();
-            return true;
-        } else if (id == R.id.action_notification) {
-            postNotification();
-        } else if (id == R.id.action_about) {
+        if (item.getItemId() == R.id.action_about) {
             startActivity(new Intent(this, AboutActivity.class));
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void postNotification() {
-        String bigText = "A longer line of text, count is " + debug_notification_count;
-        String text = "Count is " + debug_notification_count;
-        Notification.Builder notificationBuilder = new Notification.Builder(this)
-                .setContentTitle("This is how we speak!")
-                .setContentText(text)
-                .setTicker(text)
-                .setStyle(new Notification.BigTextStyle().bigText(bigText))
-                .setSmallIcon(R.mipmap.ic_notification)
-                .setPriority(Notification.PRIORITY_MAX);
-        Notification notification = notificationBuilder.build();
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                .notify(10001, notification); //same ID so that the same notification is updated
-        debug_notification_count++;
     }
 
     @Override
