@@ -1,8 +1,7 @@
 <resources>
     <dimen name="margin">12dp</dimen>
 
-    <dimen name="circle_radius">64dp</dimen>
-    <dimen name="circle_radius_pressed">62dp</dimen>
-    <dimen name="circle_radius_ambient">56dp</dimen>
+    <dimen name="circle_radius">56dp</dimen>
+    <dimen name="circle_radius_pressed">54dp</dimen>
     <dimen name="circle_shadow_width">4dp</dimen>
 </resources>
