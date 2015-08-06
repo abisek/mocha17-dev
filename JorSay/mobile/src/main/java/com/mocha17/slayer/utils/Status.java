@@ -99,7 +99,7 @@ public class Status {
         }
 
         //Add 'apps' info
-        sb.append(", ");
+        sb.append(" ");
         key = context.getString(R.string.pref_key_all_apps);
         if (sharedPreferences.getBoolean(key, false)) {
             sb.append(context.getString(R.string.status_apps, context.getString(R.string.all)));
