@@ -117,19 +117,23 @@ public class ShakeDetectionDialog extends DialogFragment
         super.onSaveInstanceState(outState);
     }
 
-    private void updateUIState() {
+    private void showHelpToast() {
         if (shakeDetectionEnable.isChecked()) {
             Toast.makeText(getActivity(),
                     R.string.pref_android_wear_summary_on, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getActivity(),
+                    R.string.pref_android_wear_summary_off, Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    private void updateUIState() {
+        if (shakeDetectionEnable.isChecked()) {
             shakeIntensityTitle.setVisibility(View.VISIBLE);
             shakeIntensity.setVisibility(View.VISIBLE);
             shakeDurationTitle.setVisibility(View.VISIBLE);
             shakeDuration.setVisibility(View.VISIBLE);
         } else {
-            Toast.makeText(getActivity(),
-                    R.string.pref_android_wear_summary_off, Toast.LENGTH_SHORT).show();
-
             shakeIntensityTitle.setVisibility(View.INVISIBLE);
             shakeIntensity.setVisibility(View.INVISIBLE);
             shakeDurationTitle.setVisibility(View.INVISIBLE);
@@ -189,6 +193,7 @@ public class ShakeDetectionDialog extends DialogFragment
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (buttonView.getId() == shakeDetectionEnable.getId()) {
             shakeDetectionEnable.setChecked(isChecked);
+            showHelpToast();
             updateUIState();
         }
     }
