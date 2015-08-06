@@ -28,13 +28,13 @@ public class MobileDataReceiver extends WearableListenerService {
             } else if (Constants.PATH_MSG_SET_SHAKE_INTENSITY.contains(path)) {
                 Logger.d(this, "onDataChanged setting shake intensity");
                 DataMap dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
-                ShakeDetector.setShakeIntensity(
+                ShakeDetector.setShakeIntensity(this,
                         dataMap.getString(Constants.KEY_SHAKE_INTENSITY_VALUE));
                 break;
             } else if (Constants.PATH_MSG_SET_SHAKE_DURATION.contains(path)) {
                 Logger.d(this, "onDataChanged setting shake duration");
                 DataMap dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
-                ShakeDetector.setShakeDuration(
+                ShakeDetector.setShakeDuration(this,
                         dataMap.getInt(Constants.KEY_SHAKE_DURATION_VALUE));
                 break;
             }

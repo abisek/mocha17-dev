@@ -200,13 +200,15 @@ public class ShakeDetectionDialog extends DialogFragment
                 //save values
                 editor.putBoolean(getString(R.string.pref_key_android_wear),
                         shakeDetectionEnable.isChecked()).apply();
-                editor.putString(getString(R.string.pref_key_shake_intensity),
-                        shakeIntensityVal).apply();
-                editor.putInt(getString(R.string.pref_key_shake_duration),
-                        shakeDurationVal).apply();
-                //send data to Wear
-                WearDataSender.setShakeIntensity(getActivity(), shakeIntensityVal);
-                WearDataSender.setShakeDuration(getActivity(), shakeDurationVal);
+                if (shakeDetectionEnable.isChecked()) {
+                    editor.putString(getString(R.string.pref_key_shake_intensity),
+                            shakeIntensityVal).apply();
+                    editor.putInt(getString(R.string.pref_key_shake_duration),
+                            shakeDurationVal).apply();
+                    //send data to Wear
+                    WearDataSender.setShakeIntensity(getActivity(), shakeIntensityVal);
+                    WearDataSender.setShakeDuration(getActivity(), shakeDurationVal);
+                }
 
                 //fall-through to dismiss the Dialog
             case R.id.cancel_button:

@@ -24,11 +24,12 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
     private static final int START_STOP_VIBRATE_DURATION_MILLI = 400;
     private static final int SHAKE_VIBRATE_DURATION_MILLI = 700;
 
-    private static final String PREF_SHAKE_THRESHOLD = "pref_shake_threshold";
-    private static final String PREF_SHAKE_DURATION = "pref_shake_duration";
+    //Keys for both intent extras and preferences
+    private static final String SHAKE_THRESHOLD = "shake_threshold";
+    private static final String SHAKE_DURATION = "shake_duration";
 
     private SharedPreferences defaultSharedPreferences;
-    private static SharedPreferences.Editor editor;
+    private SharedPreferences.Editor editor;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -36,10 +37,10 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
     private float currX, currY, currZ;
     private float prevX, prevY, prevZ;
 
-    private static float shakeThreshold = Constants.SHAKE_INTENSITY_DEFAULT;
-    private static int shakeDurationMilli = Constants.SHAKE_MONITORING_DURATION_MILLI;
+    private static final int TOTAL_SHAKES = 2;
+    private float shakeThreshold;
+    private int shakeDurationMilli;
     private int shakeCount = 0;
-    private int TOTAL_SHAKES = 2;
     private boolean triggerMessageSent = false;
 
     public ShakeDetector() {
@@ -52,22 +53,18 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
         context.startService(intent);
     }
 
-    public static void setShakeIntensity(String shakeIntensity) {
-        if (Constants.SHAKE_INTENSITY_LOW.equals(shakeIntensity)) {
-            shakeThreshold = Constants.SHAKE_INTENSITY_LOW_VALUE;
-        } else if (Constants.SHAKE_INTENSITY_MED.equals(shakeIntensity)) {
-            shakeThreshold = Constants.SHAKE_INTENSITY_MED_VALUE;
-        } else if (Constants.SHAKE_INTENSITY_HIGH.equals(shakeIntensity)) {
-            shakeThreshold = Constants.SHAKE_INTENSITY_HIGH_VALUE;
-        }
-        editor.putFloat(PREF_SHAKE_THRESHOLD, shakeThreshold).apply();
-        Logger.d("ShakeDetector shakeThreshold set to " + shakeThreshold);
+    public static void setShakeIntensity(Context context, String shakeIntensity) {
+        Intent intent = new Intent(context, ShakeDetector.class);
+        intent.setAction(Constants.ACTION_SET_SHAKE_INTENSITY);
+        intent.putExtra(SHAKE_THRESHOLD, shakeIntensity);
+        context.startService(intent);
     }
 
-    public static void setShakeDuration(int shakeDuration) {
-        shakeDurationMilli = shakeDuration*1000;
-        editor.putInt(PREF_SHAKE_DURATION, shakeDurationMilli).apply();
-        Logger.d("ShakeDetector shakeDuration set to " + shakeDurationMilli);
+    public static void setShakeDuration(Context context, int shakeDuration) {
+        Intent intent = new Intent(context, ShakeDetector.class);
+        intent.setAction(Constants.ACTION_SET_SHAKE_DURATION);
+        intent.putExtra(SHAKE_DURATION, shakeDuration);
+        context.startService(intent);
     }
 
     @Override
@@ -80,15 +77,31 @@ public class ShakeDetector extends IntentService implements SensorEventListener 
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor = defaultSharedPreferences.edit();
         shakeThreshold = defaultSharedPreferences.getFloat(
-                PREF_SHAKE_THRESHOLD, Constants.SHAKE_INTENSITY_DEFAULT);
+                SHAKE_THRESHOLD, Constants.SHAKE_INTENSITY_DEFAULT);
         shakeDurationMilli = defaultSharedPreferences.getInt(
-                PREF_SHAKE_DURATION, Constants.SHAKE_MONITORING_DURATION_MILLI);
+                SHAKE_DURATION, Constants.SHAKE_MONITORING_DURATION_MILLI);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         if(Constants.ACTION_START_SHAKE_DETECTION.equals(intent.getAction())) {
             startMonitoringForShake();
+        } else if (Constants.ACTION_SET_SHAKE_INTENSITY.equals(intent.getAction())) {
+            String shakeIntensity = intent.getStringExtra(SHAKE_THRESHOLD);
+            if (Constants.SHAKE_INTENSITY_LOW.equals(shakeIntensity)) {
+                shakeThreshold = Constants.SHAKE_INTENSITY_LOW_VALUE;
+            } else if (Constants.SHAKE_INTENSITY_MED.equals(shakeIntensity)) {
+                shakeThreshold = Constants.SHAKE_INTENSITY_MED_VALUE;
+            } else if (Constants.SHAKE_INTENSITY_HIGH.equals(shakeIntensity)) {
+                shakeThreshold = Constants.SHAKE_INTENSITY_HIGH_VALUE;
+            }
+            editor.putFloat(SHAKE_THRESHOLD, shakeThreshold).apply();
+            Logger.d("ShakeDetector shakeThreshold set to " + shakeThreshold);
+        } else if (Constants.ACTION_SET_SHAKE_DURATION.equals(intent.getAction())) {
+            shakeDurationMilli = 1000 * intent.getIntExtra(
+                    SHAKE_DURATION, Constants.SHAKE_MONITORING_DURATION_MILLI);
+            editor.putInt(SHAKE_DURATION, shakeDurationMilli).apply();
+            Logger.d("ShakeDetector shakeDuration set to " + shakeDurationMilli);
         }
     }
 

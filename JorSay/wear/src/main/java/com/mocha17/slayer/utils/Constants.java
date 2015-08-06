@@ -15,6 +15,10 @@ public class Constants {
     public static final int SHAKE_MONITORING_DURATION_MILLI = 20000; //20 seconds
     public static final String ACTION_START_SHAKE_DETECTION =
             "com.mocha17.slayer.ACTION_START_SHAKE_DETECTION";
+    public static final String ACTION_SET_SHAKE_INTENSITY =
+            "com.mocha17.slayer.ACTION_SHAKE_INTENSITY";
+    public static final String ACTION_SET_SHAKE_DURATION =
+            "com.mocha17.slayer.ACTION_SHAKE_DURATION";
     public static final String PATH_MSG_START_SHAKE_DETECTION = "/start_shake_detection";
     public static final String PATH_MSG_SET_SHAKE_INTENSITY = "/set_shake_intensity";
     public static final String KEY_SHAKE_INTENSITY_VALUE = "shake_intensity_value";
@@ -25,7 +29,7 @@ public class Constants {
     public static final String SHAKE_INTENSITY_HIGH = "SHAKE_INTENSITY_HIGH";
     public static final float SHAKE_INTENSITY_LOW_VALUE = 2f;
     public static final float SHAKE_INTENSITY_MED_VALUE = 6f;
-    public static final float SHAKE_INTENSITY_HIGH_VALUE = 12f;
+    public static final float SHAKE_INTENSITY_HIGH_VALUE = 11f;
     public static final float SHAKE_INTENSITY_DEFAULT = SHAKE_INTENSITY_MED_VALUE;
 
     //read aloud
