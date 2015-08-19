@@ -31,6 +31,16 @@ public class SlayerApp extends Application {
             instance = this;
         }
         defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        /*Following two checks are important enough to be done in Application.onCreate():
+        1. Set 'Enable shake detection' to true if it is never set. (We are not overwriting
+        user's preference; just setting it to true by default.)
+        2. Start the NotificationListenerService if user has enabled 'read aloud'*/
+        String enableShakeDetection = getString(R.string.pref_key_android_wear);
+        if (!defaultSharedPreferences.contains(enableShakeDetection)) {
+            Logger.d(this, "Shake Detection was never set before, setting it to true");
+            defaultSharedPreferences.edit().putBoolean(enableShakeDetection, true).apply();
+        }
         boolean prefGlobalReadAloud = defaultSharedPreferences.getBoolean(
                 getString(R.string.pref_key_global_read_aloud), false);
         if (prefGlobalReadAloud && !isNotificationListenerRunning()) {
@@ -46,6 +56,6 @@ public class SlayerApp extends Application {
     }
 
     public void setNotificationListenerRunning(boolean isRunning) {
-        isNotificationListenerRunning.compareAndSet(false, true);
+        isNotificationListenerRunning.set(isRunning);
     }
 }
