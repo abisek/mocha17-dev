@@ -146,8 +146,9 @@ public class NotificationListener extends NotificationListenerService
                 Logger.d(this, "Max volume isn't selected and device volume is at 0, ignoring");
                 return NextAction.IGNORE_VOLUME;
             }
-            //Next, check if the notification should be ignored - if it is for an ongoing operation,
-            //or if it is posted with minimum priority
+            /*Next, check if the notification should be ignored:
+            - if it is for an ongoing operation, or if it is posted with minimum priority
+            - if it is our own 'reading aloud' notification*/
             if (shouldIgnore(statusBarNotification)) {
                 return NextAction.IGNORE;
             }
@@ -178,6 +179,12 @@ public class NotificationListener extends NotificationListenerService
             Logger.d(this, "Notification from " + statusBarNotification.getPackageName() +
                     " isn't clearable/is for foreground service/is posted with minimum priority, " +
                     "will be ignored");
+            return true;
+        }
+        /*We do not read our own 'reading aloud' notification*/
+        if (getPackageName().equals(statusBarNotification.getPackageName()) &&
+                Constants.NOTIFICATION_ID_READING_ALOUD == statusBarNotification.getId()) {
+            Logger.d(this, "'Reading-aloud' notification, will be ignored");
             return true;
         }
         return false;
