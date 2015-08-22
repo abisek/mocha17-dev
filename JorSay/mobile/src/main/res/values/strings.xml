@@ -19,7 +19,7 @@
     <string name="status_max_volume_off">at device volume</string>
 
     <string name="status_android_wear_on">after Shake Detection using Android Wear</string>
-    <string name="status_android_wear_off">without Shake Detection using Android Wear</string>
+    <string name="status_android_wear_off">without Shake Detection</string>
 
     <string name="status_error_read_aloud">Select \'%s\' and configure other options</string>
     <string name="status_error_volume">Select \'%s\' or increase your Media volume</string>
@@ -87,4 +87,8 @@
     <string name="about_text_contact">Contact: mocha17apps@gmail.com</string>
     <string name="about_text_community">Community: https://goo.gl/nvUv4h</string>
 
+    <!-- JorSayReader -->
+    <string name="reading_aloud_title">Reading notification aloud</string>
+    <string name="reading_aloud_text">JorSay is reading a notification aloud.</string>
+    <string name="action_not_now">Not now</string>
 </resources>
