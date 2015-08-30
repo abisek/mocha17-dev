@@ -12,7 +12,6 @@ import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
-import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
 
 import java.util.concurrent.TimeUnit;
@@ -22,6 +21,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class MobileDataSender extends IntentService implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
+    //timeout for GoogleApiClient blocking connect() calls
+    /*We are working near-realtime on the notifications received.
+    Waiting longer than this wouldn't make much sense */
+    private static final int CONNECT_TIMEOUT = 5000; //5 seconds
+
+    private static final String KEY_TIMESTAMP = "key_timestamp";
+
+    private static final String ACTION_MSG_READ_ALOUD =
+            "com.mocha17.slayer.ACTION_MSG_READ_ALOUD";
+    private static final String PATH_MSG_READ_ALOUD = "/jorsay";
 
     private GoogleApiClient googleApiClient;
 
@@ -32,7 +41,7 @@ public class MobileDataSender extends IntentService implements GoogleApiClient.C
     //A convenience method for callers
     public static void sendReadAloud(Context context) {
         Intent intent = new Intent(context, MobileDataSender.class);
-        intent.setAction(Constants.ACTION_MSG_READ_ALOUD);
+        intent.setAction(ACTION_MSG_READ_ALOUD);
         context.startService(intent);
     }
 
@@ -48,18 +57,18 @@ public class MobileDataSender extends IntentService implements GoogleApiClient.C
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (Constants.ACTION_MSG_READ_ALOUD.equals(intent.getAction())) {
+        if (ACTION_MSG_READ_ALOUD.equals(intent.getAction())) {
             if (!googleApiClient.isConnected()) {
                 Logger.d(this, "before blocking connect");
-                googleApiClient.blockingConnect(Constants.CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
+                googleApiClient.blockingConnect(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS);
             }
             if (googleApiClient.isConnected()) {
                 //do work - send 'read aloud' message
                 Logger.d(this, "GoogleApiClient connected, notifying mobile");
                 PutDataMapRequest putDataMapReq = PutDataMapRequest.create(
-                        Constants.PATH_MSG_READ_ALOUD);
+                        PATH_MSG_READ_ALOUD);
                 putDataMapReq.getDataMap().putLong(
-                        Constants.KEY_TIMESTAMP, System.currentTimeMillis());
+                        KEY_TIMESTAMP, System.currentTimeMillis());
                 PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
                 DataApi.DataItemResult result =
                         Wearable.DataApi.putDataItem(googleApiClient, putDataReq).await();

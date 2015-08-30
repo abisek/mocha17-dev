@@ -23,7 +23,6 @@ import com.mocha17.slayer.R;
 import com.mocha17.slayer.notification.db.NotificationDBContract.NotificationData;
 import com.mocha17.slayer.notification.db.NotificationDBOps;
 import com.mocha17.slayer.tts.snooze.SnoozeReadAloud;
-import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
 import com.mocha17.slayer.utils.Utils;
 
@@ -53,7 +52,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  until stopped, and can receive additional intents in onStartCommand().*/
 public class JorSayReader extends Service implements TextToSpeech.OnInitListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
-
+    private static final String ACTION_MSG_START_READ_ALOUD =
+            "com.mocha17.slayer.ACTION_MSG_START_READ_ALOUD";
     private static final String ACTION_SNOOZE_READ_ALOUD =
             "com.mocha17.slayer.JorSayReader.SNOOZE_READ_ALOUD";
     private static final int READ_ALOUD = 1;
@@ -71,7 +71,7 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
 
     public static void startReadAloud(Context context) {
         Intent intent = new Intent(context, JorSayReader.class);
-        intent.setAction(Constants.ACTION_MSG_START_READ_ALOUD);
+        intent.setAction(ACTION_MSG_START_READ_ALOUD);
         context.startService(intent);
     }
 
@@ -107,7 +107,7 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         Logger.d(this, "onStartCommand for intent " + intent.getAction());
-        if (Constants.ACTION_MSG_START_READ_ALOUD.equals(action)) {
+        if (ACTION_MSG_START_READ_ALOUD.equals(action)) {
             actionHandler.sendMessage(actionHandler.obtainMessage(READ_ALOUD));
         } else if (ACTION_SNOOZE_READ_ALOUD.equals(action)) {
             actionHandler.sendMessage(actionHandler.obtainMessage(SNOOZE_READ_ALOUD));
@@ -220,14 +220,15 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
         intent action etc. For the Strings used in this method, we would instead rely on GC to claim
         the memory back, rather than keeping something permanently occupied.
          */
-        StringBuilder sb = new StringBuilder("By ");
+        StringBuilder sb = new StringBuilder();
 
         String titleBig = cursor.getString(
                 cursor.getColumnIndex(NotificationData.COLUMN_NAME_TITLE_BIG));
         String title = cursor.getString(cursor.getColumnIndex(NotificationData.COLUMN_NAME_TITLE));
 
         //Use TITLE_BIG if available, else TITLE
-        title = (!TextUtils.isEmpty(titleBig))?titleBig:title;
+        //Also remove emoji symbols from title; we do not want them read aloud
+        title = Utils.withoutEmoji((!TextUtils.isEmpty(titleBig))?titleBig:title);
 
         String appName = Utils.getAppName(cursor.getString(
                 cursor.getColumnIndex(NotificationData.COLUMN_NAME_PACKAGE_NAME)));
@@ -243,28 +244,27 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
             sb.append(appName).append(".\n").append(title).append(".\n");
         }
 
-        String details = "Details: ";
         String textLines = cursor.getString(
                 cursor.getColumnIndex(NotificationData.COLUMN_NAME_TEXT_LINES));
         if (!TextUtils.isEmpty(textLines)) {
-            sb.append(details).append(textLines).append(".");
+            sb.append(textLines).append(".");
         } else {
             //These checks are nested because we want to avoid getting data we are not going to use,
             //and we want to do isEmpty() checks too.
             String bigText = cursor.getString(
                     cursor.getColumnIndex(NotificationData.COLUMN_NAME_BIG_TEXT));
             if (!TextUtils.isEmpty(bigText)) {
-                sb.append(details).append(bigText).append(".");
+                sb.append(bigText).append(".");
             } else {
                 String text = cursor.getString(
                         cursor.getColumnIndex(NotificationData.COLUMN_NAME_TEXT));
                 if (!TextUtils.isEmpty(text)) {
-                    sb.append(details).append(text).append(".");
+                    sb.append(text).append(".");
                 } else {
                     String tickerText = cursor.getString(
                             cursor.getColumnIndex(NotificationData.COLUMN_NAME_TICKER_TEXT));
                     if (!TextUtils.isEmpty(tickerText)) {
-                        sb.append(details).append(tickerText).append(".");
+                        sb.append(tickerText).append(".");
                     }
                 }
             }

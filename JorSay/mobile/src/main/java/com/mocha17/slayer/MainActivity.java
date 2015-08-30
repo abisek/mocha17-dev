@@ -28,11 +28,13 @@ import android.widget.TextView;
 import com.mocha17.slayer.notification.NotificationListener;
 import com.mocha17.slayer.settings.SettingsFragment;
 import com.mocha17.slayer.tts.snooze.SnoozeReadAloud;
-import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Status;
 
 public class MainActivity extends AppCompatActivity
         implements SharedPreferences.OnSharedPreferenceChangeListener {
+    //For Status animation
+    private static final int STATUS_ANIMATION_REPEAT_COUNT = 3;
+    private static final long STATUS_ANIMATION_DELAY_MILLI = 500;
 
     //For Status view
     private CardView statusCard;
@@ -143,7 +145,7 @@ public class MainActivity extends AppCompatActivity
             }
             if (shouldAnimate) {
                 if (withDelay) {
-                    statusAnimation.setStartDelay(Constants.STATUS_ANIMATION_DELAY_MILLI);
+                    statusAnimation.setStartDelay(STATUS_ANIMATION_DELAY_MILLI);
                 } else {
                     statusAnimation.setStartDelay(0/*no delay*/);
                 }
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity
         ValueAnimator statusTextAnimation = ValueAnimator.ofObject(
                 new ArgbEvaluator(), r.getColor(R.color.text_error_from),
                 r.getColor(R.color.text_error_to));
-        statusTextAnimation.setRepeatCount(Constants.STATUS_ANIMATION_REPEAT_COUNT);
+        statusTextAnimation.setRepeatCount(STATUS_ANIMATION_REPEAT_COUNT);
         statusTextAnimation.setRepeatMode(Animation.REVERSE);
         statusTextAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -199,7 +201,7 @@ public class MainActivity extends AppCompatActivity
         ValueAnimator statusCardAnimation = ValueAnimator.ofObject(
                 new ArgbEvaluator(), r.getColor(R.color.background_error),
                 r.getColor(R.color.background_error_to));
-        statusCardAnimation.setRepeatCount(Constants.STATUS_ANIMATION_REPEAT_COUNT);
+        statusCardAnimation.setRepeatCount(STATUS_ANIMATION_REPEAT_COUNT);
         statusCardAnimation.setRepeatMode(Animation.REVERSE);
         statusCardAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

@@ -26,6 +26,11 @@ import com.mocha17.slayer.utils.Constants;
 public class ShakeDetectionDialog extends DialogFragment
         implements CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener,
         View.OnClickListener {
+    //Shake intensity
+    private static final String SHAKE_INTENSITY_LOW = "SHAKE_INTENSITY_LOW";
+    private static final String SHAKE_INTENSITY_MED = "SHAKE_INTENSITY_MED";
+    private static final String SHAKE_INTENSITY_HIGH = "SHAKE_INTENSITY_HIGH";
+    private static final String SHAKE_INTENSITY_DEFAULT = SHAKE_INTENSITY_MED;
 
     private SharedPreferences defaultSharedPreferences;
     private SharedPreferences.Editor editor;
@@ -88,7 +93,7 @@ public class ShakeDetectionDialog extends DialogFragment
             shakeDetectionEnable.setChecked(savedInstanceState.getBoolean(
                     getString(R.string.pref_key_android_wear), false));
             shakeIntensityVal = savedInstanceState.getString(
-                    getString(R.string.pref_key_shake_intensity), Constants.SHAKE_INTENSITY_DEFAULT);
+                    getString(R.string.pref_key_shake_intensity), SHAKE_INTENSITY_DEFAULT);
             shakeDurationVal = savedInstanceState.getInt(
                     getString(R.string.pref_key_shake_duration), Constants.SHAKE_DURATION_DEFAULT);
         } else { //obtain values from SharedPreferences
@@ -96,7 +101,7 @@ public class ShakeDetectionDialog extends DialogFragment
                     getString(R.string.pref_key_android_wear), false));
             shakeIntensityVal =
                     defaultSharedPreferences.getString(getString(R.string.pref_key_shake_intensity),
-                            Constants.SHAKE_INTENSITY_DEFAULT);
+                            SHAKE_INTENSITY_DEFAULT);
             shakeDurationVal =
                     defaultSharedPreferences.getInt(getString(R.string.pref_key_shake_duration),
                             Constants.SHAKE_DURATION_DEFAULT);
@@ -139,11 +144,11 @@ public class ShakeDetectionDialog extends DialogFragment
             shakeDurationTitle.setVisibility(View.INVISIBLE);
             shakeDuration.setVisibility(View.INVISIBLE);
         }
-        if (Constants.SHAKE_INTENSITY_LOW.equals(shakeIntensityVal)) {
+        if (SHAKE_INTENSITY_LOW.equals(shakeIntensityVal)) {
             shakeIntensity.check(R.id.shake_intensity_low);
-        } else if (Constants.SHAKE_INTENSITY_MED.equals(shakeIntensityVal)) {
+        } else if (SHAKE_INTENSITY_MED.equals(shakeIntensityVal)) {
             shakeIntensity.check(R.id.shake_intensity_med);
-        } else if (Constants.SHAKE_INTENSITY_HIGH.equals(shakeIntensityVal)) {
+        } else if (SHAKE_INTENSITY_HIGH.equals(shakeIntensityVal)) {
             shakeIntensity.check(R.id.shake_intensity_high);
         }
 
@@ -161,16 +166,16 @@ public class ShakeDetectionDialog extends DialogFragment
         if (group.equals(shakeIntensity)) {
             switch (checkedId) {
                 case R.id.shake_intensity_low:
-                    shakeIntensityVal = Constants.SHAKE_INTENSITY_LOW;
+                    shakeIntensityVal = SHAKE_INTENSITY_LOW;
                     break;
                 case R.id.shake_intensity_med:
-                    shakeIntensityVal = Constants.SHAKE_INTENSITY_MED;
+                    shakeIntensityVal = SHAKE_INTENSITY_MED;
                     break;
                 case R.id.shake_intensity_high:
-                    shakeIntensityVal = Constants.SHAKE_INTENSITY_HIGH;
+                    shakeIntensityVal = SHAKE_INTENSITY_HIGH;
                     break;
                 default:
-                    shakeIntensityVal = Constants.SHAKE_INTENSITY_DEFAULT;
+                    shakeIntensityVal = SHAKE_INTENSITY_DEFAULT;
             }
         } else if (group.equals(shakeDuration)) {
             switch (checkedId) {
