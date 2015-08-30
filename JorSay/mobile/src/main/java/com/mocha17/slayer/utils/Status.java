@@ -2,9 +2,12 @@ package com.mocha17.slayer.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.media.AudioManager;
+import android.text.TextUtils;
 
 import com.mocha17.slayer.R;
+import com.mocha17.slayer.tts.snooze.SnoozeReadAloud;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,9 +39,19 @@ public class Status {
 
     public static Status getStatus(Context context, SharedPreferences sharedPreferences) {
         StringBuilder sb = new StringBuilder();
-        String key;
 
-        //Start with 'global read aloud'
+        //Start with snooze
+        if (SnoozeReadAloud.get().isActive()) {
+            sb.append(context.getString(R.string.status_not_reading_aloud));
+            String snoozeText = getSnoozeText(context, SnoozeReadAloud.get().getMilliUntilFinished());
+            if (!TextUtils.isEmpty(snoozeText)) {
+                sb.append("\n").append(snoozeText);
+            }
+            return new Status(sb.toString(), false/*isReadAloud*/);
+        }
+
+        //Snooze isn't active. Start with 'global read aloud'
+        String key;
         key = context.getString(R.string.pref_key_global_read_aloud);
         if (!sharedPreferences.getBoolean(key, false)) {
             //Not reading notifications aloud, return the appropriate Status
@@ -116,5 +129,32 @@ public class Status {
         //And so on for other features as and when they are added
 
         return new Status(sb.toString(), true/*isReadAloud*/);
+    }
+
+    private static final String getSnoozeText(Context context, long milliUntilFinished) {
+        if (milliUntilFinished <= 0) {
+            return null;
+        }
+        Resources r = context.getResources();
+        int secondsUntilFinished = roundTo10(milliUntilFinished/1000);
+        int minutesUntilFinished = secondsUntilFinished / 60;
+        if (minutesUntilFinished == 0) {
+            return r.getString(R.string.status_snooze_time_left,
+                    secondsUntilFinished + " " + r.getString(R.string.status_seconds));
+        } else {
+            String timeLeft = minutesUntilFinished + " " + r.getQuantityString(
+                    R.plurals.status_minute, minutesUntilFinished);
+            secondsUntilFinished = secondsUntilFinished - (minutesUntilFinished * 60);
+            if (secondsUntilFinished != 0) {
+                timeLeft = timeLeft.concat(" " + secondsUntilFinished + " " +
+                        r.getString(R.string.status_seconds));
+            }
+            return context.getResources().getString(R.string.status_snooze_time_left, timeLeft);
+        }
+    }
+
+    /** Rounds up input to nearest multiple of 10. 21 would be rounded to 20 and 26 to 30.*/
+    private static int roundTo10(long number) {
+        return Math.round((number + 5)/ 10) * 10;
     }
 }

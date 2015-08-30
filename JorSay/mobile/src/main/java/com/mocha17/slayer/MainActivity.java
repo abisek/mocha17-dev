@@ -6,21 +6,28 @@ import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.animation.Animation;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.mocha17.slayer.notification.NotificationListener;
 import com.mocha17.slayer.settings.SettingsFragment;
+import com.mocha17.slayer.tts.snooze.SnoozeReadAloud;
 import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Status;
 
@@ -30,9 +37,13 @@ public class MainActivity extends AppCompatActivity
     //For Status view
     private CardView statusCard;
     private TextView statusText;
-    AnimatorSet statusAnimation;
+    private AnimatorSet statusAnimation;
 
-    SharedPreferences defaultSharedPreferences;
+    //For Snooze
+    private Button cancelSnooze;
+    private BroadcastReceiver snoozeUpdateReceiver;
+
+    private SharedPreferences defaultSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,15 +69,38 @@ public class MainActivity extends AppCompatActivity
         statusCard = (CardView) findViewById(R.id.statusCard);
         statusText = (TextView) findViewById(R.id.status_text);
         statusAnimation = setupAndGetStatusAnimation();
+
+        //Snooze
+        cancelSnooze = (Button) findViewById(R.id.cancel_snooze);
+        cancelSnooze.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SnoozeReadAloud.get().cancelIfActive();
+            }
+        });
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        //Update status view with a delay, so that the animation
+        //runs after the Activity UI is rendered
+        updateStatus(defaultSharedPreferences, true/*shouldAnimate*/, true/*withDelay*/);
 
-        //Update status view with a delay, so that the animation runs after the
-        //Activity UI is rendered
-        updateStatus(defaultSharedPreferences, true/*withDelay*/);
+        snoozeUpdateReceiver = new SnoozeUpdateReceiver();
+        IntentFilter snoozeUpdateIntentFilter = new IntentFilter();
+        snoozeUpdateIntentFilter.addAction(SnoozeReadAloud.ACTION_SNOOZE_TIME_LEFT);
+        snoozeUpdateIntentFilter.addAction(SnoozeReadAloud.ACTION_SNOOZE_FINISHED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                snoozeUpdateReceiver, snoozeUpdateIntentFilter);
+    }
+
+    @Override
+    public void onPause() {
+        if(snoozeUpdateReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(snoozeUpdateReceiver);
+        }
+        super.onPause();
     }
 
     @Override
@@ -93,10 +127,11 @@ public class MainActivity extends AppCompatActivity
                 NotificationListener.stop(this);
             }
         }
-        updateStatus(sharedPreferences, false/*withDelay*/);
+        updateStatus(sharedPreferences, true/*shouldAnimate*/, false/*withDelay*/);
     }
 
-    private void updateStatus(SharedPreferences sharedPreferences, boolean withDelay) {
+    private void updateStatus(SharedPreferences sharedPreferences,
+                              boolean shouldAnimate, boolean withDelay) {
         Status status = Status.getStatus(this, sharedPreferences);
 
         statusText.setText(status.getStatusText());
@@ -106,18 +141,34 @@ public class MainActivity extends AppCompatActivity
             if (statusAnimation.isRunning()) {
                 statusAnimation.cancel();
             }
-            if (withDelay) {
-                statusAnimation.setStartDelay(Constants.STATUS_ANIMATION_DELAY_MILLI);
-            } else {
-                statusAnimation.setStartDelay(0/*no delay*/);
+            if (shouldAnimate) {
+                if (withDelay) {
+                    statusAnimation.setStartDelay(Constants.STATUS_ANIMATION_DELAY_MILLI);
+                } else {
+                    statusAnimation.setStartDelay(0/*no delay*/);
+                }
+                statusAnimation.start();
+            } else { //no animation for snooze updates, but we still need to set state
+                statusText.setTextColor(getResources().getColor(R.color.text));
+                statusCard.setCardBackgroundColor(
+                        getResources().getColor(R.color.background_error));
             }
-            statusAnimation.start();
         } else { //For 'read aloud'
             if (statusAnimation.isRunning()) {
                 statusAnimation.cancel();
             }
             statusText.setTextColor(getResources().getColor(R.color.text));
             statusCard.setCardBackgroundColor(getResources().getColor(R.color.content_background));
+            cancelSnooze.setVisibility(View.GONE);
+        }
+        setSnoozeVisibility();
+    }
+
+    private void setSnoozeVisibility() {
+        if (!SnoozeReadAloud.get().isActive()) {
+            cancelSnooze.setVisibility(View.GONE);
+        } else {
+            cancelSnooze.setVisibility(View.VISIBLE);
         }
     }
 
@@ -168,5 +219,16 @@ public class MainActivity extends AppCompatActivity
         AnimatorSet statusAnimations = new AnimatorSet();
         statusAnimations.playTogether(statusTextAnimation, statusCardAnimation);
         return statusAnimations;
+    }
+
+    private class SnoozeUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (SnoozeReadAloud.ACTION_SNOOZE_TIME_LEFT.equals(action) ||
+                    SnoozeReadAloud.ACTION_SNOOZE_FINISHED.equals(action)) {
+                updateStatus(defaultSharedPreferences, false/*shouldAnimate*/, false/*withDelay*/);
+            }
+        }
     }
 }

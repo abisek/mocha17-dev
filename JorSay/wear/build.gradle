@@ -9,7 +9,7 @@ android {
         applicationId "com.mocha17.slayer"
         minSdkVersion 19
         targetSdkVersion 22
-        versionCode 8
+        versionCode 9
         versionName "1.5"
     }
     buildTypes {
