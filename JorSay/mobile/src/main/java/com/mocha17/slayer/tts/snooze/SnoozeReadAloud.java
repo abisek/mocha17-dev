@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Created by mocha on 8/24/15.
+ * Created by Chaitanya on 8/24/15.
  */
 public class SnoozeReadAloud {
     private static final int COUNTDOWN_INTERVAL_MILLI = 10000; //10 seconds

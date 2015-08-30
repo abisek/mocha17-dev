@@ -37,24 +37,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /* JorSayReader used to be an IntentService, and was conceptually simpler - an Intent to start 'READ
  ALOUD', handled in onHandleIntent, with IntentService taking care of thread management. We have now
  made it a Service as an instance of IntentService is really about processing an intent - it stops
- when that is done.
- We need the ability to snooze reading aloud, which means we need more state than an IntentService.
+ when that is done. We need the ability to snooze reading aloud, which means we need more state than
+ an IntentService.
+
  Snooze is more complicated than it looks. On a snooze, current ongoing reading aloud needs to stop,
  and no other notifications should be read aloud till snooze is active. We can no longer have TTS
  being initialized for every read-aloud, nor can we have a new UtteranceProgressListener for every
  read-aloud. These need to be service level, not task level.
+
  Why a started Service and not a Bound service? We do not need binding. This Service is intended to
  be one-shot from caller's perspective; it is started to read something aloud, and now the
  read-aloud can be snoozed. We don't need an ongoing session with caller and a ServiceConnection.
+
  In fact, onStartCommand() is a good mechanism for us. The Service is started, it will keep running
  until stopped, and can receive additional intents in onStartCommand().*/
 public class JorSayReader extends Service implements TextToSpeech.OnInitListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String ACTION_SNOOZE_READ_ALOUD =
-            "com.mocha17.slayer.JorSayReader.CANCEL_READ_ALOUD";
+            "com.mocha17.slayer.JorSayReader.SNOOZE_READ_ALOUD";
     private static final int READ_ALOUD = 1;
-    private static final int CANCEL_READ_ALOUD = 2;
+    private static final int SNOOZE_READ_ALOUD = 2;
 
     private TextToSpeech tts;
     private AtomicBoolean ttsReady, readOnReady;
@@ -107,7 +110,7 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
         if (Constants.ACTION_MSG_START_READ_ALOUD.equals(action)) {
             actionHandler.sendMessage(actionHandler.obtainMessage(READ_ALOUD));
         } else if (ACTION_SNOOZE_READ_ALOUD.equals(action)) {
-            actionHandler.sendMessage(actionHandler.obtainMessage(CANCEL_READ_ALOUD));
+            actionHandler.sendMessage(actionHandler.obtainMessage(SNOOZE_READ_ALOUD));
         }
         return START_NOT_STICKY;
     }
@@ -128,13 +131,13 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
                 } else {
                     readOnReady.compareAndSet(false, true);
                 }
-            } else if (CANCEL_READ_ALOUD == msg.what) {
+            } else if (SNOOZE_READ_ALOUD == msg.what) {
                 if (tts != null) {
                     tts.stop();
                 }
                 //clear pending queue
                 actionHandler.removeMessages(READ_ALOUD);
-                actionHandler.removeMessages(CANCEL_READ_ALOUD);
+                actionHandler.removeMessages(SNOOZE_READ_ALOUD);
             }
         }
     }
