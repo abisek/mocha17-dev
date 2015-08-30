@@ -6,7 +6,6 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.mocha17.slayer.trigger.ShakeDetector;
-import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
 
 /**
@@ -15,27 +14,33 @@ import com.mocha17.slayer.utils.Logger;
  */
 
 public class MobileDataReceiver extends WearableListenerService {
+    private static final String PATH_MSG_START_SHAKE_DETECTION = "/start_shake_detection";
+    private static final String PATH_MSG_SET_SHAKE_INTENSITY = "/set_shake_intensity";
+    private static final String KEY_SHAKE_INTENSITY_VALUE = "shake_intensity_value";
+    private static final String PATH_MSG_SET_SHAKE_DURATION = "/set_shake_duration";
+    private static final String KEY_SHAKE_DURATION_VALUE = "shake_duration_value";
+
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
         //We do not need dataEvents outside this scope, freeze() isn't needed
         for (DataEvent event : dataEvents) {
             String path = event.getDataItem().getUri().getLastPathSegment();
             Logger.v(this, "onDataChanged URI lastPath: " + path);
-            if (Constants.PATH_MSG_START_SHAKE_DETECTION.contains(path)) {
+            if (PATH_MSG_START_SHAKE_DETECTION.contains(path)) {
                 Logger.d(this, "onDataChanged starting shake detection");
                 ShakeDetector.startShakeDetection(this);
                 break; //we do not consider multiple nodes yet (Issue #36)
-            } else if (Constants.PATH_MSG_SET_SHAKE_INTENSITY.contains(path)) {
+            } else if (PATH_MSG_SET_SHAKE_INTENSITY.contains(path)) {
                 Logger.d(this, "onDataChanged setting shake intensity");
                 DataMap dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
                 ShakeDetector.setShakeIntensity(this,
-                        dataMap.getString(Constants.KEY_SHAKE_INTENSITY_VALUE));
+                        dataMap.getString(KEY_SHAKE_INTENSITY_VALUE));
                 break;
-            } else if (Constants.PATH_MSG_SET_SHAKE_DURATION.contains(path)) {
+            } else if (PATH_MSG_SET_SHAKE_DURATION.contains(path)) {
                 Logger.d(this, "onDataChanged setting shake duration");
                 DataMap dataMap = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
                 ShakeDetector.setShakeDuration(this,
-                        dataMap.getInt(Constants.KEY_SHAKE_DURATION_VALUE));
+                        dataMap.getInt(KEY_SHAKE_DURATION_VALUE));
                 break;
             }
         }

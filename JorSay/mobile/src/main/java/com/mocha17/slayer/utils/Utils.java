@@ -27,4 +27,15 @@ public class Utils {
             return packageName;
         }
     }
+
+    /** Returns a String with emoji characters removed from the input String */
+    public static String withoutEmoji(String s) {
+        if (TextUtils.isEmpty(s)) {
+            return s;
+        }
+        //From http://stackoverflow.com/a/12014635/299988
+        //We could also go for [\\p{InMiscellaneousSymbolsAndPictographs}|\\p{InEmoticons}]+ but
+        //it does not match the '❤' symbol and might not match others
+        return s.replaceAll("\\p{So}+", "");
+    }
 }
