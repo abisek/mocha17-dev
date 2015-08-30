@@ -19,15 +19,27 @@
         android:layout_marginEnd="@dimen/margin_small"
         android:layout_marginTop="@dimen/margin"
         android:layout_marginBottom="@dimen/margin">
-        <!-- android:lines ensures fixed height for the TextView. Else, we get weird height
-        adjustments as text changes. The number should increase if the there's more text later. -->
-        <TextView
-            android:id="@+id/status_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin"
-            android:layout_gravity="center_vertical"
-            android:lines="@integer/max_status_lines"
-            style="@style/BoldTextStyle" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <!-- android:lines ensures fixed height for the TextView. Else, we get
+            weird height adjustments as text changes. The number should increase
+            if the there's more text later. -->
+            <TextView
+                android:id="@+id/status_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin"
+                android:layout_gravity="center_vertical"
+                android:lines="@integer/max_status_lines"
+                style="@style/BoldTextStyle" />
+            <Button
+                android:id="@+id/cancel_snooze"
+                style="@style/BorderlessButtonStyle"
+                android:layout_below="@id/status_text"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/margin_tiny"
+                android:text="@string/cancel_snooze"/>
+        </RelativeLayout>
     </android.support.v7.widget.CardView>
 </android.support.v7.widget.Toolbar>

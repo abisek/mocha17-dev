@@ -19,6 +19,7 @@ import com.mocha17.slayer.SlayerApp;
 import com.mocha17.slayer.communication.WearDataSender;
 import com.mocha17.slayer.notification.db.NotificationDBOps;
 import com.mocha17.slayer.tts.JorSayReader;
+import com.mocha17.slayer.tts.snooze.SnoozeReadAloud;
 import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
 import com.mocha17.slayer.utils.Status;
@@ -129,6 +130,10 @@ public class NotificationListener extends NotificationListenerService
     }
 
     private NextAction getNextAction(StatusBarNotification statusBarNotification) {
+        if (SnoozeReadAloud.get().isActive()) {
+            Logger.d(this, "reading aloud is snoozed, ignoring");
+            return NextAction.IGNORE;
+        }
         //Start with global_read_aloud
         if (!prefGlobalReadAloud) {
             Logger.d(this, "global_read_aloud is off, ignoring");
@@ -147,7 +152,8 @@ public class NotificationListener extends NotificationListenerService
                 return NextAction.IGNORE_VOLUME;
             }
             /*Next, check if the notification should be ignored:
-            - if it is for an ongoing operation, or if it is posted with minimum priority
+            - if it is for an ongoing operation
+            - if it is posted with minimum priority
             - if it is our own 'reading aloud' notification*/
             if (shouldIgnore(statusBarNotification)) {
                 return NextAction.IGNORE;
@@ -211,13 +217,13 @@ public class NotificationListener extends NotificationListenerService
                 .toString();
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
                 .setPriority(Notification.PRIORITY_DEFAULT)
-                .setSmallIcon(R.mipmap.ic_notification)
+                .setSmallIcon(R.mipmap.info)
                 /*.setLargeIcon(BitmapFactory.decodeResource(getResources(),
-                        R.mipmap.ic_notification))*/
+                        R.mipmap.info))*/
                 .setColor(getResources().getColor(R.color.accent))
                 .setCategory(Notification.CATEGORY_ERROR)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(textDetails)
+                .setContentText(text)
                 .setTicker(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(textDetails))
                 .setAutoCancel(true)

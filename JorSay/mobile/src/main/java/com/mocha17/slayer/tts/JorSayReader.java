@@ -1,7 +1,5 @@
 package com.mocha17.slayer.tts;
 
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -19,55 +17,64 @@ import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.text.TextUtils;
 
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.notification.db.NotificationDBContract.NotificationData;
 import com.mocha17.slayer.notification.db.NotificationDBOps;
+import com.mocha17.slayer.tts.snooze.SnoozeReadAloud;
 import com.mocha17.slayer.utils.Constants;
 import com.mocha17.slayer.utils.Logger;
 import com.mocha17.slayer.utils.Utils;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by Chaitanya on 5/21/15.
  */
 /* JorSayReader used to be an IntentService, and was conceptually simpler - an Intent to start 'READ
  ALOUD', handled in onHandleIntent, with IntentService taking care of thread management. We have now
- made it a Service as IntentService could not reliably handle stopping an ongoing read-aloud. TTS
- needed to be a static, IntentService would stop self after handleIntent() is done, a new call
- worked on the static instance of tts.. it was getting messier. (Some of this was true even before
- introducing 'cancel read aloud' and was exacerbated by it.)
+ made it a Service as an instance of IntentService is really about processing an intent - it stops
+ when that is done.
+ We need the ability to snooze reading aloud, which means we need more state than an IntentService.
+ Snooze is more complicated than it looks. On a snooze, current ongoing reading aloud needs to stop,
+ and no other notifications should be read aloud till snooze is active. We can no longer have TTS
+ being initialized for every read-aloud, nor can we have a new UtteranceProgressListener for every
+ read-aloud. These need to be service level, not task level.
  Why a started Service and not a Bound service? We do not need binding. This Service is intended to
- be one-shot; it is started to read something aloud, and now the read-aloud can be interrupted. The
- caller does not need a We do not need an ongoing session and a ServiceConnection.
+ be one-shot from caller's perspective; it is started to read something aloud, and now the
+ read-aloud can be snoozed. We don't need an ongoing session with caller and a ServiceConnection.
  In fact, onStartCommand() is a good mechanism for us. The Service is started, it will keep running
- until stopped, and can receive additional intents in onStartCommand(). We stop the Service once we
- are done, in ttsDone(). We *could* keep it running to speed-up subsequent read-aloud requests, but
- let's be good a citizen and stopSelf() when done.
- Another observation - with a HandlerThread, we become, in essence, an IntentService, with a crucial
- difference - we decide when to stop.*/
+ until stopped, and can receive additional intents in onStartCommand().*/
 public class JorSayReader extends Service implements TextToSpeech.OnInitListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private static final String ACTION_SNOOZE_READ_ALOUD =
+            "com.mocha17.slayer.JorSayReader.CANCEL_READ_ALOUD";
+    private static final int READ_ALOUD = 1;
+    private static final int CANCEL_READ_ALOUD = 2;
+
     private TextToSpeech tts;
+    private AtomicBoolean ttsReady, readOnReady;
+
     private SharedPreferences defaultSharedPreferences;
     private boolean prefMaxVolume;
     private int originalVolume;
     private AudioManager audioManager;
 
-    private NotificationManagerCompat notificationManager;
-
     private Handler actionHandler;
-    private static final int READ_ALOUD = 1;
-    private static final int CANCEL_READ_ALOUD = 2;
 
     public static void startReadAloud(Context context) {
         Intent intent = new Intent(context, JorSayReader.class);
         intent.setAction(Constants.ACTION_MSG_START_READ_ALOUD);
+        context.startService(intent);
+    }
+
+    public static void snoozeReadAloud(Context context) {
+        Intent intent = new Intent(context, JorSayReader.class);
+        intent.setAction(ACTION_SNOOZE_READ_ALOUD);
         context.startService(intent);
     }
 
@@ -82,7 +89,9 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
 
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
-        notificationManager = NotificationManagerCompat.from(this);
+        tts = new TextToSpeech(getApplicationContext(), JorSayReader.this);
+        ttsReady = new AtomicBoolean();
+        readOnReady = new AtomicBoolean();
 
         //Set up the Handler for processing requests on a background thread
         HandlerThread actionHandlerThread = new HandlerThread(ActionHandler.class.getSimpleName(),
@@ -97,7 +106,7 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
         Logger.d(this, "onStartCommand for intent " + intent.getAction());
         if (Constants.ACTION_MSG_START_READ_ALOUD.equals(action)) {
             actionHandler.sendMessage(actionHandler.obtainMessage(READ_ALOUD));
-        } else if (Constants.ACTION_CANCEL_READ_ALOUD.equals(action)) {
+        } else if (ACTION_SNOOZE_READ_ALOUD.equals(action)) {
             actionHandler.sendMessage(actionHandler.obtainMessage(CANCEL_READ_ALOUD));
         }
         return START_NOT_STICKY;
@@ -110,65 +119,93 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
         @Override
         public void handleMessage(Message msg) {
             if (READ_ALOUD == msg.what) {
-                Logger.d(this, "handleMessage READ_ALOUD TTS init");
-                tts = new TextToSpeech(getApplicationContext(), JorSayReader.this);
-            } else if (CANCEL_READ_ALOUD == msg.what) {
-                Logger.d(this, "handleMessage CANCEL_READ_ALOUD");
-                if (tts != null) {
-                    //We don't need to synchronize calling ttsDone() as Handler queues the messages
-                    ttsDone();
+                if (SnoozeReadAloud.get().isActive()) {
+                    Logger.d(JorSayReader.this, "reading aloud is snoozed, returning");
+                    return;
                 }
+                if (ttsReady.get()) {
+                    readAloud();
+                } else {
+                    readOnReady.compareAndSet(false, true);
+                }
+            } else if (CANCEL_READ_ALOUD == msg.what) {
+                if (tts != null) {
+                    tts.stop();
+                }
+                //clear pending queue
+                actionHandler.removeMessages(READ_ALOUD);
+                actionHandler.removeMessages(CANCEL_READ_ALOUD);
             }
         }
     }
 
     @Override
+    public void onDestroy() {
+        if (tts != null) {
+            Logger.d(this, "onDestroy shutting down TTS");
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public void onInit(int status) {
-        if (status == TextToSpeech.SUCCESS) {
-            //TODO Change this to match user locale
+        if (TextToSpeech.SUCCESS == status) {
+            Logger.d("onInit tts ready");
+            //TODO use user's locale to find the closest match for TTS language
             tts.setLanguage(Locale.US);
-            Logger.d(this, "TTS ready");
+            tts.setOnUtteranceProgressListener(new JorSayReaderUtteranceProgressListener());
+            ttsReady.set(true);
+            if (readOnReady.getAndSet(false)) {
+                readAloud();
+            }
+        }
+    }
+
+    private void readAloud() {
+        if (ttsReady.get()) {
+            if (!SnoozeReadAloud.get().isActive()) {
             /*TODO
             Volume settings check needs to be done for each notification.
             If the user turns the volume off, we should abort immediately.*/
-            originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-            if (prefMaxVolume) {
-                Logger.d(this, "setting volume to max");
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-                        audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
-            } else {
-                if (originalVolume == 0) {
-                    Logger.d(this, "Max volume isn't selected and device volume is at 0," +
-                            "not reading aloud");
-                    return;
-                }
-            }
-            Cursor notificationCursor = NotificationDBOps.get(this).getMostRecentNotification();
-            if (notificationCursor != null) {
-                if (notificationCursor.moveToFirst()) {
-                    Logger.d(this, "TTS reading now");
-                    //Utterance ID should be unique per notification.
-                    String utteranceID = Long.toString(System.currentTimeMillis());
-                    tts.setOnUtteranceProgressListener(new JorSayReaderUtteranceProgressListener());
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, null,
-                                utteranceID);
-                    } else {
-                        HashMap<String, String> params = new HashMap<>();
-                        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
-                        //Turned off noinspection deprecation as we have a version check around this
-                        tts.speak(getStringToRead(notificationCursor),
-                                TextToSpeech.QUEUE_ADD, params);
+                originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                if (prefMaxVolume) {
+                    Logger.d(this, "setting volume to max");
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                            audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+                } else {
+                    if (originalVolume == 0) {
+                        Logger.d(this, "Max volume isn't selected and device volume is at 0," +
+                                "not reading aloud");
+                        return;
                     }
-                    //Mark the notification as read
-                    /*Retrieving the ID like this is a little tricky, the ID would be included only
-                    when it was part of the columns in the query that generated this Cursor.
-                    Else, it would be -1. Reference: stackoverflow.com/questions/2848056/
-                    how-to-get-a-row-id-from-a-cursor*/
-                    NotificationDBOps.get(this).markNotificationRead(notificationCursor.getLong(
-                            notificationCursor.getColumnIndex(NotificationData._ID)));
                 }
-                notificationCursor.close();
+                Cursor notificationCursor = NotificationDBOps.get(this).getMostRecentNotification();
+                if (notificationCursor != null) {
+                    if (notificationCursor.moveToFirst()) {
+                        Logger.d(this, "TTS reading now");
+                        //Utterance ID should be unique per notification.
+                        String utteranceID = Long.toString(System.currentTimeMillis());
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, null,
+                                    utteranceID);
+                        } else {
+                            HashMap<String, String> params = new HashMap<>();
+                            params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
+                            //Turned off noinspection deprecation as we have a version check around this
+                            tts.speak(getStringToRead(notificationCursor),
+                                    TextToSpeech.QUEUE_ADD, params);
+                        }
+                        //Mark the notification as read
+                        /*Retrieving the ID like this is a little tricky, the ID would be included
+                        only when it was part of the columns in the query that generated this
+                        Cursor. Else, it would be -1. Reference: stackoverflow.com/
+                        questions/2848056/how-to-get-a-row-id-from-a-cursor*/
+                        NotificationDBOps.get(this).markNotificationRead(notificationCursor.getLong(
+                                notificationCursor.getColumnIndex(NotificationData._ID)));
+                    }
+                    notificationCursor.close();
+                }
             }
         }
     }
@@ -232,53 +269,18 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
         return sb.toString();
     }
 
-    private void postReadingNotification() {
-        Intent intent = new Intent(this, JorSayReader.class);
-        intent.setAction(Constants.ACTION_CANCEL_READ_ALOUD);
-        PendingIntent stopReadAloudPendingIntent = PendingIntent.getService(this,
-                Constants.REQUEST_CODE_CANCEL_READ_ALOUD,
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        NotificationCompat.Action actionNotNow =
-                new NotificationCompat.Action.Builder(R.mipmap.cancel,
-                        getString(R.string.action_not_now), stopReadAloudPendingIntent)
-                        .build();
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .setSmallIcon(R.mipmap.ic_notification)
-                .setColor(getResources().getColor(R.color.accent))
-                .setCategory(Notification.CATEGORY_STATUS)
-                .setContentTitle(getString(R.string.reading_aloud_title))
-                .setTicker(getString(R.string.reading_aloud_title))
-                .setContentText(getString(R.string.reading_aloud_text))
-                .setContentIntent(stopReadAloudPendingIntent)
-                .addAction(actionNotNow);
-
-        notificationManager.notify(Constants.NOTIFICATION_ID_READING_ALOUD, builder.build());
-    }
-
-    private void cancelReadingNotification() {
-        notificationManager.cancel(Constants.NOTIFICATION_ID_READING_ALOUD);
-    }
-
     private void ttsDone() {
-        Logger.d(this, "ttsDone shutting down");
-        tts.shutdown();
-
         //After TTS is done, set volume back to original level
         Logger.d(this, "ttsDone restoring original volume");
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, originalVolume, 0);
-        cancelReadingNotification();
-
-        Logger.d(this, "stopping self");
-        stopSelf();
+        SnoozeReadAloud.get().cancelNotification();
     }
 
     private class JorSayReaderUtteranceProgressListener extends UtteranceProgressListener {
         @Override
         public void onStart(String utteranceId) {
-            Logger.d(this, "onStart utteranceId: " + utteranceId);
-            postReadingNotification();
+            //post this only when we actually start reading
+            SnoozeReadAloud.get().postNotification();
         }
 
         @Override

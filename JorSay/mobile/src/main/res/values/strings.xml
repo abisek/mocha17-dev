@@ -25,6 +25,14 @@
     <string name="status_error_volume">Select \'%s\' or increase your Media volume</string>
     <string name="status_error_apps">Select some apps</string>
 
+    <string name="status_snooze_time_left">Reading notifications is snoozed for %s</string>
+    <plurals name="status_minute">
+        <item quantity="one">minute</item>
+        <item quantity="other">minutes</item>
+    </plurals>
+    <string name="status_seconds">seconds</string>
+    <string name="cancel_snooze">Cancel snooze</string>
+
     <string name="notification_access_dialog_title">Notification access</string>
     <string name="notification_access_dialog_text">JorSay needs access to notifications so that
         it can read them aloud.\n\nEnable it from device notification settings. Tap
@@ -87,8 +95,11 @@
     <string name="about_text_contact">Contact: mocha17apps@gmail.com</string>
     <string name="about_text_community">Community: https://goo.gl/nvUv4h</string>
 
-    <!-- JorSayReader -->
-    <string name="reading_aloud_title">Reading notification aloud</string>
-    <string name="reading_aloud_text">JorSay is reading a notification aloud.</string>
-    <string name="action_not_now">Not now</string>
+    <!-- SnoozeReadAloud -->
+    <string name="snooze_read_aloud_title">Snooze JorSay</string>
+    <string name="snooze_read_aloud_text">Select a snooze duration</string>
+    <plurals name="minute">
+        <item quantity="one">min</item>
+        <item quantity="other">mins</item>
+    </plurals>
 </resources>
