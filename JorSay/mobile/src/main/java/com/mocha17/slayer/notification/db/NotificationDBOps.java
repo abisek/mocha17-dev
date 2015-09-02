@@ -77,7 +77,7 @@ public class NotificationDBOps {
         cv.put(NotificationData.COLUMN_NAME_SUMMARY,
                 notificationExtras.getString(Notification.EXTRA_SUMMARY_TEXT));
         cv.put(NotificationData.COLUMN_NAME_TEXT_LINES,
-                notificationExtras.getString(Notification.EXTRA_TEXT_LINES));
+                getString(notificationExtras.getCharSequenceArray(Notification.EXTRA_TEXT_LINES)));
         cv.put(NotificationData.COLUMN_NAME_SUBTEXT,
                 notificationExtras.getString(Notification.EXTRA_SUB_TEXT));
         if (!TextUtils.isEmpty(notification.tickerText)) {
@@ -222,6 +222,18 @@ public class NotificationDBOps {
         }
         String [] selectionArgs = new String[] {Integer.toString(NOTIFICATION_READ)};
         notificationDB.delete(NotificationData.TABLE_NAME, IS_UNREAD_SELECTION, selectionArgs);
+    }
+
+    /**Utility method to convert an array of Charsequences to a String*/
+    private String getString(CharSequence[] charSequences) {
+        if (charSequences == null || charSequences.length == 0) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (CharSequence charSequence : charSequences) {
+            sb.append(charSequence.toString()).append("\n");
+        }
+        return sb.toString();
     }
 
     public void shutdown(Context context) {
