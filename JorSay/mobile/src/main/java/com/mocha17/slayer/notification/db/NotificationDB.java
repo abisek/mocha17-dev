@@ -12,7 +12,7 @@ import com.mocha17.slayer.utils.Logger;
  */
 /*package-private*/ class NotificationDB extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "NotificationDB.db";
-    private static int DATABASE_VERSION = 2; //to be updated on schema change
+    private static int DATABASE_VERSION = 3; //to be updated on schema change
 
     private static final String TEXT_TYPE = " TEXT";
     private static final String INTEGER_TYPE = " INTEGER";
@@ -21,8 +21,9 @@ import com.mocha17.slayer.utils.Logger;
     private static final String SQL_CREATE_ENTRIES_NOTIFICATION_DATA =
             "CREATE TABLE " + NotificationData.TABLE_NAME + " (" +
                     NotificationData._ID + INTEGER_TYPE + " PRIMARY KEY," +
-                    NotificationData.COLUMN_NAME_NOTIFICATION_ID + INTEGER_TYPE + COMMA +
                     NotificationData.COLUMN_NAME_PACKAGE_NAME + TEXT_TYPE + COMMA +
+                    NotificationData.COLUMN_NAME_NOTIFICATION_ID + INTEGER_TYPE + COMMA +
+                    NotificationData.COLUMN_NAME_NOTIFICATION_TAG + INTEGER_TYPE + COMMA +
                     NotificationData.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA +
                     NotificationData.COLUMN_NAME_TEXT + TEXT_TYPE + COMMA +
                     NotificationData.COLUMN_NAME_TITLE_BIG + TEXT_TYPE + COMMA +
@@ -52,7 +53,8 @@ import com.mocha17.slayer.utils.Logger;
         /*Version 2 adds NOTIFICATION_READ flag to DB. We could do something fancy here, like
         marking all the notifications in the table READ. But, we don't care all that much about
         prior notifications anyways - they are not going to read later. We are going to delete READ
-        notifications periodically; dropping the table is same as marking notifications as READ. */
+        notifications periodically; dropping the table is same as marking notifications as READ.
+        Version 3 adds NOTIFICATION_TAG to DB.*/
         db.execSQL(SQL_DELETE_ENTRIES_NOTIFICATION_DATA);
         DATABASE_VERSION = newVersion;
         onCreate(db);

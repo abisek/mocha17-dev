@@ -129,7 +129,7 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
                 if (ttsReady.get()) {
                     readAloud();
                 } else {
-                    readOnReady.compareAndSet(false, true);
+                    readOnReady.set(true);
                 }
             } else if (SNOOZE_READ_ALOUD == msg.what) {
                 if (tts != null) {

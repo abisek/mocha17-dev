@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemClock;
 
 import com.mocha17.slayer.utils.Logger;
 
@@ -20,14 +21,12 @@ public class NotificationDBCleaner extends BroadcastReceiver {
 
     public static void start(Context context) {
         Logger.d("NotificationDBCleaner - setting up alarm");
-
-        Intent intent = new Intent(ACTION_NOTIFICATION_DB_CLEANER);
-        alarmIntent = PendingIntent.getBroadcast(context, ALARM_INTENT_REQUEST_CODE, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
+        alarmIntent = PendingIntent.getBroadcast(context, ALARM_INTENT_REQUEST_CODE,
+                new Intent(ACTION_NOTIFICATION_DB_CLEANER), PendingIntent.FLAG_UPDATE_CURRENT);
+        long triggerAtMillis = SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_DAY;
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, 0 /*start now*/,
-                AlarmManager.INTERVAL_DAY, alarmIntent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
+                triggerAtMillis, AlarmManager.INTERVAL_DAY, alarmIntent);
     }
 
     public static void stop(Context context) {
@@ -40,9 +39,14 @@ public class NotificationDBCleaner extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         if (ACTION_NOTIFICATION_DB_CLEANER.equals(intent.getAction())) {
-            NotificationDBOps.get(context).removeReadNotifications();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    NotificationDBOps.get(context).removeReadNotifications();
+                }
+            }).start();
         }
     }
 }

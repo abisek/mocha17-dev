@@ -8,6 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -34,6 +38,8 @@ import java.util.Set;
 public class NotificationListener extends NotificationListenerService
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    private Context context;
+
     private SharedPreferences defaultSharedPreferences;
     /* We use these members for recording current state of settings. These are evaluated when the
     Service starts, and updated onSharedPreferenceChanged. Why this? We do not want to retrieve and
@@ -57,6 +63,10 @@ public class NotificationListener extends NotificationListenerService
 
     NotificationDBOps notificationDBOps;
 
+    private Handler actionHandler;
+    private static final int NOTIFICATION_POSTED = 1;
+    private static final int NOTIFICATION_REMOVED = 2;
+
     public static void start(Context context) {
         context.startService(new Intent(context, NotificationListener.class));
     }
@@ -68,14 +78,21 @@ public class NotificationListener extends NotificationListenerService
     @Override
     public void onCreate() {
         super.onCreate();
+        context = this;
 
-        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
-        notificationDBOps = NotificationDBOps.get(this);
+        notificationDBOps = NotificationDBOps.get(context);
+
+        //Set up the Handler for processing requests on a background thread
+        HandlerThread actionHandlerThread = new HandlerThread(ActionHandler.class.getSimpleName(),
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        actionHandlerThread.start();
+        actionHandler = new ActionHandler(actionHandlerThread.getLooper());
     }
 
     @Override
@@ -104,29 +121,55 @@ public class NotificationListener extends NotificationListenerService
 
     @Override
     public void onNotificationPosted(StatusBarNotification statusBarNotification) {
-        switch (getNextAction(statusBarNotification)) {
-            case START_SHAKE_DETECTION:
-                notificationDBOps.storeNotification(statusBarNotification);
-                WearDataSender.startShakeDetection(this);
-                break;
-            case START_READ_ALOUD:
-                notificationDBOps.storeNotification(statusBarNotification);
-                JorSayReader.startReadAloud(this);
-                break;
-            case IGNORE_VOLUME:
-                postVolumeErrorNotification(statusBarNotification);
-                break;
-            case IGNORE:
-                //do nothing
-            default:
-                break;
-        }
+        actionHandler.sendMessage(
+                actionHandler.obtainMessage(NOTIFICATION_POSTED, statusBarNotification));
     }
 
     @Override
     public void onNotificationRemoved(StatusBarNotification statusBarNotification) {
-        notificationDBOps.removeNotification(statusBarNotification.getPackageName(),
-                statusBarNotification.getId());
+        actionHandler.sendMessage(
+                actionHandler.obtainMessage(NOTIFICATION_REMOVED, statusBarNotification));
+    }
+
+    private final class ActionHandler extends Handler {
+        public ActionHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case NOTIFICATION_POSTED:
+                    StatusBarNotification statusBarNotification = (StatusBarNotification)msg.obj;
+                    switch (getNextAction(statusBarNotification)) {
+                        case START_SHAKE_DETECTION:
+                            if (notificationDBOps.storeNotification(statusBarNotification)) {
+                                WearDataSender.startShakeDetection(context);
+                            }
+                            break;
+                        case START_READ_ALOUD:
+                            if (notificationDBOps.storeNotification(statusBarNotification)) {
+                                JorSayReader.startReadAloud(context);
+                            }
+                            break;
+                        case IGNORE_VOLUME:
+                            postVolumeErrorNotification(statusBarNotification);
+                            break;
+                        case IGNORE:
+                            //do nothing
+                        default:
+                            break;
+                    }
+                    break;
+                case NOTIFICATION_REMOVED:
+                    statusBarNotification = (StatusBarNotification)msg.obj;
+                    Logger.d(this, "removing notification from "
+                            + statusBarNotification.getPackageName());
+                    notificationDBOps.removeNotification(statusBarNotification);
+                    break;
+            }
+
+        }
     }
 
     private NextAction getNextAction(StatusBarNotification statusBarNotification) {
@@ -205,9 +248,9 @@ public class NotificationListener extends NotificationListenerService
             return;
         }
         //Intent to start MainActivity from Notification
-        PendingIntent notificationIntent = PendingIntent.getActivity(this,
+        PendingIntent notificationIntent = PendingIntent.getActivity(context,
                 Constants.REQUEST_CODE_SHOW_MAIN_SCREEN,
-                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         String text = getString(R.string.text_volume_notification, Utils.getAppName(packageName));
         String textDetails = new StringBuilder(text)
@@ -215,7 +258,7 @@ public class NotificationListener extends NotificationListenerService
                 .append(getString(R.string.status_error_volume,
                         getString(R.string.pref_max_volume)))
                 .toString();
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setPriority(Notification.PRIORITY_DEFAULT)
                 .setSmallIcon(R.mipmap.info)
                 /*.setLargeIcon(BitmapFactory.decodeResource(getResources(),
@@ -301,16 +344,16 @@ public class NotificationListener extends NotificationListenerService
     }
 
     private Notification getPersistentNotification(SharedPreferences sharedPreferences) {
-        Status status = Status.getStatus(this, sharedPreferences);
+        Status status = Status.getStatus(context, sharedPreferences);
         String text = status.isReadAloud()?getString(R.string.status_reading_aloud):
                 getString(R.string.status_not_reading_aloud);
 
         //Intent to start MainActivity from Notification
-        PendingIntent notificationIntent = PendingIntent.getActivity(this,
+        PendingIntent notificationIntent = PendingIntent.getActivity(context,
                 Constants.REQUEST_CODE_SHOW_MAIN_SCREEN,
-                new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setPriority(Notification.PRIORITY_MIN) //so that an icon isn't seen in the top bar
                 .setSmallIcon(R.mipmap.ic_notification)
                 /*.setLargeIcon(BitmapFactory.decodeResource(getResources(),
@@ -338,7 +381,7 @@ public class NotificationListener extends NotificationListenerService
         stopForeground(true /*removeNotification*/);
         SlayerApp.getInstance().setNotificationListenerRunning(false);
 
-        notificationDBOps.shutdown(this);
+        notificationDBOps.shutdown(context);
 
         super.onDestroy();
     }
