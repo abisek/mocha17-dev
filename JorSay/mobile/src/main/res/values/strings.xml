@@ -71,6 +71,8 @@
 
     <string name="pref_key_shake_detection" translatable="false">pref_key_shake_detection</string>
     <string name="pref_shake_detection_title">Configure Shake Detection</string>
+    <string name="pref_shake_detection_summary_on">Shake Detection is on</string>
+    <string name="pref_shake_detection_summary_off">Shake Detection is off</string>
     <string name="pref_key_android_wear" translatable="false">pref_key_android_wear</string>
     <string name="pref_android_wear">Enable Shake Detection using Android Wear</string>
     <string name="pref_android_wear_summary_off">Will read notifications aloud immediately</string>

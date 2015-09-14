@@ -127,6 +127,7 @@ public class SettingsFragment extends PreferenceFragment implements
                         getString(R.string.pref_key_max_volume), true));
 
                 prefShakeDetection.setEnabled(true);
+                setShakeDetectionSummary();
             } else {
                 prefPersistentNotification.setEnabled(false);
                 prefApps.setEnabled(false);
@@ -154,6 +155,15 @@ public class SettingsFragment extends PreferenceFragment implements
                     prefApps.setSummary(getString(R.string.pref_apps_summary, appsList.size()));
                 }
             }
+        }
+    }
+
+    private void setShakeDetectionSummary() {
+        if (defaultSharedPreferences.getBoolean(
+                getString(R.string.pref_key_android_wear), false)) {
+            prefShakeDetection.setSummary(getString(R.string.pref_shake_detection_summary_on));
+        } else {
+            prefShakeDetection.setSummary(getString(R.string.pref_shake_detection_summary_off));
         }
     }
 
@@ -211,6 +221,8 @@ public class SettingsFragment extends PreferenceFragment implements
                 getString(R.string.pref_key_apps).equals(key)) {
             //Update summary text when apps selection data changes
             setPrefAppsSummary();
+        } else if (getString(R.string.pref_key_android_wear).equals(key)) {
+            setShakeDetectionSummary();
         }
     }
 }

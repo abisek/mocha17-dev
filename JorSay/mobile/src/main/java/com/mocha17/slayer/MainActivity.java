@@ -102,6 +102,10 @@ public class MainActivity extends AppCompatActivity
         if(snoozeUpdateReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(snoozeUpdateReceiver);
         }
+        //stop any ongoing animation
+        if (statusAnimation != null && statusAnimation.isRunning()) {
+            statusAnimation.cancel();
+        }
         super.onPause();
     }
 
