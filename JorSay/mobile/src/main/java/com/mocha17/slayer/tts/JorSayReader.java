@@ -190,8 +190,8 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
                         //Utterance ID should be unique per notification.
                         String utteranceID = Long.toString(System.currentTimeMillis());
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD, null,
-                                    utteranceID);
+                            tts.speak(getStringToRead(notificationCursor), TextToSpeech.QUEUE_ADD,
+                                    null, utteranceID);
                         } else {
                             HashMap<String, String> params = new HashMap<>();
                             params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
@@ -214,12 +214,6 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
     }
 
     private String getStringToRead(Cursor cursor) {
-        /*Why are we using Strings directly rather than defining them as static finals? Because...
-        defining BY makes little sense, definition and string are not different here. The name for
-        the variable isn't supposed to mean anything - it isn't a key, it isn't a path, it isn't an
-        intent action etc. For the Strings used in this method, we would instead rely on GC to claim
-        the memory back, rather than keeping something permanently occupied.
-         */
         StringBuilder sb = new StringBuilder();
 
         String titleBig = cursor.getString(

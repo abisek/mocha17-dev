@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.DialogFragment;
@@ -60,6 +62,7 @@ public class SetupActivity extends AppCompatActivity
         TTS_USER_REJECT,
         TTS_SUCCESS,
         CHECKING_NOTIFICATION_ACCESS,
+        INIT_JORSAY_PARAMS,
         SUCCESS;
     }
     private State state;
@@ -213,8 +216,13 @@ public class SetupActivity extends AppCompatActivity
                     perhapsShowNotificationSettingDialog();
                 } else {
                     //JorSay has notifications access, go to Success
-                    updateState(State.SUCCESS);
+                    updateState(State.INIT_JORSAY_PARAMS);
                 }
+                break;
+            case INIT_JORSAY_PARAMS:
+                progressText.setText(R.string.progress_init_jorsay_params);
+                perhapsInitJorSayParams();
+                updateState(State.SUCCESS);
                 break;
             case SUCCESS:
                 //start MainActivity
@@ -293,6 +301,31 @@ public class SetupActivity extends AppCompatActivity
                                 dismissDialogAndFinish();
                             }
                         }).create();
+    }
+
+    /* Sets up JorSay for first-time use. Initializes the required parameters to default values*/
+    private void perhapsInitJorSayParams() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        //enable global read-aloud
+        String key = getString(R.string.pref_key_global_read_aloud);
+        if (!sharedPreferences.contains(key)) {
+            sharedPreferences.edit().putBoolean(key, true).apply();
+        }
+        //select all apps
+        key = getString(R.string.pref_key_all_apps);
+        if (!sharedPreferences.contains(key)) {
+            sharedPreferences.edit().putBoolean(key, true).apply();
+        }
+        //maximum volume
+        key = getString(R.string.pref_key_max_volume);
+        if (!sharedPreferences.contains(key)) {
+            sharedPreferences.edit().putBoolean(key, true).apply();
+        }
+        //enable shake detection
+        key = getString(R.string.pref_key_android_wear);
+        if (!sharedPreferences.contains(key)) {
+            sharedPreferences.edit().putBoolean(key, true).apply();
+        }
     }
 
     @Override

@@ -18,6 +18,9 @@
         android:summary="@string/pref_max_volume_summary"/>
 
     <!-- Shake Detection -->
+    <SwitchPreference
+        android:key="@string/pref_key_android_wear"
+        android:title="@string/pref_android_wear" />
     <Preference
         android:key="@string/pref_key_shake_detection"
         android:title="@string/pref_shake_detection_title" />
