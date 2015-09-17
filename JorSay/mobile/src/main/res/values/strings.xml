@@ -6,6 +6,7 @@
     <string name="progress_gps">Checking Google Play Services</string>
     <string name="progress_tts">Checking Text to Speech</string>
     <string name="progress_notifications">Checking Notifications access</string>
+    <string name="progress_init_jorsay_params">Initializing</string>
 
     <!-- Status messages -->
     <string name="status_not_reading_aloud">Not reading any notifications aloud</string>
@@ -71,13 +72,11 @@
 
     <string name="pref_key_shake_detection" translatable="false">pref_key_shake_detection</string>
     <string name="pref_shake_detection_title">Configure Shake Detection</string>
-    <string name="pref_shake_detection_summary_on">Shake Detection is on</string>
-    <string name="pref_shake_detection_summary_off">Shake Detection is off</string>
     <string name="pref_key_android_wear" translatable="false">pref_key_android_wear</string>
-    <string name="pref_android_wear">Enable Shake Detection using Android Wear</string>
+    <string name="pref_android_wear">Shake Detection using Wear</string>
     <string name="pref_android_wear_summary_off">Will read notifications aloud immediately</string>
     <string name="pref_android_wear_summary_on">
-        Trigger \'read aloud\' by shaking your Android Wear-wearing wrist</string>
+        Trigger \'read aloud\' by shaking your wrist</string>
     <string name="pref_key_shake_intensity" translatable="false">pref_key_shake_intensity</string>
 
     <string name="pref_key_shake_duration" translatable="false">pref_key_shake_duration</string>

@@ -153,7 +153,7 @@ public class Status {
         }
     }
 
-    /** Rounds up input to nearest multiple of 10. 21 would be rounded to 20 and 26 to 30.*/
+    /** Rounds input to nearest multiple of 10. 21 would be rounded to 20 and 26 to 30.*/
     private static int roundTo10(long number) {
         return Math.round((number + 5)/ 10) * 10;
     }

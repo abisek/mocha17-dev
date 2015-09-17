@@ -206,7 +206,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
                 /* We could have chosen to avoid running this Task again if it was done, opting to
                 show the data immediately. We are not doing that because triggering it again updates
                 selected state correctly. If user selects appA while list is displayed, then selects
-                all apps and then unselectes all apps, in the list displayed, appA should be shown
+                all apps and then unselects all apps, in the list displayed, appA should be shown
                 as selected. */
                 if (appsLoaderTask == null || appsLoaderTask.isDone()) {
                     appsLoaderTask = new AppsLoaderTask();
@@ -238,7 +238,7 @@ public class SelectAppsDialog extends DialogFragment implements View.OnClickList
         }
     }
 
-    /** AsyncTask for loading list of apps asyncronously */
+    /** AsyncTask for loading list of apps asynchronously */
     private class AppsLoaderTask extends AsyncTask<Void, Void, UIState> {
         private int iconWidth, iconHeight;
         private Canvas canvas;

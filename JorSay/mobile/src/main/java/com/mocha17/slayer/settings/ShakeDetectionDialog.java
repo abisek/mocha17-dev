@@ -9,12 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.communication.WearDataSender;
@@ -24,8 +21,7 @@ import com.mocha17.slayer.utils.Constants;
  * Created by Chaitanya on 7/23/15.
  */
 public class ShakeDetectionDialog extends DialogFragment
-        implements CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener,
-        View.OnClickListener {
+        implements RadioGroup.OnCheckedChangeListener, View.OnClickListener {
     //Shake intensity
     private static final String SHAKE_INTENSITY_LOW = "SHAKE_INTENSITY_LOW";
     private static final String SHAKE_INTENSITY_MED = "SHAKE_INTENSITY_MED";
@@ -35,7 +31,6 @@ public class ShakeDetectionDialog extends DialogFragment
     private SharedPreferences defaultSharedPreferences;
     private SharedPreferences.Editor editor;
 
-    private Switch shakeDetectionEnable;
     private RadioGroup shakeIntensity, shakeDuration;
     private TextView shakeIntensityTitle, shakeDurationTitle;
     private String shakeIntensityVal;
@@ -63,9 +58,6 @@ public class ShakeDetectionDialog extends DialogFragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_shake_detection, container, false);
 
-        shakeDetectionEnable = (Switch) view.findViewById(R.id.shake_detection_enable);
-        shakeDetectionEnable.setOnCheckedChangeListener(this);
-
         shakeIntensity = (RadioGroup) view.findViewById(R.id.shake_intensity_choice);
         shakeIntensity.setOnCheckedChangeListener(this);
         shakeDuration = (RadioGroup) view.findViewById(R.id.shake_duration_choice);
@@ -90,15 +82,11 @@ public class ShakeDetectionDialog extends DialogFragment
 
         //Set UI state
         if (savedInstanceState != null) {
-            shakeDetectionEnable.setChecked(savedInstanceState.getBoolean(
-                    getString(R.string.pref_key_android_wear), false));
             shakeIntensityVal = savedInstanceState.getString(
                     getString(R.string.pref_key_shake_intensity), SHAKE_INTENSITY_DEFAULT);
             shakeDurationVal = savedInstanceState.getInt(
                     getString(R.string.pref_key_shake_duration), Constants.SHAKE_DURATION_DEFAULT);
         } else { //obtain values from SharedPreferences
-            shakeDetectionEnable.setChecked(defaultSharedPreferences.getBoolean(
-                    getString(R.string.pref_key_android_wear), false));
             shakeIntensityVal =
                     defaultSharedPreferences.getString(getString(R.string.pref_key_shake_intensity),
                             SHAKE_INTENSITY_DEFAULT);
@@ -114,36 +102,13 @@ public class ShakeDetectionDialog extends DialogFragment
 
     @Override
     public void onSaveInstanceState (Bundle outState) {
-        outState.putBoolean(getString(R.string.pref_key_android_wear),
-                shakeDetectionEnable.isChecked());
         outState.putString(getString(R.string.pref_key_shake_intensity), shakeIntensityVal);
         outState.putInt(getString(R.string.pref_key_shake_duration), shakeDurationVal);
 
         super.onSaveInstanceState(outState);
     }
 
-    private void showHelpToast() {
-        if (shakeDetectionEnable.isChecked()) {
-            Toast.makeText(getActivity(),
-                    R.string.pref_android_wear_summary_on, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getActivity(),
-                    R.string.pref_android_wear_summary_off, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     private void updateUIState() {
-        if (shakeDetectionEnable.isChecked()) {
-            shakeIntensityTitle.setVisibility(View.VISIBLE);
-            shakeIntensity.setVisibility(View.VISIBLE);
-            shakeDurationTitle.setVisibility(View.VISIBLE);
-            shakeDuration.setVisibility(View.VISIBLE);
-        } else {
-            shakeIntensityTitle.setVisibility(View.INVISIBLE);
-            shakeIntensity.setVisibility(View.INVISIBLE);
-            shakeDurationTitle.setVisibility(View.INVISIBLE);
-            shakeDuration.setVisibility(View.INVISIBLE);
-        }
         if (SHAKE_INTENSITY_LOW.equals(shakeIntensityVal)) {
             shakeIntensity.check(R.id.shake_intensity_low);
         } else if (SHAKE_INTENSITY_MED.equals(shakeIntensityVal)) {
@@ -195,30 +160,17 @@ public class ShakeDetectionDialog extends DialogFragment
     }
 
     @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (buttonView.getId() == shakeDetectionEnable.getId()) {
-            shakeDetectionEnable.setChecked(isChecked);
-            showHelpToast();
-            updateUIState();
-        }
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.ok_button:
                 //save values
-                editor.putBoolean(getString(R.string.pref_key_android_wear),
-                        shakeDetectionEnable.isChecked()).apply();
-                if (shakeDetectionEnable.isChecked()) {
-                    editor.putString(getString(R.string.pref_key_shake_intensity),
-                            shakeIntensityVal).apply();
-                    editor.putInt(getString(R.string.pref_key_shake_duration),
-                            shakeDurationVal).apply();
-                    //send data to Wear
-                    WearDataSender.setShakeIntensity(getActivity(), shakeIntensityVal);
-                    WearDataSender.setShakeDuration(getActivity(), shakeDurationVal);
-                }
+                editor.putString(getString(R.string.pref_key_shake_intensity),
+                        shakeIntensityVal).apply();
+                editor.putInt(getString(R.string.pref_key_shake_duration),
+                        shakeDurationVal).apply();
+                //send data to Wear
+                WearDataSender.setShakeIntensity(getActivity(), shakeIntensityVal);
+                WearDataSender.setShakeDuration(getActivity(), shakeDurationVal);
 
                 //fall-through to dismiss the Dialog
             case R.id.cancel_button:

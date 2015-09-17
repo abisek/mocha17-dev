@@ -24,8 +24,9 @@ public class SettingsFragment extends PreferenceFragment implements
     private SharedPreferences defaultSharedPreferences;
     private SharedPreferences.Editor editor;
 
-    private SwitchPreference prefGlobalReadAloud, prefMaxVolume, prefPersistentNotification;
-    private Preference prefApps, prefShakeDetection;
+    private SwitchPreference prefGlobalReadAloud, prefMaxVolume, prefShakeDetection,
+            prefPersistentNotification;
+    private Preference prefApps, prefConfigShakeDetection;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -101,10 +102,16 @@ public class SettingsFragment extends PreferenceFragment implements
         }
 
         //Shake Detection
-        key = getString(R.string.pref_key_shake_detection);
-        prefShakeDetection = findPreference(key);
+        key = getString(R.string.pref_key_android_wear);
+        prefShakeDetection = (SwitchPreference)findPreference(key);
         if (prefShakeDetection != null) {
-            prefShakeDetection.setOnPreferenceClickListener(this);
+            prefShakeDetection.setOnPreferenceChangeListener(this);
+            prefShakeDetection.setChecked(defaultSharedPreferences.getBoolean(key, false));
+        }
+        key = getString(R.string.pref_key_shake_detection);
+        prefConfigShakeDetection = findPreference(key);
+        if (prefConfigShakeDetection != null) {
+            prefConfigShakeDetection.setOnPreferenceClickListener(this);
         }
 
         updatePreferenceUIState();
@@ -127,12 +134,33 @@ public class SettingsFragment extends PreferenceFragment implements
                         getString(R.string.pref_key_max_volume), true));
 
                 prefShakeDetection.setEnabled(true);
-                setShakeDetectionSummary();
+                updateShakeDetectionState();
             } else {
                 prefPersistentNotification.setEnabled(false);
                 prefApps.setEnabled(false);
                 prefMaxVolume.setEnabled(false);
                 prefShakeDetection.setEnabled(false);
+                prefShakeDetection.setEnabled(false);
+                updateShakeDetectionState();
+            }
+        }
+    }
+
+    private void updateShakeDetectionState() {
+        if (prefShakeDetection.isChecked()) {
+            if (prefShakeDetection.isEnabled()) {
+                prefShakeDetection.setSummary(getString(R.string.pref_android_wear_summary_on));
+            }
+            if (prefConfigShakeDetection != null) {
+                getPreferenceScreen().addPreference(prefConfigShakeDetection);
+                prefConfigShakeDetection.setEnabled(prefShakeDetection.isEnabled());
+            }
+        } else {
+            if (prefShakeDetection.isEnabled()) {
+                prefShakeDetection.setSummary(getString(R.string.pref_android_wear_summary_off));
+            }
+            if (prefConfigShakeDetection != null) {
+                getPreferenceScreen().removePreference(prefConfigShakeDetection);
             }
         }
     }
@@ -158,15 +186,6 @@ public class SettingsFragment extends PreferenceFragment implements
         }
     }
 
-    private void setShakeDetectionSummary() {
-        if (defaultSharedPreferences.getBoolean(
-                getString(R.string.pref_key_android_wear), false)) {
-            prefShakeDetection.setSummary(getString(R.string.pref_shake_detection_summary_on));
-        } else {
-            prefShakeDetection.setSummary(getString(R.string.pref_shake_detection_summary_off));
-        }
-    }
-
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         String key = preference.getKey();
@@ -189,6 +208,13 @@ public class SettingsFragment extends PreferenceFragment implements
             editor.putBoolean(key, value).apply();
             return true;
         }
+        if (getString(R.string.pref_key_android_wear).equals(key)) {
+            boolean value = (boolean) newValue;
+            prefShakeDetection.setChecked(value);
+            editor.putBoolean(key, value).apply();
+            updateShakeDetectionState();
+            return true;
+        }
         return false;
     }
 
@@ -203,7 +229,7 @@ public class SettingsFragment extends PreferenceFragment implements
                         selectAppsDialogName).commit();
             }
             return true;
-        } else if (key.equals(prefShakeDetection.getKey())) {
+        } else if (key.equals(prefConfigShakeDetection.getKey())) {
             FragmentManager fragmentManager = getFragmentManager();
             String shakeDetectionFragmentName = ShakeDetectionDialog.class.getSimpleName();
             if (fragmentManager.findFragmentByTag(shakeDetectionFragmentName) == null) {
@@ -221,8 +247,6 @@ public class SettingsFragment extends PreferenceFragment implements
                 getString(R.string.pref_key_apps).equals(key)) {
             //Update summary text when apps selection data changes
             setPrefAppsSummary();
-        } else if (getString(R.string.pref_key_android_wear).equals(key)) {
-            setShakeDetectionSummary();
         }
     }
 }
