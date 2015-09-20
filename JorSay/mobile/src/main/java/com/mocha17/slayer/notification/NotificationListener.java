@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.TelephonyManager;
 
 import com.mocha17.slayer.MainActivity;
 import com.mocha17.slayer.R;
@@ -53,6 +54,8 @@ public class NotificationListener extends NotificationListenerService
     private NotificationManager notificationManager;
     private AudioManager audioManager;
 
+    private TelephonyManager telephonyManager;
+
     //Action to be taken on received notification
     private enum NextAction {
         IGNORE,
@@ -85,6 +88,8 @@ public class NotificationListener extends NotificationListenerService
 
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
 
         notificationDBOps = NotificationDBOps.get(context);
 
@@ -173,6 +178,11 @@ public class NotificationListener extends NotificationListenerService
     }
 
     private NextAction getNextAction(StatusBarNotification statusBarNotification) {
+        if (telephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK ||
+                telephonyManager.getCallState() == TelephonyManager.CALL_STATE_RINGING) {
+            Logger.d(this, "in a call, ignoring");
+            return NextAction.IGNORE;
+        }
         if (SnoozeReadAloud.get().isActive()) {
             Logger.d(this, "reading aloud is snoozed, ignoring");
             return NextAction.IGNORE;
