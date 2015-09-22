@@ -67,6 +67,7 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
     private boolean prefMaxVolume;
     private int originalVolume;
     private AudioManager audioManager;
+    OnAudioFocusChangeListener audioFocusChangeListener;
 
     private Handler actionHandler;
 
@@ -92,6 +93,16 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
                 getString(R.string.pref_key_max_volume), false);
 
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+
+        audioFocusChangeListener = new OnAudioFocusChangeListener() {
+            public void onAudioFocusChange(int focusChange) {
+                if (focusChange == AudioManager.AUDIOFOCUS_LOSS ||
+                        focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ||
+                        focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+                    handleFocusLoss();
+                }
+            }
+        };
 
         tts = new TextToSpeech(getApplicationContext(), JorSayReader.this);
         ttsReady = new AtomicBoolean();
@@ -169,60 +180,47 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
     private void readAloud() {
         if (ttsReady.get()) {
             if (!SnoozeReadAloud.get().isActive()) {
-                //Request audio focus for playback. We are requesting a temporary focus,
-                //anticipated to last a short amount of time.
-                int result = audioManager.requestAudioFocus(audioFocusChangeListener,
-                        AudioManager.STREAM_MUSIC,
-                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
-
-                if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                    Logger.d(this, "got focus");
-                    originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                    /*TODO
-                    Volume settings check needs to be done for each notification.
-                    If the user turns the volume off, we should abort immediately.*/
-                    if (prefMaxVolume) {
-                        Logger.d(this, "setting volume to max");
-                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-                                audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
-                    } else {
-                        if (originalVolume == 0) {
-                            Logger.d(this, "Max volume isn't selected and device volume is at 0," +
-                                    "not reading aloud");
-                            audioManager.abandonAudioFocus(audioFocusChangeListener);
-                            return;
-                        }
+                originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                /*TODO
+                Volume settings check needs to be done for each notification.
+                If the user turns the volume off, we should abort immediately.*/
+                if (prefMaxVolume) {
+                    Logger.d(this, "setting volume to max");
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                            audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+                } else {
+                    if (originalVolume == 0) {
+                        Logger.d(this, "Max volume isn't selected and device volume is at 0," +
+                                "not reading aloud");
+                        return;
                     }
-                    Cursor notificationCursor =
-                            NotificationDBOps.get(this).getMostRecentNotification();
-                    if (notificationCursor != null) {
-                        if (notificationCursor.moveToFirst()) {
-                            Logger.d(this, "TTS reading now");
-                            //Utterance ID should be unique per notification.
-                            String utteranceID = Long.toString(System.currentTimeMillis());
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                tts.speak(getStringToRead(notificationCursor),
-                                        TextToSpeech.QUEUE_ADD, null, utteranceID);
-                            } else {
-                                HashMap<String, String> params = new HashMap<>();
-                                params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
-                                //Turned off noinspection deprecation as we have a version check
-                                tts.speak(getStringToRead(notificationCursor),
-                                        TextToSpeech.QUEUE_ADD, params);
-                            }
-                            //Mark the notification as read
+                }
+                Cursor notificationCursor = NotificationDBOps.get(this).getMostRecentNotification();
+                if (notificationCursor != null) {
+                    if (notificationCursor.moveToFirst()) {
+                        Logger.d(this, "TTS reading now");
+                        //Utterance ID should be unique per notification.
+                        String utteranceID = Long.toString(System.currentTimeMillis());
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            tts.speak(getStringToRead(notificationCursor),
+                                    TextToSpeech.QUEUE_ADD, null, utteranceID);
+                        } else {
+                            HashMap<String, String> params = new HashMap<>();
+                            params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, utteranceID);
+                            //Turned off noinspection deprecation as we have a version check
+                            tts.speak(getStringToRead(notificationCursor),
+                                    TextToSpeech.QUEUE_ADD, params);
+                        }
+                        //Mark the notification as read
                         /*Retrieving the ID like this is a little tricky, the ID would be included
                         only when it was part of the columns in the query that generated this
-                        Cursor. Else, it would be -1. Reference: stackoverflow.com/
-                        questions/2848056/how-to-get-a-row-id-from-a-cursor*/
-                            NotificationDBOps.get(this).markNotificationRead(
-                                    notificationCursor.getLong(notificationCursor.
-                                            getColumnIndex(NotificationData._ID)));
-                        }
-                        notificationCursor.close();
+                        Cursor. Else, it would be -1.
+                        stackoverflow.com/questions/2848056/how-to-get-a-row-id-from-a-cursor*/
+                        NotificationDBOps.get(this).markNotificationRead(
+                                notificationCursor.getLong(notificationCursor.
+                                        getColumnIndex(NotificationData._ID)));
                     }
-                } else {
-                    Logger.d(this, "did not get audio focus, not reading aloud");
+                    notificationCursor.close();
                 }
             }
         }
@@ -289,11 +287,27 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
         SnoozeReadAloud.get().cancelNotification();
     }
 
+    private void handleFocusLoss() {
+        Logger.d(JorSayReader.this, "AudioFocus loss, stop_read_aloud");
+        actionHandler.sendMessage(actionHandler.obtainMessage(STOP_READ_ALOUD));
+        ttsDone();
+    }
+
     private class JorSayReaderUtteranceProgressListener extends UtteranceProgressListener {
         @Override
         public void onStart(String utteranceId) {
-            //post this only when we actually start reading
-            SnoozeReadAloud.get().postNotification();
+            //Request audio focus for playback. We are requesting a temporary focus,
+            //anticipated to last a short amount of time.
+            int result = audioManager.requestAudioFocus(audioFocusChangeListener,
+                    AudioManager.STREAM_MUSIC,
+                    AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                Logger.d(JorSayReader.this, "UtteranceProgressListener got audio focus");
+                //post this now as we are starting to read
+                SnoozeReadAloud.get().postNotification();
+            } else {
+                handleFocusLoss();
+            }
         }
 
         @Override
@@ -306,16 +320,6 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
             ttsDone();
         }
     }
-
-    OnAudioFocusChangeListener audioFocusChangeListener = new OnAudioFocusChangeListener() {
-        public void onAudioFocusChange(int focusChange) {
-            if (focusChange == AudioManager.AUDIOFOCUS_LOSS ||
-                    focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ||
-                    focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
-                actionHandler.sendMessage(actionHandler.obtainMessage(STOP_READ_ALOUD));
-            }
-        }
-    };
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
