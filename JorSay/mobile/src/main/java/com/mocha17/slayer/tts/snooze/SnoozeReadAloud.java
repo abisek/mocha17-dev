@@ -141,7 +141,6 @@ public class SnoozeReadAloud {
             }
             if (snoozeMin != 0) {
                 Logger.d(instance, "starting timer for " + snoozeMin + " min");
-                cancelNotification();
                 instance.start(snoozeMin * 60 * 1000);
                 JorSayReader.snoozeReadAloud(context);
             }
