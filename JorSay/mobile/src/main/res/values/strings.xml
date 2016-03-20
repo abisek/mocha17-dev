@@ -5,6 +5,8 @@
     <string name="progress_init">Initializing</string>
     <string name="progress_gps">Checking Google Play Services</string>
     <string name="progress_tts">Checking Text to Speech</string>
+    <string name="progress_tts_language">Checking Text to Speech for %s</string>
+    <string name="progress_tts_error">Text to Speech not available</string>
     <string name="progress_notifications">Checking Notifications access</string>
     <string name="progress_init_jorsay_params">Initializing</string>
 
