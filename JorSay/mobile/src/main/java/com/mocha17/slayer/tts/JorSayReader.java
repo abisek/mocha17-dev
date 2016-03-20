@@ -166,14 +166,27 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
     @Override
     public void onInit(int status) {
         if (TextToSpeech.SUCCESS == status) {
-            Logger.d("onInit tts ready");
-            //TODO use user's locale to find the closest match for TTS language
-            tts.setLanguage(Locale.US);
+            Logger.d(this, "onInit tts ready");
+            setTTSLanguage();
             tts.setOnUtteranceProgressListener(new JorSayReaderUtteranceProgressListener());
             ttsReady.set(true);
             if (readOnReady.getAndSet(false)) {
                 readAloud();
             }
+        }
+    }
+
+    private void setTTSLanguage() {
+        Locale defaultLocale = Locale.getDefault();
+        int isDefaultLanguageAvailable = tts.isLanguageAvailable(defaultLocale);
+        if (TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE == isDefaultLanguageAvailable ||
+                TextToSpeech.LANG_COUNTRY_AVAILABLE == isDefaultLanguageAvailable ||
+                TextToSpeech.LANG_AVAILABLE ==isDefaultLanguageAvailable) {
+            Logger.d(this, "setTTSLanguage - setting to " + defaultLocale.getLanguage());
+            tts.setLanguage(defaultLocale);
+        } else {
+            Logger.d(this, "setTTSLanguage - setting to " + Locale.US.getLanguage());
+            tts.setLanguage(Locale.US);
         }
     }
 
@@ -308,6 +321,7 @@ public class JorSayReader extends Service implements TextToSpeech.OnInitListener
             } else {
                 handleFocusLoss();
             }
+            setTTSLanguage();
         }
 
         @Override

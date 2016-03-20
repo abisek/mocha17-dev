@@ -28,9 +28,11 @@ import com.mocha17.slayer.MainActivity;
 import com.mocha17.slayer.R;
 import com.mocha17.slayer.utils.Logger;
 
+import java.util.Locale;
+
 //https://developer.android.com/google/auth/api-client.html#Starting
 public class SetupActivity extends AppCompatActivity
-        implements ConnectionCallbacks, OnConnectionFailedListener {
+        implements ConnectionCallbacks, OnConnectionFailedListener, TextToSpeech.OnInitListener {
 
     private TextView progressText;
 
@@ -43,9 +45,10 @@ public class SetupActivity extends AppCompatActivity
 
     private static final int TTS_DATA_CHECK_CODE = 1002;
 
-    private AlertDialog notificationSettingsDialog;
-
     private Context context;
+
+    private AlertDialog notificationSettingsDialog;
+    private TextToSpeech tts;
 
     private enum State {
         INIT,
@@ -60,6 +63,7 @@ public class SetupActivity extends AppCompatActivity
         CHECKING_TTS,
         TTS_SETUP,
         TTS_USER_REJECT,
+        TTS_CHECK_LANGUAGE,
         TTS_SUCCESS,
         CHECKING_NOTIFICATION_ACCESS,
         INIT_JORSAY_PARAMS,
@@ -91,14 +95,12 @@ public class SetupActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        /* Do nothing if we are GPS_RESOLVING_ERROR. Else, if we are INIT, start with CHECKING_GPS.
-        If we are not INIT, restore the State.
-         */
+        // Restore the state if needed, and start with CHECKING_GPS if we are in INIT
         if (state != State.GPS_RESOLVING_ERROR) {
-            if (state == State.INIT) {
+            if (State.INIT == state) {
                 Logger.d(this, "onResume updating state to " + State.CHECKING_GPS);
                 updateState(State.CHECKING_GPS);
-            } else {
+            } else if (State.CHECKING_NOTIFICATION_ACCESS == state) { //to show the dialog again
                 Logger.d(this, "onResume updating state to " + state);
                 updateState(state);
             }
@@ -112,6 +114,13 @@ public class SetupActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onDestroy() {
+        if (tts != null) {
+            tts.shutdown();
+        }
+        super.onDestroy();
+    }
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == GPS_REQUEST_RESOLVE_ERROR) {
             updateState(State.GPS_ERROR_RESOLVED);
@@ -124,7 +133,7 @@ public class SetupActivity extends AppCompatActivity
             }
         } else if (requestCode == TTS_DATA_CHECK_CODE) {
             if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                updateState(State.TTS_SUCCESS);
+                updateState(State.TTS_CHECK_LANGUAGE);
             } else {
                 updateState(State.TTS_SETUP);
             }
@@ -192,7 +201,13 @@ public class SetupActivity extends AppCompatActivity
                         TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
                 startActivity(installIntent);
                 break;
+            case TTS_CHECK_LANGUAGE:
+                progressText.setText(getString(R.string.progress_tts_language,
+                        Locale.getDefault().getDisplayLanguage()));
+                tts = new TextToSpeech(this, this);
+                break;
             case TTS_USER_REJECT:
+                progressText.setText(R.string.progress_tts_error);
                 break;
             case TTS_SUCCESS:
                 Logger.d(this, "updateState TTS_SUCCESS starting with NOTIFICATION_ACCESS");
@@ -287,7 +302,12 @@ public class SetupActivity extends AppCompatActivity
                             public void onClick(DialogInterface dialog, int which) {
                                 dismissDialogAndFinish();
                             }
-                        }).create();
+                        }).setOnCancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        dismissDialogAndFinish();
+                    }
+                }).create();
     }
 
     private AlertDialog getErrorDialog() {
@@ -298,6 +318,11 @@ public class SetupActivity extends AppCompatActivity
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                dismissDialogAndFinish();
+                            }
+                        }).setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialog) {
                                 dismissDialogAndFinish();
                             }
                         }).create();
@@ -325,6 +350,24 @@ public class SetupActivity extends AppCompatActivity
         key = getString(R.string.pref_key_android_wear);
         if (!sharedPreferences.contains(key)) {
             sharedPreferences.edit().putBoolean(key, true).apply();
+        }
+    }
+
+    //TTS
+    @Override
+    public void onInit(int status) {
+        if (TextToSpeech.SUCCESS == status) {
+            Locale defaultLocale = Locale.getDefault();
+            int isDefaultLanguageAvailable = tts.isLanguageAvailable(defaultLocale);
+            Logger.d(this, "default locale: " + defaultLocale +
+                    ", available? " + isDefaultLanguageAvailable);
+            if (TextToSpeech.LANG_MISSING_DATA == isDefaultLanguageAvailable) {
+                updateState(State.TTS_SETUP);
+            } else {
+                updateState(State.TTS_SUCCESS);
+            }
+        } else {
+            progressText.setText(R.string.progress_tts_error);
         }
     }
 
